@@ -29,9 +29,9 @@ include(GNUInstallDirs)
 # "devel" branch. The postfix is only to be altered on release
 # branches.
 set(TSC_VERSION_MAJOR 2)
-set(TSC_VERSION_MINOR 1)
-set(TSC_VERSION_PATCH 1)
-set(TSC_VERSION_POSTFIX "dev")
+set(TSC_VERSION_MINOR 2)
+set(TSC_VERSION_PATCH 0)
+set(TSC_VERSION_POSTFIX "beta1")
 string(TIMESTAMP TSC_COMPILE_YEAR "%Y")
 string(TIMESTAMP TSC_COMPILE_MONTH "%m")
 string(TIMESTAMP TSC_COMPILE_DAY "%d")
