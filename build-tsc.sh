@@ -16,7 +16,7 @@ cd build
 rm -rf ../tsc
 
 # Build TSC
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../tsc ..
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../tsc ..
 make -j$(nproc)
 
 # Install TSC to $HOME/tsc
