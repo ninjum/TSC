@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Secretchronicles\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-25 22:42+0300\n"
+"POT-Creation-Date: 2026-02-20 17:33+0200\n"
 "PO-Revision-Date: 2019-05-18 19:05+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian\n"
@@ -18,298 +18,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 18.12.3\n"
-
-#: ../../src/level/level_settings.cpp:192
-#: ../../src/level/level_settings.cpp:446
-#: ../../src/level/level_settings.cpp:649
-#: ../../src/overworld/world_waypoint.cpp:755
-#: ../../src/overworld/world_waypoint.cpp:758
-msgid "(None)"
-msgstr "(Nincs)"
-
-#: ../../src/level/level_settings.cpp:193 ../../src/gui/menu_data.cpp:1851
-#: ../../src/gui/menu_data.cpp:2898
-msgid "None"
-msgstr "Nincs"
-
-#: ../../src/level/level_settings.cpp:276 ../../src/level/level_editor.cpp:256
-#: ../../src/overworld/world_editor.cpp:127
-msgid "Save "
-msgstr "Mentés "
-
-#: ../../src/level/level_editor.cpp:187
-msgid "Create a new Level"
-msgstr "Új szint létrehozása"
-
-#: ../../src/level/level_editor.cpp:187 ../../src/level/level_editor.cpp:214
-#: ../../src/level/level_editor.cpp:218 ../../src/objects/level_entry.cpp:374
-msgctxt "level"
-msgid "Name"
-msgstr "Név"
-
-#: ../../src/level/level_editor.cpp:196 ../../src/level/level.cpp:418
-msgid "Level "
-msgstr "Szint "
-
-#: ../../src/level/level_editor.cpp:196 ../../src/overworld/world_editor.cpp:86
-msgid " already exists"
-msgstr " már létezik"
-
-#: ../../src/level/level_editor.cpp:208 ../../src/overworld/world_editor.cpp:82
-msgid "Created "
-msgstr "Létrehozva "
-
-#: ../../src/level/level_editor.cpp:218
-msgid "Load a Level"
-msgstr "Szint betöltése"
-
-#: ../../src/level/level_editor.cpp:237
-#: ../../src/overworld/world_editor.cpp:114
-msgid "Loaded "
-msgstr "Betöltve "
-
-#: ../../src/level/level_editor.cpp:265
-msgid "Save Level as"
-msgstr "Szint mentése másként"
-
-#: ../../src/level/level_editor.cpp:265
-msgid "New name"
-msgstr "Új név"
-
-#: ../../src/level/level_editor.cpp:280
-msgid "Level was not yet saved"
-msgstr "A szint még nem lett elmentve"
-
-#: ../../src/level/level_editor.cpp:285
-msgid "Delete and Unload "
-msgstr "Törlés és eltávolítás "
-
-#. TRANS: Level editor left menu's entries follow
-#. TRANS: World editor left menu's entries follow
-#: ../../src/level/level_editor.cpp:369
-#: ../../src/overworld/world_editor.cpp:165
-msgid "---Sprites---"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:370
-msgid "Green Ground"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:371
-msgid "Desert Ground"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:372
-#, fuzzy
-msgid "Sand Ground"
-msgstr "föld alatt"
-
-#: ../../src/level/level_editor.cpp:373
-msgid "Castle Ground"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:374
-msgid "Cave Ground"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:375
-#, fuzzy
-msgid "Underground"
-msgstr "föld alatt"
-
-#: ../../src/level/level_editor.cpp:376
-msgid "Plastic Ground"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:377
-#, fuzzy
-msgid "Jungle Ground"
-msgstr "föld alatt"
-
-#: ../../src/level/level_editor.cpp:378
-#, fuzzy
-msgid "Snow Ground"
-msgstr "Hang"
-
-#: ../../src/level/level_editor.cpp:379
-#: ../../src/overworld/world_editor.cpp:177
-msgid "Blocks"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:380
-#: ../../src/overworld/world_editor.cpp:168
-msgid "Clouds"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:381
-#: ../../src/overworld/world_editor.cpp:169
-msgid "Hedges"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:382
-msgid "Trees"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:383
-#: ../../src/overworld/world_editor.cpp:170
-msgid "Plants"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:384
-#: ../../src/overworld/world_editor.cpp:171
-msgid "Cactus"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:385
-#, fuzzy
-msgid "Platforms"
-msgstr "platform – "
-
-#: ../../src/level/level_editor.cpp:386
-#: ../../src/overworld/world_editor.cpp:174
-msgid "Pipes"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:387
-msgid "Pipe Connectors"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:388
-msgid "Library"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:389
-#: ../../src/overworld/world_editor.cpp:172
-msgid "Hills"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:390
-msgid "Signs"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:391
-msgid "Ropes"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:392
-msgid "Doors"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:393
-#: ../../src/overworld/world_editor.cpp:178
-msgid "Bones"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:394
-msgid "Windows"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:395
-#, fuzzy
-msgid "Candy"
-msgstr "cukorka"
-
-#: ../../src/level/level_editor.cpp:396
-msgid "Stuff"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:397
-#: ../../src/overworld/world_editor.cpp:180
-msgid "---Objects---"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:398
-msgid "Boxes"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:399
-msgid "Enemies"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:400
-#: ../../src/overworld/world_editor.cpp:179
-msgid "Special"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:401
-#: ../../src/overworld/world_editor.cpp:182
-msgid "---Functions---"
-msgstr ""
-
-#: ../../src/level/level_editor.cpp:402 ../../src/gui/menu_data.cpp:630
-#: ../../src/overworld/world_editor.cpp:183
-msgid "New"
-msgstr "Új"
-
-#: ../../src/level/level_editor.cpp:403 ../../src/gui/menu_data.cpp:3101
-#: ../../src/gui/menu_data.cpp:3103 ../../src/overworld/world_editor.cpp:184
-msgid "Load"
-msgstr "Betöltés"
-
-#: ../../src/level/level_editor.cpp:404 ../../src/gui/menu_data.cpp:3094
-#: ../../src/gui/menu_data.cpp:3096 ../../src/overworld/world_editor.cpp:185
-msgid "Save"
-msgstr "Mentés"
-
-#: ../../src/level/level_editor.cpp:405
-#, fuzzy
-msgid "Save as"
-msgstr "Mentés "
-
-#: ../../src/level/level_editor.cpp:406 ../../src/gui/menu_data.cpp:632
-#: ../../src/objects/path.cpp:770
-msgid "Delete"
-msgstr "Törlés"
-
-#: ../../src/level/level_editor.cpp:407
-msgid "Settings"
-msgstr ""
-
-#: ../../src/level/level_player.cpp:3976 ../../src/video/animation.cpp:1574
-#: ../../src/enemies/krush.cpp:385 ../../src/enemies/flyon.cpp:567
-#: ../../src/enemies/gee.cpp:573 ../../src/enemies/rokko.cpp:581
-#: ../../src/enemies/larry.cpp:422 ../../src/enemies/spikeball.cpp:515
-#: ../../src/enemies/bosses/turtle_boss.cpp:1006 ../../src/enemies/pip.cpp:369
-#: ../../src/enemies/beetle.cpp:270 ../../src/enemies/furball.cpp:746
-#: ../../src/enemies/army.cpp:927 ../../src/enemies/eato.cpp:284
-#: ../../src/enemies/thromp.cpp:686 ../../src/objects/moving_platform.cpp:958
-#: ../../src/objects/level_entry.cpp:369 ../../src/objects/level_exit.cpp:485
-msgid "Direction"
-msgstr "Irány"
-
-#: ../../src/level/level_player.cpp:3976
-msgid "Initial direction"
-msgstr "Kezdeti irány"
-
-#: ../../src/level/level_manager.cpp:472
-msgid "Invalid target level."
-msgstr "Érvénytelen célszint."
-
-#: ../../src/level/level.cpp:220
-msgid "Unsupported Level format : "
-msgstr "Nem támogatott szintformátum: "
-
-#: ../../src/level/level.cpp:402
-msgid "Couldn't save level "
-msgstr "Nem sikerült elmenteni a szintet "
-
-#: ../../src/level/level.cpp:418 ../../src/overworld/overworld.cpp:250
-#: ../../src/video/video.cpp:1436
-msgid " saved"
-msgstr " mentve"
-
-#: ../../src/level/level.cpp:716
-msgid "Omega Mode disabled"
-msgstr "Ómega mód letiltva"
-
-#: ../../src/level/level.cpp:720
-msgid "Omega Mode enabled"
-msgstr "Ómega mód engedélyezve"
-
-#: ../../src/level/level.cpp:731
-#, fuzzy
-msgid "Kid cheat activated"
-msgstr "Sebesség, ha aktiválva van"
 
 #: ../../src/audio/random_sound.cpp:451 ../../src/video/animation.cpp:1400
 msgid "Filename"
@@ -374,780 +82,6 @@ msgid ""
 msgstr ""
 "A hangerőcsökkentés befejeződik ezen a távolságon. Nem lesz hang lejátszva "
 "emögött."
-
-#: ../../src/scene/01_prologue.cpp:36
-msgid ""
-"The sinking sun sent out its last colourful beams over the Eastern Desert "
-"when a single individual was making his way through the ups and downs of the "
-"sandy dunes."
-msgstr ""
-"A lemenő nap az utolsó színes fénysugarait bocsátotta ki a keleti sivatag "
-"fölött, amikor egy magányos személy a homokdűnék buckái és völgyei között "
-"rótta az útját."
-
-#: ../../src/scene/01_prologue.cpp:37
-#, fuzzy
-msgid ""
-"When he reached the top of the highest dune, he gazed around, but to only "
-"see sand followed by more sand, by even more "
-"[colour='FFFFF000']sand[colour='FFFFFFFF']."
-msgstr ""
-"Amikor elérte a legmagasabb dűne csúcsát, körbenézett, és csak homokot, még "
-"több homokot és még annál is több homokot látott."
-
-#: ../../src/scene/01_prologue.cpp:38
-msgid ""
-"He took out a map, but with the stars not yet visible on the darkening sky "
-"there was no means of orientation in this infinite sea of equally hostile "
-"sand dunes."
-msgstr ""
-"Elővett egy térképet, de mivel a csillagok még nem látszottak a sötétedő "
-"égen, nem talált semmilyen biztos tájékozódási pontot az egyforma ellenséges "
-"homokdűnék végtelen tengerében."
-
-#: ../../src/gui/debug_window.cpp:43
-msgid "Debugging Information"
-msgstr ""
-
-#. TRANS: Do not translate the part in brackets
-#: ../../src/gui/debug_window.cpp:103
-#, c-format
-msgid "[colour='FFFFFF00']FPS: Best: %.02f Worst: %.02f Current: %0.2f"
-msgstr ""
-"[colour='FFFFFF00']FPS: legjobb: %.02f, legrosszabb: %.02f, jelenlegi: %0.2f"
-
-#: ../../src/gui/debug_window.cpp:111
-#, c-format
-msgid "Camera X: %d Y: %d"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:121
-#, c-format
-msgid "Level: %s (return stack size: %ld)"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:126
-#, fuzzy, c-format
-msgid "Overworld: %s"
-msgstr "Áttekintő térkép kiválasztása"
-
-#: ../../src/gui/debug_window.cpp:130
-#, fuzzy, c-format
-msgid "<Menu Active>"
-msgstr "Menüszint"
-
-#: ../../src/gui/debug_window.cpp:133
-#, c-format
-msgid "Scene: %s"
-msgstr ""
-
-#. TRANS: Abbreviations mean:
-#. TRANS: T=Total, P=Passive, M=Massive, E=Enemy, A=Active, H=Halfmassive
-#: ../../src/gui/debug_window.cpp:164
-#, c-format
-msgid "T: %lu P: %d M: %d E: %d A: %d H: %d"
-msgstr ""
-
-#. TRANS: Abbreviations mean:
-#. TRANS: BBox=Bonus boxes, GBox=Gold boxes, MPlat=Moving platforms
-#: ../../src/gui/debug_window.cpp:177
-#, c-format
-msgid "BBox: %d GBox: %d MPlat: %d"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:185
-#, c-format
-msgid "Player X1: %.4f X2: %.4f"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:192
-#, c-format
-msgid "Player Y1: %.4f Y2: %.4f"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:199
-#, c-format
-msgid "Player XVel: %.4f, YVel: %.4f"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:206
-#, c-format
-msgid "Player MState: %d Ground: %d (%s)"
-msgstr ""
-
-#: ../../src/gui/debug_window.cpp:214
-#, c-format
-msgid "Game Mode: %d"
-msgstr ""
-
-#: ../../src/gui/hud.cpp:159
-#, c-format
-msgid "Time %02d:%02d"
-msgstr "Idő: %02d:%02d"
-
-#: ../../src/gui/hud.cpp:193
-#, c-format
-msgid "Points %08ld"
-msgstr "Pontszám: %08ld"
-
-#. TRANS: The text is copied from the end of the GPLv3. If there is an
-#. TRANS: accepted translation of the GPLv3 available in your language,
-#. TRANS: then you should use its wording rather than trying to translate
-#. TRANS: it yourself.
-#: ../../src/gui/game_console.cpp:170
-#, fuzzy, c-format
-msgid ""
-"TSC Scripting Console\n"
-"Copyright © 2012-%d The TSC Contributors\n"
-"\n"
-"This program comes with ABSOLUTELY NO WARRANTY; for details\n"
-"see the file COPYING. This is free software, and you are\n"
-"welcome to redistribute it under certain conditions; see the\n"
-"aforementioned file for details.\n"
-msgstr ""
-"TSC parancsfájlkészítő konzol\n"
-"Copyright \\302\\251 2012-%d A TSC közreműködői\n"
-"\n"
-"Ez a program GARANCIA NÉLKÜL érkezik, a részletekért nézze meg\n"
-"a COPYING fájlt. Ez egy szabad szoftver, szívesen vesszük, ha\n"
-"továbbterjeszti a megfelelő feltételek szerint. A részletekért\n"
-"nézze meg a fent említett fájlt.\n"
-
-#. TRANS: %s is the version postfix, e.g. "dev" or "beta3".
-#: ../../src/gui/game_console.cpp:181
-#, c-format
-msgid "You are running TSC version %d.%d.%d-%s.\n"
-msgstr "A TSC %d.%d.%d-%s verzióját futtatod.\n"
-
-#: ../../src/gui/game_console.cpp:187
-#, c-format
-msgid "You are running TSC version %d.%d.%d.\n"
-msgstr "A TSC %d.%d.%d verzióját futtatod.\n"
-
-#: ../../src/gui/game_console.cpp:239
-msgid "(#inspect did not return a string)\n"
-msgstr "(#a vizsgálat nem karakterlánccal tért vissza)\n"
-
-#: ../../src/gui/menu_data.cpp:330
-msgid "Credits"
-msgstr "Köszönet"
-
-#: ../../src/gui/menu_data.cpp:631
-msgid "Edit"
-msgstr "Szerkesztés"
-
-#: ../../src/gui/menu_data.cpp:633
-msgid "Enter"
-msgstr "Belépés"
-
-#: ../../src/gui/menu_data.cpp:634 ../../src/gui/menu_data.cpp:1422
-#: ../../src/gui/menu_data.cpp:3108
-msgid "Back"
-msgstr "Vissza"
-
-#: ../../src/gui/menu_data.cpp:638
-msgid "Select Level"
-msgstr "Szint kiválasztása"
-
-#: ../../src/gui/menu_data.cpp:640
-msgid "Select Campaign"
-msgstr "Küldetés kiválasztása"
-
-#: ../../src/gui/menu_data.cpp:642
-msgid "Select Overworld"
-msgstr "Áttekintő térkép kiválasztása"
-
-#: ../../src/gui/menu_data.cpp:644 ../../src/gui/menu_data.cpp:646
-msgid "Description"
-msgstr "Leírás"
-
-#. TRANS: The colour names refer to the colours the level names can
-#. TRANS: be in. "Game" means the level is shipped by the game,
-#. TRANS: "user" means the level has been created by the user.
-#. TRANS: If the user edited a system level, it gets copied to his
-#. TRANS: personal level directory and is coloured mixedly to indicate
-#. TRANS: that. "Deprecated" are levels from very old versions
-#. TRANS: of the game.
-#: ../../src/gui/menu_data.cpp:656
-msgid ""
-"- Level Colors -\n"
-"\n"
-"Orange: Game\n"
-"Green: User\n"
-"Grey: Deprecated\n"
-"Mixed: See the colors"
-msgstr ""
-"- Szint színei -\n"
-"\n"
-"Narancssárga: játék\n"
-"Zöld: felhasználó\n"
-"Szürke: elavult\n"
-"Kevert: nézd meg a színeket"
-
-#: ../../src/gui/menu_data.cpp:809 ../../src/gui/menu_data.cpp:851
-#: ../../src/gui/menu_data.cpp:877
-msgid ""
-"This will reset your current progress.\n"
-"Continue ?"
-msgstr ""
-"Ez visszaállítja a jelenlegi előrehaladást.\n"
-"Folytatod?"
-
-#: ../../src/gui/menu_data.cpp:817 ../../src/gui/menu_data.cpp:835
-msgid "Couldn't load campaign "
-msgstr "Nem sikerült betölteni a küldetést "
-
-#: ../../src/gui/menu_data.cpp:859
-msgid "Couldn't load overworld "
-msgstr "Nem sikerült betölteni az áttekintő térképet "
-
-#: ../../src/gui/menu_data.cpp:885
-msgid "Couldn't load level "
-msgstr "Nem sikerült betölteni a szintet "
-
-#: ../../src/gui/menu_data.cpp:1350
-#, c-format
-msgid "Delete %s?"
-msgstr "%s törlése?"
-
-#: ../../src/gui/menu_data.cpp:1460
-msgid "Always Run"
-msgstr "Mindig fusson"
-
-#: ../../src/gui/menu_data.cpp:1464 ../../src/gui/menu_data.cpp:1472
-#: ../../src/gui/menu_data.cpp:1631 ../../src/gui/menu_data.cpp:1639
-#: ../../src/gui/menu_data.cpp:1653 ../../src/gui/menu_data.cpp:1661
-#: ../../src/gui/menu_data.cpp:1744 ../../src/gui/menu_data.cpp:1752
-#: ../../src/gui/menu_data.cpp:1775 ../../src/gui/menu_data.cpp:1783
-#: ../../src/gui/menu_data.cpp:1945 ../../src/gui/menu_data.cpp:1953
-#: ../../src/gui/menu_data.cpp:1976 ../../src/gui/menu_data.cpp:1984
-#: ../../src/gui/menu_data.cpp:2039 ../../src/gui/menu_data.cpp:2131
-#: ../../src/gui/menu_data.cpp:2142 ../../src/gui/menu_data.cpp:2180
-#: ../../src/gui/menu_data.cpp:2191 ../../src/gui/menu_data.cpp:2216
-#: ../../src/gui/menu_data.cpp:2231 ../../src/gui/menu_data.cpp:2426
-#: ../../src/gui/menu_data.cpp:2559 ../../src/gui/menu_data.cpp:2575
-#: ../../src/gui/menu_data.cpp:2629 ../../src/gui/menu_data.cpp:2637
-#: ../../src/gui/menu_data.cpp:2738 ../../src/gui/menu_data.cpp:2768
-#: ../../src/gui/menu_data.cpp:2988 ../../src/gui/menu_data.cpp:3014
-msgid "On"
-msgstr "Be"
-
-#: ../../src/gui/menu_data.cpp:1467 ../../src/gui/menu_data.cpp:1475
-#: ../../src/gui/menu_data.cpp:1634 ../../src/gui/menu_data.cpp:1642
-#: ../../src/gui/menu_data.cpp:1656 ../../src/gui/menu_data.cpp:1664
-#: ../../src/gui/menu_data.cpp:1747 ../../src/gui/menu_data.cpp:1755
-#: ../../src/gui/menu_data.cpp:1778 ../../src/gui/menu_data.cpp:1786
-#: ../../src/gui/menu_data.cpp:1948 ../../src/gui/menu_data.cpp:1956
-#: ../../src/gui/menu_data.cpp:1979 ../../src/gui/menu_data.cpp:1987
-#: ../../src/gui/menu_data.cpp:2042 ../../src/gui/menu_data.cpp:2134
-#: ../../src/gui/menu_data.cpp:2145 ../../src/gui/menu_data.cpp:2183
-#: ../../src/gui/menu_data.cpp:2194 ../../src/gui/menu_data.cpp:2219
-#: ../../src/gui/menu_data.cpp:2234 ../../src/gui/menu_data.cpp:2632
-#: ../../src/gui/menu_data.cpp:2640
-msgid "Off"
-msgstr "Ki"
-
-#: ../../src/gui/menu_data.cpp:1482
-msgid "Camera Hor Speed"
-msgstr "Kamera vízszintes sebessége"
-
-#: ../../src/gui/menu_data.cpp:1491
-msgid "Camera Ver Speed"
-msgstr "Kamera függőleges sebessége"
-
-#: ../../src/gui/menu_data.cpp:1500
-msgid "Language"
-msgstr "Nyelv"
-
-#: ../../src/gui/menu_data.cpp:1504 ../../src/gui/menu_data.cpp:1523
-#: ../../src/gui/menu_data.cpp:2463 ../../src/core/property_helper.cpp:860
-msgid "default"
-msgstr "alapértelmezett"
-
-#: ../../src/gui/menu_data.cpp:1533
-msgid "Menu Level"
-msgstr "Menüszint"
-
-#: ../../src/gui/menu_data.cpp:1549 ../../src/gui/menu_data.cpp:1697
-#: ../../src/gui/menu_data.cpp:1801 ../../src/gui/menu_data.cpp:1831
-#: ../../src/gui/menu_data.cpp:1932 ../../src/gui/menu_data.cpp:1995
-msgid "Reset"
-msgstr "Visszaállítás"
-
-#: ../../src/gui/menu_data.cpp:1558
-msgid "Resolution"
-msgstr "Felbontás"
-
-#: ../../src/gui/menu_data.cpp:1610
-msgid "Bpp"
-msgstr "Bpp"
-
-#: ../../src/gui/menu_data.cpp:1627
-msgid "Fullscreen"
-msgstr "Teljes képernyő"
-
-#: ../../src/gui/menu_data.cpp:1649
-msgid "VSync"
-msgstr "VSync"
-
-#: ../../src/gui/menu_data.cpp:1671
-msgid "FPS Limit"
-msgstr "FPS korlát"
-
-#: ../../src/gui/menu_data.cpp:1680
-msgid "Geometry Quality"
-msgstr "Geometria minősége"
-
-#: ../../src/gui/menu_data.cpp:1688
-msgid "Texture Quality"
-msgstr "Textúra minősége"
-
-#: ../../src/gui/menu_data.cpp:1702
-msgid "Apply"
-msgstr "Alkalmaz"
-
-#: ../../src/gui/menu_data.cpp:1707
-msgid "Recreate Cache"
-msgstr "Gyorsítótár újra létrehozása"
-
-#: ../../src/gui/menu_data.cpp:1716
-msgid "Hertz (Hz)"
-msgstr "Hertz (Hz)"
-
-#: ../../src/gui/menu_data.cpp:1717
-msgid "You should only change the value if the audio is scratchy."
-msgstr "Csak akkor változtasd meg az értéket, ha a hang sercegő."
-
-#: ../../src/gui/menu_data.cpp:1739
-msgid "Music"
-msgstr "Zene"
-
-#: ../../src/gui/menu_data.cpp:1740
-msgid "Enable to play music. You need to have the Music Addon installed."
-msgstr "Zenelejátszás engedélyezése. Telepítve kell lennie a zenebővítménynek."
-
-#: ../../src/gui/menu_data.cpp:1762
-msgid "Set the Music Volume."
-msgstr "A zene hangerejének beállítása."
-
-#: ../../src/gui/menu_data.cpp:1770
-msgid "Sound"
-msgstr "Hang"
-
-#: ../../src/gui/menu_data.cpp:1771
-msgid "Enable to play Sounds."
-msgstr "Hangok lejátszásának engedélyezése."
-
-#: ../../src/gui/menu_data.cpp:1793
-msgid "Set the Sound Volume."
-msgstr "A hangerő beállítása."
-
-#: ../../src/gui/menu_data.cpp:1810 ../../src/gui/menu_data.cpp:1919
-msgid "Shortcuts"
-msgstr "Gyorsbillentyűk"
-
-#: ../../src/gui/menu_data.cpp:1814 ../../src/gui/menu_data.cpp:1923
-msgid "Name"
-msgstr "Név"
-
-#: ../../src/gui/menu_data.cpp:1815
-msgid "Key"
-msgstr "Billentyű"
-
-#: ../../src/gui/menu_data.cpp:1822
-msgid "Scroll Speed"
-msgstr "Görgetés sebessége"
-
-#: ../../src/gui/menu_data.cpp:1840
-msgid "Sensitivity"
-msgstr "Érzékenység"
-
-#: ../../src/gui/menu_data.cpp:1844
-msgid "Joystick"
-msgstr "Botkormány"
-
-#: ../../src/gui/menu_data.cpp:1887
-msgid "Axis Hor"
-msgstr "Vízszintes tengely"
-
-#: ../../src/gui/menu_data.cpp:1895
-msgid "Ver"
-msgstr "Függőleges"
-
-#: ../../src/gui/menu_data.cpp:1903
-msgid "Axis Hor2"
-msgstr "2. vízszintes tengely"
-
-#: ../../src/gui/menu_data.cpp:1911
-msgid "Ver2"
-msgstr "2. függőleges"
-
-#: ../../src/gui/menu_data.cpp:1924
-msgid "Button"
-msgstr "Gomb"
-
-#: ../../src/gui/menu_data.cpp:1941
-msgid "Show images"
-msgstr "Képek megjelenítése"
-
-#: ../../src/gui/menu_data.cpp:1963
-msgid "Item image size"
-msgstr "Tárgy képmérete"
-
-#: ../../src/gui/menu_data.cpp:1972
-msgid "Auto-Hide Mouse"
-msgstr "Egér automatikus elrejtése"
-
-#: ../../src/gui/menu_data.cpp:2267
-msgid "Up"
-msgstr "Fel"
-
-#: ../../src/gui/menu_data.cpp:2268
-msgid "Down"
-msgstr "Le"
-
-#: ../../src/gui/menu_data.cpp:2269
-msgid "Left"
-msgstr "Balra"
-
-#: ../../src/gui/menu_data.cpp:2270
-msgid "Right"
-msgstr "Jobbra"
-
-#: ../../src/gui/menu_data.cpp:2271 ../../src/gui/menu_data.cpp:2287
-msgid "Jump"
-msgstr "Ugrás"
-
-#: ../../src/gui/menu_data.cpp:2272 ../../src/gui/menu_data.cpp:2288
-msgid "Shoot"
-msgstr "Lövés"
-
-#: ../../src/gui/menu_data.cpp:2273 ../../src/gui/menu_data.cpp:2290
-#: ../../src/objects/bonusbox.cpp:501
-msgid "Item"
-msgstr "Tárgy"
-
-#: ../../src/gui/menu_data.cpp:2274 ../../src/gui/menu_data.cpp:2289
-msgid "Action"
-msgstr "Művelet"
-
-#: ../../src/gui/menu_data.cpp:2275
-msgid "Screenshot"
-msgstr "Képernyőkép"
-
-#: ../../src/gui/menu_data.cpp:2276
-msgid "Editor fast copy up"
-msgstr "Szerkesztő gyors másolás fel"
-
-#: ../../src/gui/menu_data.cpp:2277
-msgid "Editor fast copy down"
-msgstr "Szerkesztő gyors másolás le"
-
-#: ../../src/gui/menu_data.cpp:2278
-msgid "Editor fast copy left"
-msgstr "Szerkesztő gyors másolás balra"
-
-#: ../../src/gui/menu_data.cpp:2279
-msgid "Editor fast copy right"
-msgstr "Szerkesztő gyors másolás jobbra"
-
-#: ../../src/gui/menu_data.cpp:2280
-msgid "Editor pixel move up"
-msgstr "Szerkesztő képpont mozgatás fel"
-
-#: ../../src/gui/menu_data.cpp:2281
-msgid "Editor pixel move down"
-msgstr "Szerkesztő képpont mozgatás le"
-
-#: ../../src/gui/menu_data.cpp:2282
-msgid "Editor pixel move left"
-msgstr "Szerkesztő képpont mozgatás balra"
-
-#: ../../src/gui/menu_data.cpp:2283
-msgid "Editor pixel move right"
-msgstr "Szerkesztő képpont mozgatás jobbra"
-
-#: ../../src/gui/menu_data.cpp:2291
-msgid "Exit"
-msgstr "Kilépés"
-
-#: ../../src/gui/menu_data.cpp:2350
-msgid "Press a key"
-msgstr "Nyomj meg egy billentyűt"
-
-#: ../../src/gui/menu_data.cpp:2353
-msgid "Press a button"
-msgstr "Nyomj meg egy gombot"
-
-#: ../../src/gui/menu_data.cpp:2356
-msgid " for "
-msgstr " ehhez: "
-
-#: ../../src/gui/menu_data.cpp:2356
-msgid ". Press ESC to cancel."
-msgstr ". Nyomd meg az ESC billentyűt a megszakításhoz."
-
-#: ../../src/gui/menu_data.cpp:2661
-msgid "Reinitialization"
-msgstr "Újra-előkészítés"
-
-#: ../../src/gui/menu_data.cpp:2720
-msgid "Reloading"
-msgstr "Újratöltés"
-
-#: ../../src/gui/menu_data.cpp:2879
-msgid "Enabled : "
-msgstr "Engedélyezve: "
-
-#: ../../src/gui/menu_data.cpp:3095
-msgid "Save the game"
-msgstr "A játék mentése"
-
-#: ../../src/gui/menu_data.cpp:3102
-msgid "Load a saved game"
-msgstr "Elmentett játék betöltése"
-
-#: ../../src/gui/menu_data.cpp:3266
-msgid ""
-"3000 Points needed for saving in a level.\n"
-"Saving on the Overworld is free."
-msgstr ""
-"A mentéshez 3000 pont szükséges egy szinten.\n"
-"Az áttekintőn szabadon menthető."
-
-#: ../../src/gui/menu_data.cpp:3287 ../../src/gui/menu_data.cpp:3291
-#: ../../src/gui/menu_data.cpp:3296
-msgid "No Description"
-msgstr "Nincs leírás"
-
-#: ../../src/gui/menu_data.cpp:3300
-msgid "Enter Description"
-msgstr "Leírás megadása"
-
-#: ../../src/gui/menu_data.cpp:3318 ../../src/gui/menu_data.cpp:3323
-#: ../../src/gui/menu_data.cpp:3328
-msgid "Savegame loading failed"
-msgstr "A mentett játék betöltése sikertelen"
-
-#: ../../src/user/savegame/savegame.cpp:271
-msgid "Savegame "
-msgstr "Játékmentés "
-
-#: ../../src/user/savegame/savegame.cpp:271
-msgid " loaded"
-msgstr " betöltve"
-
-#: ../../src/user/savegame/savegame.cpp:436
-msgid "Couldn't save savegame "
-msgstr "Nem sikerült menteni a játékmentést "
-
-#: ../../src/user/savegame/savegame.cpp:439
-msgid "Saved to Slot "
-msgstr "Mentve a helyre: "
-
-#. TRANS: %u is replaced by the number of the save slot, starting with 1.
-#: ../../src/user/savegame/savegame.cpp:505
-#, c-format
-msgid "%u. Free Save"
-msgstr "%u. Szabad mentés"
-
-#: ../../src/user/savegame/savegame.cpp:527
-msgid " -  Level "
-msgstr " – Szint "
-
-#: ../../src/user/savegame/savegame.cpp:534
-msgid " -  Unknown"
-msgstr " – Ismeretlen"
-
-#: ../../src/user/savegame/savegame.cpp:538
-msgid " - Date "
-msgstr " – Dátum "
-
-#: ../../src/user/savegame/savegame_loader.cpp:75
-msgid "No description"
-msgstr "Nincs leírás"
-
-#: ../../src/core/game_core.cpp:251
-msgid "Loading Level failed : "
-msgstr "A szint betöltése sikertelen: "
-
-#: ../../src/core/game_core.cpp:361
-msgid "Loading Images"
-msgstr "Képek betöltése"
-
-#: ../../src/core/game_core.cpp:498
-msgid "Loading Sounds"
-msgstr "Hangok betöltése"
-
-#: ../../src/core/property_helper.cpp:514
-#: ../../src/core/property_helper.cpp:764
-msgid "undefined"
-msgstr "nincs meghatározva"
-
-#: ../../src/core/property_helper.cpp:516
-msgid "left"
-msgstr "balra"
-
-#: ../../src/core/property_helper.cpp:518
-msgid "right"
-msgstr "jobbra"
-
-#: ../../src/core/property_helper.cpp:520
-msgid "up"
-msgstr "fel"
-
-#: ../../src/core/property_helper.cpp:522
-msgid "down"
-msgstr "le"
-
-#: ../../src/core/property_helper.cpp:524
-msgid "top_left"
-msgstr "bal felső"
-
-#: ../../src/core/property_helper.cpp:526
-msgid "top_right"
-msgstr "jobb felső"
-
-#: ../../src/core/property_helper.cpp:528
-msgid "bottom_left"
-msgstr "bal alsó"
-
-#: ../../src/core/property_helper.cpp:530
-msgid "bottom_right"
-msgstr "jobb alsó"
-
-#: ../../src/core/property_helper.cpp:532
-msgid "left_top"
-msgstr "bal felső"
-
-#: ../../src/core/property_helper.cpp:534
-msgid "left_bottom"
-msgstr "bal alsó"
-
-#: ../../src/core/property_helper.cpp:536
-msgid "right_top"
-msgstr "jobb felső"
-
-#: ../../src/core/property_helper.cpp:538
-msgid "right_bottom"
-msgstr "jobb alsó"
-
-#: ../../src/core/property_helper.cpp:540
-msgid "horizontal"
-msgstr "vízszintes"
-
-#: ../../src/core/property_helper.cpp:542
-msgid "vertical"
-msgstr "függőleges"
-
-#: ../../src/core/property_helper.cpp:544
-msgid "all"
-msgstr "összes"
-
-#: ../../src/core/property_helper.cpp:546
-msgid "first"
-msgstr "első"
-
-#: ../../src/core/property_helper.cpp:548
-msgid "last"
-msgstr "utolsó"
-
-#: ../../src/core/property_helper.cpp:766
-#: ../../src/core/property_helper.cpp:872
-msgid "green"
-msgstr "zöld"
-
-#: ../../src/core/property_helper.cpp:768
-msgid "jungle"
-msgstr "dzsungel"
-
-#: ../../src/core/property_helper.cpp:770
-msgid "ice"
-msgstr "jég"
-
-#: ../../src/core/property_helper.cpp:772
-msgid "snow"
-msgstr "hó"
-
-#: ../../src/core/property_helper.cpp:774
-msgid "water"
-msgstr "víz"
-
-#: ../../src/core/property_helper.cpp:776
-msgid "candy"
-msgstr "cukorka"
-
-#: ../../src/core/property_helper.cpp:778
-msgid "desert"
-msgstr "sivatag"
-
-#: ../../src/core/property_helper.cpp:780
-msgid "sand"
-msgstr "homok"
-
-#: ../../src/core/property_helper.cpp:782
-msgid "castle"
-msgstr "kastély"
-
-#: ../../src/core/property_helper.cpp:784
-msgid "underground"
-msgstr "föld alatt"
-
-#: ../../src/core/property_helper.cpp:786
-msgid "crystal"
-msgstr "kristály"
-
-#: ../../src/core/property_helper.cpp:788
-msgid "ghost"
-msgstr "szellem"
-
-#: ../../src/core/property_helper.cpp:790
-msgid "mushroom"
-msgstr "gomba"
-
-#: ../../src/core/property_helper.cpp:792
-msgid "sky"
-msgstr "égbolt"
-
-#: ../../src/core/property_helper.cpp:794
-msgid "plastic"
-msgstr "műanyag"
-
-#: ../../src/core/property_helper.cpp:862
-msgid "white"
-msgstr "fehér"
-
-#: ../../src/core/property_helper.cpp:864
-msgid "black"
-msgstr "fekete"
-
-#: ../../src/core/property_helper.cpp:866
-msgid "red"
-msgstr "piros"
-
-#: ../../src/core/property_helper.cpp:868
-msgid "orange"
-msgstr "narancssárga"
-
-#: ../../src/core/property_helper.cpp:870
-msgid "yellow"
-msgstr "sárga"
-
-#: ../../src/core/property_helper.cpp:874
-msgid "blue"
-msgstr "kék"
-
-#: ../../src/core/property_helper.cpp:876
-msgid "brown"
-msgstr "barna"
-
-#: ../../src/core/property_helper.cpp:878
-msgid "grey"
-msgstr "szürke"
-
-#: ../../src/core/property_helper.cpp:880
-msgid "violet"
-msgstr "ibolya"
 
 #. TRANS: Editor left menu 1st tab heading. Keep this short.
 #: ../../src/core/editor/editor.cpp:71
@@ -1340,14 +274,1723 @@ msgstr "Mászható - "
 msgid "Front Passive"
 msgstr "Előtérben lévő passzív - "
 
+#: ../../src/core/game_core.cpp:251
+msgid "Loading Level failed : "
+msgstr "A szint betöltése sikertelen: "
+
+#: ../../src/core/game_core.cpp:361
+msgid "Loading Images"
+msgstr "Képek betöltése"
+
+#: ../../src/core/game_core.cpp:498
+msgid "Loading Sounds"
+msgstr "Hangok betöltése"
+
+#: ../../src/core/property_helper.cpp:514
+#: ../../src/core/property_helper.cpp:764
+msgid "undefined"
+msgstr "nincs meghatározva"
+
+#: ../../src/core/property_helper.cpp:516
+msgid "left"
+msgstr "balra"
+
+#: ../../src/core/property_helper.cpp:518
+msgid "right"
+msgstr "jobbra"
+
+#: ../../src/core/property_helper.cpp:520
+msgid "up"
+msgstr "fel"
+
+#: ../../src/core/property_helper.cpp:522
+msgid "down"
+msgstr "le"
+
+#: ../../src/core/property_helper.cpp:524
+msgid "top_left"
+msgstr "bal felső"
+
+#: ../../src/core/property_helper.cpp:526
+msgid "top_right"
+msgstr "jobb felső"
+
+#: ../../src/core/property_helper.cpp:528
+msgid "bottom_left"
+msgstr "bal alsó"
+
+#: ../../src/core/property_helper.cpp:530
+msgid "bottom_right"
+msgstr "jobb alsó"
+
+#: ../../src/core/property_helper.cpp:532
+msgid "left_top"
+msgstr "bal felső"
+
+#: ../../src/core/property_helper.cpp:534
+msgid "left_bottom"
+msgstr "bal alsó"
+
+#: ../../src/core/property_helper.cpp:536
+msgid "right_top"
+msgstr "jobb felső"
+
+#: ../../src/core/property_helper.cpp:538
+msgid "right_bottom"
+msgstr "jobb alsó"
+
+#: ../../src/core/property_helper.cpp:540
+msgid "horizontal"
+msgstr "vízszintes"
+
+#: ../../src/core/property_helper.cpp:542
+msgid "vertical"
+msgstr "függőleges"
+
+#: ../../src/core/property_helper.cpp:544
+msgid "all"
+msgstr "összes"
+
+#: ../../src/core/property_helper.cpp:546
+msgid "first"
+msgstr "első"
+
+#: ../../src/core/property_helper.cpp:548
+msgid "last"
+msgstr "utolsó"
+
+#: ../../src/core/property_helper.cpp:766
+#: ../../src/core/property_helper.cpp:872
+msgid "green"
+msgstr "zöld"
+
+#: ../../src/core/property_helper.cpp:768
+msgid "jungle"
+msgstr "dzsungel"
+
+#: ../../src/core/property_helper.cpp:770
+msgid "ice"
+msgstr "jég"
+
+#: ../../src/core/property_helper.cpp:772
+msgid "snow"
+msgstr "hó"
+
+#: ../../src/core/property_helper.cpp:774
+msgid "water"
+msgstr "víz"
+
+#: ../../src/core/property_helper.cpp:776
+msgid "candy"
+msgstr "cukorka"
+
+#: ../../src/core/property_helper.cpp:778
+msgid "desert"
+msgstr "sivatag"
+
+#: ../../src/core/property_helper.cpp:780
+msgid "sand"
+msgstr "homok"
+
+#: ../../src/core/property_helper.cpp:782
+msgid "castle"
+msgstr "kastély"
+
+#: ../../src/core/property_helper.cpp:784
+msgid "underground"
+msgstr "föld alatt"
+
+#: ../../src/core/property_helper.cpp:786
+msgid "crystal"
+msgstr "kristály"
+
+#: ../../src/core/property_helper.cpp:788
+msgid "ghost"
+msgstr "szellem"
+
+#: ../../src/core/property_helper.cpp:790
+msgid "mushroom"
+msgstr "gomba"
+
+#: ../../src/core/property_helper.cpp:792
+msgid "sky"
+msgstr "égbolt"
+
+#: ../../src/core/property_helper.cpp:794
+msgid "plastic"
+msgstr "műanyag"
+
+#: ../../src/core/property_helper.cpp:860 ../../src/gui/menu_data.cpp:1504
+#: ../../src/gui/menu_data.cpp:1523 ../../src/gui/menu_data.cpp:2463
+msgid "default"
+msgstr "alapértelmezett"
+
+#: ../../src/core/property_helper.cpp:862
+msgid "white"
+msgstr "fehér"
+
+#: ../../src/core/property_helper.cpp:864
+msgid "black"
+msgstr "fekete"
+
+#: ../../src/core/property_helper.cpp:866
+msgid "red"
+msgstr "piros"
+
+#: ../../src/core/property_helper.cpp:868
+msgid "orange"
+msgstr "narancssárga"
+
+#: ../../src/core/property_helper.cpp:870
+msgid "yellow"
+msgstr "sárga"
+
+#: ../../src/core/property_helper.cpp:874
+msgid "blue"
+msgstr "kék"
+
+#: ../../src/core/property_helper.cpp:876
+msgid "brown"
+msgstr "barna"
+
+#: ../../src/core/property_helper.cpp:878
+msgid "grey"
+msgstr "szürke"
+
+#: ../../src/core/property_helper.cpp:880
+msgid "violet"
+msgstr "ibolya"
+
+#: ../../src/enemies/army.cpp:927 ../../src/enemies/beetle.cpp:270
+#: ../../src/enemies/bosses/turtle_boss.cpp:1006 ../../src/enemies/eato.cpp:284
+#: ../../src/enemies/flyon.cpp:567 ../../src/enemies/furball.cpp:746
+#: ../../src/enemies/gee.cpp:573 ../../src/enemies/krush.cpp:385
+#: ../../src/enemies/larry.cpp:422 ../../src/enemies/pip.cpp:369
+#: ../../src/enemies/rokko.cpp:581 ../../src/enemies/spikeball.cpp:515
+#: ../../src/enemies/thromp.cpp:686 ../../src/level/level_player.cpp:3976
+#: ../../src/objects/level_entry.cpp:369 ../../src/objects/level_exit.cpp:485
+#: ../../src/objects/moving_platform.cpp:958 ../../src/video/animation.cpp:1574
+msgid "Direction"
+msgstr "Irány"
+
+#: ../../src/enemies/army.cpp:927 ../../src/enemies/beetle.cpp:270
+#: ../../src/enemies/bosses/turtle_boss.cpp:1006
+#: ../../src/enemies/furball.cpp:746 ../../src/enemies/gee.cpp:573
+#: ../../src/enemies/krush.cpp:385 ../../src/enemies/larry.cpp:422
+#: ../../src/enemies/spikeball.cpp:515
+#: ../../src/objects/moving_platform.cpp:958
+msgid "Starting direction."
+msgstr "Kezdőirány."
+
+#: ../../src/enemies/beetle.cpp:281
+msgid "Color"
+msgstr "Szín"
+
+#: ../../src/enemies/beetle.cpp:281
+msgid "Color."
+msgstr "Szín."
+
+#: ../../src/enemies/beetle_barrage.cpp:356 ../../src/enemies/gee.cpp:609
+msgid "Fly distance"
+msgstr "Repülési távolság"
+
+#: ../../src/enemies/beetle_barrage.cpp:356
+msgid "Initial beetle flying distance"
+msgstr "Bogár repülésének kezdeti távolsága"
+
+#: ../../src/enemies/beetle_barrage.cpp:363
+msgid "Action range"
+msgstr "Művelet hatótávolsága"
+
+#: ../../src/enemies/beetle_barrage.cpp:363
+msgid "Radius in which it reacts on Alex"
+msgstr "Az a sugár, amelyben hatással van Alexre"
+
+#: ../../src/enemies/beetle_barrage.cpp:369
+msgid "Count"
+msgstr "Darabszám"
+
+#: ../../src/enemies/beetle_barrage.cpp:369
+msgid "Number of beetles spit out at a time"
+msgstr "Egyidőben kiköpött bogarak száma"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1010
+msgid "Hits"
+msgstr "Találatok"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1010
+msgid "Hits until a downgrade"
+msgstr "Találatok egy visszafejlődésig"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1018
+#: ../../src/enemies/furball.cpp:754
+msgid "Downgrades"
+msgstr "Visszafejlődések"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1018
+#: ../../src/enemies/furball.cpp:754
+msgid "Downgrades until death"
+msgstr "Visszafejlődések a halálig"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1026
+msgid "Shell Time"
+msgstr "Kagylóidő"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1026
+msgid "Time running as shell to rise again"
+msgstr "A kagylóként eltelt idő az újra felemelkedéshez"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1035
+#: ../../src/enemies/bosses/turtle_boss.cpp:1039
+#: ../../src/enemies/bosses/turtle_boss.cpp:1096
+#: ../../src/enemies/furball.cpp:762 ../../src/enemies/furball.cpp:767
+#: ../../src/enemies/furball.cpp:784 ../../src/enemies/gee.cpp:586
+#: ../../src/enemies/gee.cpp:591 ../../src/enemies/gee.cpp:644
+#: ../../src/enemies/static.cpp:346 ../../src/enemies/static.cpp:350
+#: ../../src/enemies/static.cpp:419 ../../src/objects/bonusbox.cpp:506
+#: ../../src/objects/bonusbox.cpp:510 ../../src/objects/bonusbox.cpp:618
+#: ../../src/overworld/world_waypoint.cpp:540
+#: ../../src/overworld/world_waypoint.cpp:544
+#: ../../src/overworld/world_waypoint.cpp:662
+msgid "Enabled"
+msgstr "Engedélyezve"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1036
+#: ../../src/enemies/bosses/turtle_boss.cpp:1042
+#: ../../src/enemies/furball.cpp:763 ../../src/enemies/furball.cpp:770
+#: ../../src/enemies/gee.cpp:587 ../../src/enemies/gee.cpp:594
+#: ../../src/enemies/static.cpp:347 ../../src/enemies/static.cpp:353
+#: ../../src/objects/bonusbox.cpp:507 ../../src/objects/bonusbox.cpp:513
+#: ../../src/objects/box.cpp:690 ../../src/objects/box.cpp:705
+#: ../../src/overworld/world_waypoint.cpp:541
+#: ../../src/overworld/world_waypoint.cpp:547
+msgid "Disabled"
+msgstr "Letiltva"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1045
+#: ../../src/enemies/furball.cpp:764
+msgid "End Level"
+msgstr "Szint befejezése"
+
+#: ../../src/enemies/bosses/turtle_boss.cpp:1045
+#: ../../src/enemies/furball.cpp:764
+msgid "End the level if it is killed."
+msgstr "A szint befejezése, ha megölték."
+
+#: ../../src/enemies/eato.cpp:288 ../../src/enemies/flyon.cpp:571
+#: ../../src/enemies/thromp.cpp:690
+msgid "Image directory"
+msgstr "Kép könyvtára"
+
+#: ../../src/enemies/eato.cpp:288 ../../src/enemies/flyon.cpp:571
+#: ../../src/enemies/thromp.cpp:690
+msgid "Directory containing the images"
+msgstr "A képeket tartalmazó könyvtár"
+
+#: ../../src/enemies/flyon.cpp:567 ../../src/enemies/rokko.cpp:581
+#: ../../src/enemies/thromp.cpp:686
+msgid "Direction it moves into."
+msgstr "Az irány, amelybe mozog."
+
+#: ../../src/enemies/flyon.cpp:578 ../../src/enemies/gee.cpp:577
+#: ../../src/enemies/thromp.cpp:697 ../../src/objects/moving_platform.cpp:962
+msgid "Distance"
+msgstr "Távolság"
+
+#: ../../src/enemies/flyon.cpp:578
+msgid "Movable Distance into its direction"
+msgstr "Mozgatható távolság az irányába"
+
+#: ../../src/enemies/flyon.cpp:586 ../../src/enemies/rokko.cpp:585
+#: ../../src/enemies/static.cpp:337 ../../src/enemies/thromp.cpp:705
+#: ../../src/objects/moving_platform.cpp:970
+msgid "Speed"
+msgstr "Sebesség"
+
+#: ../../src/enemies/flyon.cpp:586
+msgid "Initial speed when jumping out"
+msgstr "Kezdeti sebesség kiugráskor"
+
+#: ../../src/enemies/furball.cpp:820
+msgid "Boss"
+msgstr ""
+
+#: ../../src/enemies/gee.cpp:577
+msgid "Movable distance"
+msgstr "Mozgatható távolság"
+
+#: ../../src/enemies/gee.cpp:588
+msgid "Always fly"
+msgstr "Mindig repüljön"
+
+#: ../../src/enemies/gee.cpp:588
+msgid "Move without stopping at the fly distance"
+msgstr "Mozgás a repülési távolságnál történő megállás nélkül"
+
+#: ../../src/enemies/gee.cpp:601
+msgid "Wait time"
+msgstr "Várakozási idő"
+
+#: ../../src/enemies/gee.cpp:601
+msgid "Time to wait until moving again after a stop"
+msgstr "Várakozási idő egy megállás utáni ismételt mozgásig"
+
+#: ../../src/enemies/gee.cpp:609
+msgid "The distance to move each time"
+msgstr "A távolság az egyes alkalmakkor történő mozgáshoz"
+
+#: ../../src/enemies/gee.cpp:681
+#, fuzzy
+msgid "Electro"
+msgstr "Áttekintő térkép kiválasztása"
+
+#: ../../src/enemies/gee.cpp:684 ../../src/objects/lava.cpp:55
+msgid "Lava"
+msgstr "Láva"
+
+#: ../../src/enemies/gee.cpp:687
+msgid "Venom"
+msgstr ""
+
+#: ../../src/enemies/pip.cpp:369
+msgid "Starting direction"
+msgstr "Kezdeti irány"
+
+#: ../../src/enemies/rokko.cpp:585 ../../src/enemies/thromp.cpp:705
+msgid "Speed when activated"
+msgstr "Sebesség, ha aktiválva van"
+
+#: ../../src/enemies/static.cpp:315 ../../src/objects/sprite.cpp:1454
+msgid "Image"
+msgstr "Kép"
+
+#: ../../src/enemies/static.cpp:315 ../../src/objects/sprite.cpp:1454
+#: ../../src/video/animation.cpp:1400
+msgid "Image filename"
+msgstr "Kép fájlneve"
+
+#: ../../src/enemies/static.cpp:322
+msgid "Rotation Speed"
+msgstr "Forgatás sebesége"
+
+#: ../../src/enemies/static.cpp:330 ../../src/objects/level_exit.cpp:549
+#: ../../src/objects/moving_platform.cpp:943
+msgid "Path Identifier"
+msgstr "Útvonal azonosítója"
+
+#: ../../src/enemies/static.cpp:330 ../../src/objects/moving_platform.cpp:943
+msgid "Name of the Path to move along."
+msgstr "Az útvonal neve, amelyen végig kell menni."
+
+#: ../../src/enemies/static.cpp:337 ../../src/objects/moving_platform.cpp:970
+msgid "Maximum speed"
+msgstr "Legnagyobb sebesség"
+
+#: ../../src/enemies/static.cpp:357
+msgid "Fire Resistant"
+msgstr "Tűzálló"
+
+#: ../../src/enemies/static.cpp:357
+msgid "If it is resistant against fire"
+msgstr "Ha ellenáll a tűznek"
+
+#: ../../src/enemies/static.cpp:361
+msgid "Ice Resistance"
+msgstr "Jégálló"
+
+#: ../../src/enemies/static.cpp:361
+msgid "Resistance against Ice (0.0-1.0)"
+msgstr "Ellenállás a jégnek (0.0-1.0)"
+
+#: ../../src/enemies/thromp.cpp:697
+msgid "Detection distance into its direction"
+msgstr "Felismerési távolság az irányába"
+
+#: ../../src/gui/debug_window.cpp:43
+msgid "Debugging Information"
+msgstr ""
+
+#. TRANS: Do not translate the part in brackets
+#: ../../src/gui/debug_window.cpp:103
+#, c-format
+msgid "[colour='FFFFFF00']FPS: Best: %.02f Worst: %.02f Current: %0.2f"
+msgstr ""
+"[colour='FFFFFF00']FPS: legjobb: %.02f, legrosszabb: %.02f, jelenlegi: %0.2f"
+
+#: ../../src/gui/debug_window.cpp:111
+#, c-format
+msgid "Camera X: %d Y: %d"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:121
+#, c-format
+msgid "Level: %s (return stack size: %ld)"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:126
+#, fuzzy, c-format
+msgid "Overworld: %s"
+msgstr "Áttekintő térkép kiválasztása"
+
+#: ../../src/gui/debug_window.cpp:130
+#, fuzzy, c-format
+msgid "<Menu Active>"
+msgstr "Menüszint"
+
+#: ../../src/gui/debug_window.cpp:133
+#, c-format
+msgid "Scene: %s"
+msgstr ""
+
+#. TRANS: Abbreviations mean:
+#. TRANS: T=Total, P=Passive, M=Massive, E=Enemy, A=Active, H=Halfmassive
+#: ../../src/gui/debug_window.cpp:164
+#, c-format
+msgid "T: %lu P: %d M: %d E: %d A: %d H: %d"
+msgstr ""
+
+#. TRANS: Abbreviations mean:
+#. TRANS: BBox=Bonus boxes, GBox=Gold boxes, MPlat=Moving platforms
+#: ../../src/gui/debug_window.cpp:177
+#, c-format
+msgid "BBox: %d GBox: %d MPlat: %d"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:185
+#, c-format
+msgid "Player X1: %.4f X2: %.4f"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:192
+#, c-format
+msgid "Player Y1: %.4f Y2: %.4f"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:199
+#, c-format
+msgid "Player XVel: %.4f, YVel: %.4f"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:206
+#, c-format
+msgid "Player MState: %d Ground: %d (%s)"
+msgstr ""
+
+#: ../../src/gui/debug_window.cpp:214
+#, c-format
+msgid "Game Mode: %d"
+msgstr ""
+
+#. TRANS: The text is copied from the end of the GPLv3. If there is an
+#. TRANS: accepted translation of the GPLv3 available in your language,
+#. TRANS: then you should use its wording rather than trying to translate
+#. TRANS: it yourself.
+#: ../../src/gui/game_console.cpp:170
+#, fuzzy, c-format
+msgid ""
+"TSC Scripting Console\n"
+"Copyright © 2012-%d The TSC Contributors\n"
+"\n"
+"This program comes with ABSOLUTELY NO WARRANTY; for details\n"
+"see the file COPYING. This is free software, and you are\n"
+"welcome to redistribute it under certain conditions; see the\n"
+"aforementioned file for details.\n"
+msgstr ""
+"TSC parancsfájlkészítő konzol\n"
+"Copyright \\302\\251 2012-%d A TSC közreműködői\n"
+"\n"
+"Ez a program GARANCIA NÉLKÜL érkezik, a részletekért nézze meg\n"
+"a COPYING fájlt. Ez egy szabad szoftver, szívesen vesszük, ha\n"
+"továbbterjeszti a megfelelő feltételek szerint. A részletekért\n"
+"nézze meg a fent említett fájlt.\n"
+
+#. TRANS: %s is the version postfix, e.g. "dev" or "beta3".
+#: ../../src/gui/game_console.cpp:181
+#, c-format
+msgid "You are running TSC version %d.%d.%d-%s.\n"
+msgstr "A TSC %d.%d.%d-%s verzióját futtatod.\n"
+
+#: ../../src/gui/game_console.cpp:187
+#, c-format
+msgid "You are running TSC version %d.%d.%d.\n"
+msgstr "A TSC %d.%d.%d verzióját futtatod.\n"
+
+#: ../../src/gui/game_console.cpp:239
+msgid "(#inspect did not return a string)\n"
+msgstr "(#a vizsgálat nem karakterlánccal tért vissza)\n"
+
+#: ../../src/gui/hud.cpp:159
+#, c-format
+msgid "Time %02d:%02d"
+msgstr "Idő: %02d:%02d"
+
+#: ../../src/gui/hud.cpp:193
+#, c-format
+msgid "Points %08ld"
+msgstr "Pontszám: %08ld"
+
+#: ../../src/gui/menu_data.cpp:330
+msgid "Credits"
+msgstr "Köszönet"
+
+#: ../../src/gui/menu_data.cpp:630 ../../src/level/level_editor.cpp:402
+#: ../../src/overworld/world_editor.cpp:183
+msgid "New"
+msgstr "Új"
+
+#: ../../src/gui/menu_data.cpp:631
+msgid "Edit"
+msgstr "Szerkesztés"
+
+#: ../../src/gui/menu_data.cpp:632 ../../src/level/level_editor.cpp:406
+#: ../../src/objects/path.cpp:770
+msgid "Delete"
+msgstr "Törlés"
+
+#: ../../src/gui/menu_data.cpp:633
+msgid "Enter"
+msgstr "Belépés"
+
+#: ../../src/gui/menu_data.cpp:634 ../../src/gui/menu_data.cpp:1422
+#: ../../src/gui/menu_data.cpp:3108
+msgid "Back"
+msgstr "Vissza"
+
+#: ../../src/gui/menu_data.cpp:638
+msgid "Select Level"
+msgstr "Szint kiválasztása"
+
+#: ../../src/gui/menu_data.cpp:640
+msgid "Select Campaign"
+msgstr "Küldetés kiválasztása"
+
+#: ../../src/gui/menu_data.cpp:642
+msgid "Select Overworld"
+msgstr "Áttekintő térkép kiválasztása"
+
+#: ../../src/gui/menu_data.cpp:644 ../../src/gui/menu_data.cpp:646
+msgid "Description"
+msgstr "Leírás"
+
+#. TRANS: The colour names refer to the colours the level names can
+#. TRANS: be in. "Game" means the level is shipped by the game,
+#. TRANS: "user" means the level has been created by the user.
+#. TRANS: If the user edited a system level, it gets copied to his
+#. TRANS: personal level directory and is coloured mixedly to indicate
+#. TRANS: that. "Deprecated" are levels from very old versions
+#. TRANS: of the game.
+#: ../../src/gui/menu_data.cpp:656
+msgid ""
+"- Level Colors -\n"
+"\n"
+"Orange: Game\n"
+"Green: User\n"
+"Grey: Deprecated\n"
+"Mixed: See the colors"
+msgstr ""
+"- Szint színei -\n"
+"\n"
+"Narancssárga: játék\n"
+"Zöld: felhasználó\n"
+"Szürke: elavult\n"
+"Kevert: nézd meg a színeket"
+
+#: ../../src/gui/menu_data.cpp:809 ../../src/gui/menu_data.cpp:851
+#: ../../src/gui/menu_data.cpp:877
+msgid ""
+"This will reset your current progress.\n"
+"Continue ?"
+msgstr ""
+"Ez visszaállítja a jelenlegi előrehaladást.\n"
+"Folytatod?"
+
+#: ../../src/gui/menu_data.cpp:817 ../../src/gui/menu_data.cpp:835
+msgid "Couldn't load campaign "
+msgstr "Nem sikerült betölteni a küldetést "
+
+#: ../../src/gui/menu_data.cpp:859
+msgid "Couldn't load overworld "
+msgstr "Nem sikerült betölteni az áttekintő térképet "
+
+#: ../../src/gui/menu_data.cpp:885
+msgid "Couldn't load level "
+msgstr "Nem sikerült betölteni a szintet "
+
+#: ../../src/gui/menu_data.cpp:1350
+#, c-format
+msgid "Delete %s?"
+msgstr "%s törlése?"
+
+#: ../../src/gui/menu_data.cpp:1460
+msgid "Always Run"
+msgstr "Mindig fusson"
+
+#: ../../src/gui/menu_data.cpp:1464 ../../src/gui/menu_data.cpp:1472
+#: ../../src/gui/menu_data.cpp:1631 ../../src/gui/menu_data.cpp:1639
+#: ../../src/gui/menu_data.cpp:1653 ../../src/gui/menu_data.cpp:1661
+#: ../../src/gui/menu_data.cpp:1744 ../../src/gui/menu_data.cpp:1752
+#: ../../src/gui/menu_data.cpp:1775 ../../src/gui/menu_data.cpp:1783
+#: ../../src/gui/menu_data.cpp:1945 ../../src/gui/menu_data.cpp:1953
+#: ../../src/gui/menu_data.cpp:1976 ../../src/gui/menu_data.cpp:1984
+#: ../../src/gui/menu_data.cpp:2039 ../../src/gui/menu_data.cpp:2131
+#: ../../src/gui/menu_data.cpp:2142 ../../src/gui/menu_data.cpp:2180
+#: ../../src/gui/menu_data.cpp:2191 ../../src/gui/menu_data.cpp:2216
+#: ../../src/gui/menu_data.cpp:2231 ../../src/gui/menu_data.cpp:2426
+#: ../../src/gui/menu_data.cpp:2559 ../../src/gui/menu_data.cpp:2575
+#: ../../src/gui/menu_data.cpp:2629 ../../src/gui/menu_data.cpp:2637
+#: ../../src/gui/menu_data.cpp:2738 ../../src/gui/menu_data.cpp:2768
+#: ../../src/gui/menu_data.cpp:2988 ../../src/gui/menu_data.cpp:3014
+msgid "On"
+msgstr "Be"
+
+#: ../../src/gui/menu_data.cpp:1467 ../../src/gui/menu_data.cpp:1475
+#: ../../src/gui/menu_data.cpp:1634 ../../src/gui/menu_data.cpp:1642
+#: ../../src/gui/menu_data.cpp:1656 ../../src/gui/menu_data.cpp:1664
+#: ../../src/gui/menu_data.cpp:1747 ../../src/gui/menu_data.cpp:1755
+#: ../../src/gui/menu_data.cpp:1778 ../../src/gui/menu_data.cpp:1786
+#: ../../src/gui/menu_data.cpp:1948 ../../src/gui/menu_data.cpp:1956
+#: ../../src/gui/menu_data.cpp:1979 ../../src/gui/menu_data.cpp:1987
+#: ../../src/gui/menu_data.cpp:2042 ../../src/gui/menu_data.cpp:2134
+#: ../../src/gui/menu_data.cpp:2145 ../../src/gui/menu_data.cpp:2183
+#: ../../src/gui/menu_data.cpp:2194 ../../src/gui/menu_data.cpp:2219
+#: ../../src/gui/menu_data.cpp:2234 ../../src/gui/menu_data.cpp:2632
+#: ../../src/gui/menu_data.cpp:2640
+msgid "Off"
+msgstr "Ki"
+
+#: ../../src/gui/menu_data.cpp:1482
+msgid "Camera Hor Speed"
+msgstr "Kamera vízszintes sebessége"
+
+#: ../../src/gui/menu_data.cpp:1491
+msgid "Camera Ver Speed"
+msgstr "Kamera függőleges sebessége"
+
+#: ../../src/gui/menu_data.cpp:1500
+msgid "Language"
+msgstr "Nyelv"
+
+#: ../../src/gui/menu_data.cpp:1533
+msgid "Menu Level"
+msgstr "Menüszint"
+
+#: ../../src/gui/menu_data.cpp:1549 ../../src/gui/menu_data.cpp:1697
+#: ../../src/gui/menu_data.cpp:1801 ../../src/gui/menu_data.cpp:1831
+#: ../../src/gui/menu_data.cpp:1932 ../../src/gui/menu_data.cpp:1995
+msgid "Reset"
+msgstr "Visszaállítás"
+
+#: ../../src/gui/menu_data.cpp:1558
+msgid "Resolution"
+msgstr "Felbontás"
+
+#: ../../src/gui/menu_data.cpp:1610
+msgid "Bpp"
+msgstr "Bpp"
+
+#: ../../src/gui/menu_data.cpp:1627
+msgid "Fullscreen"
+msgstr "Teljes képernyő"
+
+#: ../../src/gui/menu_data.cpp:1649
+msgid "VSync"
+msgstr "VSync"
+
+#: ../../src/gui/menu_data.cpp:1671
+msgid "FPS Limit"
+msgstr "FPS korlát"
+
+#: ../../src/gui/menu_data.cpp:1680
+msgid "Geometry Quality"
+msgstr "Geometria minősége"
+
+#: ../../src/gui/menu_data.cpp:1688
+msgid "Texture Quality"
+msgstr "Textúra minősége"
+
+#: ../../src/gui/menu_data.cpp:1702
+msgid "Apply"
+msgstr "Alkalmaz"
+
+#: ../../src/gui/menu_data.cpp:1707
+msgid "Recreate Cache"
+msgstr "Gyorsítótár újra létrehozása"
+
+#: ../../src/gui/menu_data.cpp:1716
+msgid "Hertz (Hz)"
+msgstr "Hertz (Hz)"
+
+#: ../../src/gui/menu_data.cpp:1717
+msgid "You should only change the value if the audio is scratchy."
+msgstr "Csak akkor változtasd meg az értéket, ha a hang sercegő."
+
+#: ../../src/gui/menu_data.cpp:1739
+msgid "Music"
+msgstr "Zene"
+
+#: ../../src/gui/menu_data.cpp:1740
+msgid "Enable to play music. You need to have the Music Addon installed."
+msgstr "Zenelejátszás engedélyezése. Telepítve kell lennie a zenebővítménynek."
+
+#: ../../src/gui/menu_data.cpp:1762
+msgid "Set the Music Volume."
+msgstr "A zene hangerejének beállítása."
+
+#: ../../src/gui/menu_data.cpp:1770
+msgid "Sound"
+msgstr "Hang"
+
+#: ../../src/gui/menu_data.cpp:1771
+msgid "Enable to play Sounds."
+msgstr "Hangok lejátszásának engedélyezése."
+
+#: ../../src/gui/menu_data.cpp:1793
+msgid "Set the Sound Volume."
+msgstr "A hangerő beállítása."
+
+#: ../../src/gui/menu_data.cpp:1810 ../../src/gui/menu_data.cpp:1919
+msgid "Shortcuts"
+msgstr "Gyorsbillentyűk"
+
+#: ../../src/gui/menu_data.cpp:1814 ../../src/gui/menu_data.cpp:1923
+msgid "Name"
+msgstr "Név"
+
+#: ../../src/gui/menu_data.cpp:1815
+msgid "Key"
+msgstr "Billentyű"
+
+#: ../../src/gui/menu_data.cpp:1822
+msgid "Scroll Speed"
+msgstr "Görgetés sebessége"
+
+#: ../../src/gui/menu_data.cpp:1840
+msgid "Sensitivity"
+msgstr "Érzékenység"
+
+#: ../../src/gui/menu_data.cpp:1844
+msgid "Joystick"
+msgstr "Botkormány"
+
+#: ../../src/gui/menu_data.cpp:1851 ../../src/gui/menu_data.cpp:2898
+#: ../../src/level/level_settings.cpp:193
+msgid "None"
+msgstr "Nincs"
+
+#: ../../src/gui/menu_data.cpp:1887
+msgid "Axis Hor"
+msgstr "Vízszintes tengely"
+
+#: ../../src/gui/menu_data.cpp:1895
+msgid "Ver"
+msgstr "Függőleges"
+
+#: ../../src/gui/menu_data.cpp:1903
+msgid "Axis Hor2"
+msgstr "2. vízszintes tengely"
+
+#: ../../src/gui/menu_data.cpp:1911
+msgid "Ver2"
+msgstr "2. függőleges"
+
+#: ../../src/gui/menu_data.cpp:1924
+msgid "Button"
+msgstr "Gomb"
+
+#: ../../src/gui/menu_data.cpp:1941
+msgid "Show images"
+msgstr "Képek megjelenítése"
+
+#: ../../src/gui/menu_data.cpp:1963
+msgid "Item image size"
+msgstr "Tárgy képmérete"
+
+#: ../../src/gui/menu_data.cpp:1972
+msgid "Auto-Hide Mouse"
+msgstr "Egér automatikus elrejtése"
+
+#: ../../src/gui/menu_data.cpp:2267
+msgid "Up"
+msgstr "Fel"
+
+#: ../../src/gui/menu_data.cpp:2268
+msgid "Down"
+msgstr "Le"
+
+#: ../../src/gui/menu_data.cpp:2269
+msgid "Left"
+msgstr "Balra"
+
+#: ../../src/gui/menu_data.cpp:2270
+msgid "Right"
+msgstr "Jobbra"
+
+#: ../../src/gui/menu_data.cpp:2271 ../../src/gui/menu_data.cpp:2287
+msgid "Jump"
+msgstr "Ugrás"
+
+#: ../../src/gui/menu_data.cpp:2272 ../../src/gui/menu_data.cpp:2288
+msgid "Shoot"
+msgstr "Lövés"
+
+#: ../../src/gui/menu_data.cpp:2273 ../../src/gui/menu_data.cpp:2290
+#: ../../src/objects/bonusbox.cpp:501
+msgid "Item"
+msgstr "Tárgy"
+
+#: ../../src/gui/menu_data.cpp:2274 ../../src/gui/menu_data.cpp:2289
+msgid "Action"
+msgstr "Művelet"
+
+#: ../../src/gui/menu_data.cpp:2275
+msgid "Screenshot"
+msgstr "Képernyőkép"
+
+#: ../../src/gui/menu_data.cpp:2276
+msgid "Editor fast copy up"
+msgstr "Szerkesztő gyors másolás fel"
+
+#: ../../src/gui/menu_data.cpp:2277
+msgid "Editor fast copy down"
+msgstr "Szerkesztő gyors másolás le"
+
+#: ../../src/gui/menu_data.cpp:2278
+msgid "Editor fast copy left"
+msgstr "Szerkesztő gyors másolás balra"
+
+#: ../../src/gui/menu_data.cpp:2279
+msgid "Editor fast copy right"
+msgstr "Szerkesztő gyors másolás jobbra"
+
+#: ../../src/gui/menu_data.cpp:2280
+msgid "Editor pixel move up"
+msgstr "Szerkesztő képpont mozgatás fel"
+
+#: ../../src/gui/menu_data.cpp:2281
+msgid "Editor pixel move down"
+msgstr "Szerkesztő képpont mozgatás le"
+
+#: ../../src/gui/menu_data.cpp:2282
+msgid "Editor pixel move left"
+msgstr "Szerkesztő képpont mozgatás balra"
+
+#: ../../src/gui/menu_data.cpp:2283
+msgid "Editor pixel move right"
+msgstr "Szerkesztő képpont mozgatás jobbra"
+
+#: ../../src/gui/menu_data.cpp:2291
+msgid "Exit"
+msgstr "Kilépés"
+
+#: ../../src/gui/menu_data.cpp:2350
+msgid "Press a key"
+msgstr "Nyomj meg egy billentyűt"
+
+#: ../../src/gui/menu_data.cpp:2353
+msgid "Press a button"
+msgstr "Nyomj meg egy gombot"
+
+#: ../../src/gui/menu_data.cpp:2356
+msgid " for "
+msgstr " ehhez: "
+
+#: ../../src/gui/menu_data.cpp:2356
+msgid ". Press ESC to cancel."
+msgstr ". Nyomd meg az ESC billentyűt a megszakításhoz."
+
+#: ../../src/gui/menu_data.cpp:2661
+msgid "Reinitialization"
+msgstr "Újra-előkészítés"
+
+#: ../../src/gui/menu_data.cpp:2720
+msgid "Reloading"
+msgstr "Újratöltés"
+
+#: ../../src/gui/menu_data.cpp:2879
+msgid "Enabled : "
+msgstr "Engedélyezve: "
+
+#: ../../src/gui/menu_data.cpp:3094 ../../src/gui/menu_data.cpp:3096
+#: ../../src/level/level_editor.cpp:404
+#: ../../src/overworld/world_editor.cpp:185
+msgid "Save"
+msgstr "Mentés"
+
+#: ../../src/gui/menu_data.cpp:3095
+msgid "Save the game"
+msgstr "A játék mentése"
+
+#: ../../src/gui/menu_data.cpp:3101 ../../src/gui/menu_data.cpp:3103
+#: ../../src/level/level_editor.cpp:403
+#: ../../src/overworld/world_editor.cpp:184
+msgid "Load"
+msgstr "Betöltés"
+
+#: ../../src/gui/menu_data.cpp:3102
+msgid "Load a saved game"
+msgstr "Elmentett játék betöltése"
+
+#: ../../src/gui/menu_data.cpp:3266
+msgid ""
+"3000 Points needed for saving in a level.\n"
+"Saving on the Overworld is free."
+msgstr ""
+"A mentéshez 3000 pont szükséges egy szinten.\n"
+"Az áttekintőn szabadon menthető."
+
+#: ../../src/gui/menu_data.cpp:3287 ../../src/gui/menu_data.cpp:3291
+#: ../../src/gui/menu_data.cpp:3296
+msgid "No Description"
+msgstr "Nincs leírás"
+
+#: ../../src/gui/menu_data.cpp:3300
+msgid "Enter Description"
+msgstr "Leírás megadása"
+
+#: ../../src/gui/menu_data.cpp:3318 ../../src/gui/menu_data.cpp:3323
+#: ../../src/gui/menu_data.cpp:3328
+msgid "Savegame loading failed"
+msgstr "A mentett játék betöltése sikertelen"
+
+#: ../../src/input/keyboard.cpp:256
+msgid "Debug mode disabled"
+msgstr "Hibakeresési mód letiltva"
+
+#: ../../src/input/keyboard.cpp:262
+msgid "Debug mode enabled"
+msgstr "Hibakeresési mód engedélyezve"
+
+#: ../../src/input/mouse.cpp:1149
+msgid "Snap to object mode enabled"
+msgstr "Illesztés az objektumhoz mód engedélyezve"
+
+#: ../../src/input/mouse.cpp:1152
+msgid "Snap to object mode disabled"
+msgstr "Illesztés az objektumhoz mód letiltva"
+
+#: ../../src/level/level.cpp:220
+msgid "Unsupported Level format : "
+msgstr "Nem támogatott szintformátum: "
+
+#: ../../src/level/level.cpp:402
+msgid "Couldn't save level "
+msgstr "Nem sikerült elmenteni a szintet "
+
+#: ../../src/level/level.cpp:418 ../../src/level/level_editor.cpp:196
+msgid "Level "
+msgstr "Szint "
+
+#: ../../src/level/level.cpp:418 ../../src/overworld/overworld.cpp:250
+#: ../../src/video/video.cpp:1436
+msgid " saved"
+msgstr " mentve"
+
+#: ../../src/level/level.cpp:716
+msgid "Omega Mode disabled"
+msgstr "Ómega mód letiltva"
+
+#: ../../src/level/level.cpp:720
+msgid "Omega Mode enabled"
+msgstr "Ómega mód engedélyezve"
+
+#: ../../src/level/level.cpp:731
+#, fuzzy
+msgid "Kid cheat activated"
+msgstr "Sebesség, ha aktiválva van"
+
+#: ../../src/level/level_editor.cpp:187
+msgid "Create a new Level"
+msgstr "Új szint létrehozása"
+
+#: ../../src/level/level_editor.cpp:187 ../../src/level/level_editor.cpp:214
+#: ../../src/level/level_editor.cpp:218 ../../src/objects/level_entry.cpp:374
+msgctxt "level"
+msgid "Name"
+msgstr "Név"
+
+#: ../../src/level/level_editor.cpp:196 ../../src/overworld/world_editor.cpp:86
+msgid " already exists"
+msgstr " már létezik"
+
+#: ../../src/level/level_editor.cpp:208 ../../src/overworld/world_editor.cpp:82
+msgid "Created "
+msgstr "Létrehozva "
+
+#: ../../src/level/level_editor.cpp:218
+msgid "Load a Level"
+msgstr "Szint betöltése"
+
+#: ../../src/level/level_editor.cpp:237
+#: ../../src/overworld/world_editor.cpp:114
+msgid "Loaded "
+msgstr "Betöltve "
+
+#: ../../src/level/level_editor.cpp:256 ../../src/level/level_settings.cpp:276
+#: ../../src/overworld/world_editor.cpp:127
+msgid "Save "
+msgstr "Mentés "
+
+#: ../../src/level/level_editor.cpp:265
+msgid "Save Level as"
+msgstr "Szint mentése másként"
+
+#: ../../src/level/level_editor.cpp:265
+msgid "New name"
+msgstr "Új név"
+
+#: ../../src/level/level_editor.cpp:280
+msgid "Level was not yet saved"
+msgstr "A szint még nem lett elmentve"
+
+#: ../../src/level/level_editor.cpp:285
+msgid "Delete and Unload "
+msgstr "Törlés és eltávolítás "
+
+#. TRANS: Level editor left menu's entries follow
+#. TRANS: World editor left menu's entries follow
+#: ../../src/level/level_editor.cpp:369
+#: ../../src/overworld/world_editor.cpp:165
+msgid "---Sprites---"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:370
+msgid "Green Ground"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:371
+msgid "Desert Ground"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:372
+#, fuzzy
+msgid "Sand Ground"
+msgstr "föld alatt"
+
+#: ../../src/level/level_editor.cpp:373
+msgid "Castle Ground"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:374
+msgid "Cave Ground"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:375
+#, fuzzy
+msgid "Underground"
+msgstr "föld alatt"
+
+#: ../../src/level/level_editor.cpp:376
+msgid "Plastic Ground"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:377
+#, fuzzy
+msgid "Jungle Ground"
+msgstr "föld alatt"
+
+#: ../../src/level/level_editor.cpp:378
+#, fuzzy
+msgid "Snow Ground"
+msgstr "Hang"
+
+#: ../../src/level/level_editor.cpp:379
+#: ../../src/overworld/world_editor.cpp:177
+msgid "Blocks"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:380
+#: ../../src/overworld/world_editor.cpp:168
+msgid "Clouds"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:381
+#: ../../src/overworld/world_editor.cpp:169
+msgid "Hedges"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:382
+msgid "Trees"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:383
+#: ../../src/overworld/world_editor.cpp:170
+msgid "Plants"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:384
+#: ../../src/overworld/world_editor.cpp:171
+msgid "Cactus"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:385
+#, fuzzy
+msgid "Platforms"
+msgstr "platform – "
+
+#: ../../src/level/level_editor.cpp:386
+#: ../../src/overworld/world_editor.cpp:174
+msgid "Pipes"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:387
+msgid "Pipe Connectors"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:388
+msgid "Library"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:389
+#: ../../src/overworld/world_editor.cpp:172
+msgid "Hills"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:390
+msgid "Signs"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:391
+msgid "Ropes"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:392
+msgid "Doors"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:393
+#: ../../src/overworld/world_editor.cpp:178
+msgid "Bones"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:394
+msgid "Windows"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:395
+#, fuzzy
+msgid "Candy"
+msgstr "cukorka"
+
+#: ../../src/level/level_editor.cpp:396
+msgid "Stuff"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:397
+#: ../../src/overworld/world_editor.cpp:180
+msgid "---Objects---"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:398
+msgid "Boxes"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:399
+msgid "Enemies"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:400
+#: ../../src/overworld/world_editor.cpp:179
+msgid "Special"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:401
+#: ../../src/overworld/world_editor.cpp:182
+msgid "---Functions---"
+msgstr ""
+
+#: ../../src/level/level_editor.cpp:405
+#, fuzzy
+msgid "Save as"
+msgstr "Mentés "
+
+#: ../../src/level/level_editor.cpp:407
+msgid "Settings"
+msgstr ""
+
+#: ../../src/level/level_manager.cpp:472
+msgid "Invalid target level."
+msgstr "Érvénytelen célszint."
+
+#: ../../src/level/level_player.cpp:3976
+msgid "Initial direction"
+msgstr "Kezdeti irány"
+
+#: ../../src/level/level_settings.cpp:192
+#: ../../src/level/level_settings.cpp:446
+#: ../../src/level/level_settings.cpp:649
+#: ../../src/overworld/world_waypoint.cpp:755
+#: ../../src/overworld/world_waypoint.cpp:758
+msgid "(None)"
+msgstr "(Nincs)"
+
+#: ../../src/objects/bonusbox.cpp:79 ../../src/objects/bonusbox.cpp:152
+msgid "Bonusbox Empty"
+msgstr "Bónuszdoboz: üres"
+
+#: ../../src/objects/bonusbox.cpp:161
+msgid "Bonusbox Berry"
+msgstr "Bónuszdoboz: bogyó"
+
+#: ../../src/objects/bonusbox.cpp:165
+msgid "Bonusbox Fire berry"
+msgstr "Bónuszdoboz: tűzbogyó"
+
+#: ../../src/objects/bonusbox.cpp:169
+msgid "Bonusbox Ice berry"
+msgstr "Bónuszdoboz: jégbogyó"
+
+#: ../../src/objects/bonusbox.cpp:173
+msgid "Bonusbox Ghost berry"
+msgstr "Bónuszdoboz: szellembogyó"
+
+#: ../../src/objects/bonusbox.cpp:177
+msgid "Bonusbox 1-Up berry"
+msgstr "Bónuszdoboz: életbogyó"
+
+#: ../../src/objects/bonusbox.cpp:181
+msgid "Bonusbox Lemon"
+msgstr "Bónuszdoboz: citrom"
+
+#: ../../src/objects/bonusbox.cpp:193
+msgid "Bonusbox Poisonous berry"
+msgstr "Bónuszdoboz: mérgező bogyó"
+
+#: ../../src/objects/bonusbox.cpp:241
+msgid "Bonusbox Jewel"
+msgstr "Bónuszdoboz: drágakő"
+
+#: ../../src/objects/bonusbox.cpp:245
+msgid "Bonusbox Red Jewel"
+msgstr "Bónuszdoboz: vörös drágakő"
+
+#: ../../src/objects/bonusbox.cpp:453
+msgid "Animation"
+msgstr "Animáció"
+
+#: ../../src/objects/bonusbox.cpp:453
+msgid ""
+"Use the Power animation if the box has a good or needed item for this level"
+msgstr ""
+"Használd az Erő animációt, ha a doboz jó vagy szükséges tárgyat tartalmaz "
+"ehhez a szinthez"
+
+#: ../../src/objects/bonusbox.cpp:458 ../../src/objects/bonusbox.cpp:497
+#: ../../src/overworld/overworld.cpp:54
+msgid "Empty"
+msgstr "Üres"
+
+#: ../../src/objects/bonusbox.cpp:459 ../../src/objects/bonusbox.cpp:494
+#: ../../src/objects/bonusbox.cpp:601 ../../src/video/animation.cpp:1392
+#: ../../src/video/animation.cpp:1470 ../../src/video/animation.cpp:1486
+#: ../../src/video/animation.cpp:1566 ../../src/video/animation.cpp:1582
+#: ../../src/video/animation.cpp:1598 ../../src/video/animation.cpp:1614
+#: ../../src/video/animation.cpp:1630
+msgid "Random"
+msgstr "Véletlen"
+
+#: ../../src/objects/bonusbox.cpp:460 ../../src/objects/bonusbox.cpp:470
+#: ../../src/objects/bonusbox.cpp:577 ../../src/objects/powerup.cpp:224
+msgid "Berry"
+msgstr "Bogyó"
+
+#: ../../src/objects/bonusbox.cpp:461 ../../src/objects/bonusbox.cpp:473
+#: ../../src/objects/bonusbox.cpp:580
+msgid "Fire berry"
+msgstr "Tűzbogyó"
+
+#: ../../src/objects/bonusbox.cpp:462 ../../src/objects/bonusbox.cpp:476
+#: ../../src/objects/bonusbox.cpp:583 ../../src/objects/powerup.cpp:236
+msgid "Ice berry"
+msgstr "Jégbogyó"
+
+#: ../../src/objects/bonusbox.cpp:463 ../../src/objects/bonusbox.cpp:479
+#: ../../src/objects/bonusbox.cpp:586 ../../src/objects/powerup.cpp:240
+msgid "Ghost berry"
+msgstr "Szellembogyó"
+
+#: ../../src/objects/bonusbox.cpp:464 ../../src/objects/bonusbox.cpp:482
+#: ../../src/objects/bonusbox.cpp:589
+msgid "1-UP berry"
+msgstr "Életbogyó"
+
+#: ../../src/objects/bonusbox.cpp:465 ../../src/objects/bonusbox.cpp:485
+#: ../../src/objects/bonusbox.cpp:592 ../../src/objects/star.cpp:64
+msgid "Lemon"
+msgstr "Citrom"
+
+#: ../../src/objects/bonusbox.cpp:466 ../../src/objects/bonusbox.cpp:488
+#: ../../src/objects/bonusbox.cpp:595 ../../src/objects/goldpiece.cpp:125
+msgid "Jewel"
+msgstr "Drágakő"
+
+#: ../../src/objects/bonusbox.cpp:467 ../../src/objects/bonusbox.cpp:491
+#: ../../src/objects/bonusbox.cpp:598 ../../src/objects/powerup.cpp:232
+msgid "Poisonous berry"
+msgstr "Mérgező bogyó"
+
+#: ../../src/objects/bonusbox.cpp:501
+msgid "The item that gets spawned"
+msgstr "A tárgy, amely létrejött"
+
+#: ../../src/objects/bonusbox.cpp:517
+msgid "Force item"
+msgstr "Tárgy kényszerítése"
+
+#: ../../src/objects/bonusbox.cpp:517
+msgid "Force best available item when activated"
+msgstr "Az elérhető legjobb tárgy kényszerítése, ha aktiválva van"
+
+#: ../../src/objects/bonusbox.cpp:527
+msgid "Jewel color"
+msgstr "Drágakő színe"
+
+#: ../../src/objects/bonusbox.cpp:527
+msgid "Jewel color if the item is a jewel"
+msgstr "A drágakő színe, ha a tárgy egy drágakő"
+
+#: ../../src/objects/box.cpp:53
+msgid "Box"
+msgstr "Doboz"
+
+#: ../../src/objects/box.cpp:681
+msgid "Useable Count"
+msgstr "Használható darabszám"
+
+#: ../../src/objects/box.cpp:692 ../../src/objects/box.cpp:699
+#: ../../src/objects/box.cpp:735
+msgid "Ghost"
+msgstr "Szellem"
+
+#: ../../src/objects/box.cpp:693 ../../src/objects/box.cpp:702
+#: ../../src/objects/box.cpp:738
+msgid "Semi Massive"
+msgstr "Féltömeg"
+
+#: ../../src/objects/box.cpp:709
+msgid "Invisible"
+msgstr "Láthatatlan"
+
+#: ../../src/objects/box.cpp:709
+msgid ""
+"Massive is invisible until activated.\n"
+"Ghost is only visible and activateable if in ghost mode.\n"
+"Semi Massive is like Massive but only touchable in the activation direction."
+msgstr ""
+"A tömeg láthatatlan az aktiválásig.\n"
+"A szellem csak szellem módban látható és aktiválható.\n"
+"A féltömeg olyan mint a tömeg, de csak érinthető az aktiválási irányban."
+
+#: ../../src/objects/box.cpp:753
+msgid "(Invisible)"
+msgstr "(Láthatatlan)"
+
+#: ../../src/objects/box.cpp:756
+msgid "(Ghost block)"
+msgstr "(Szellem torlasz)"
+
+#: ../../src/objects/box.cpp:759
+msgid "(Invisible Semi Massive)"
+msgstr "(Láthatatlan féltömeg)"
+
+#: ../../src/objects/crate.cpp:59
+msgid "Crate"
+msgstr "Láda"
+
+#: ../../src/objects/enemystopper.cpp:61
+msgid "Enemystopper"
+msgstr "Ellenség-megállító"
+
+#: ../../src/objects/goldpiece.cpp:106
+msgid "Red Falling Jewel"
+msgstr "Vörös leeső drágakő"
+
+#: ../../src/objects/goldpiece.cpp:112
+msgid "Falling Jewel"
+msgstr "Leeső drágakő"
+
+#: ../../src/objects/goldpiece.cpp:119
+msgid "Red Jewel"
+msgstr "Vörös drágakő"
+
+#: ../../src/objects/level_entry.cpp:133 ../../src/objects/level_exit.cpp:208
+msgid " Beam"
+msgstr " Fénysugár"
+
+#: ../../src/objects/level_entry.cpp:136 ../../src/objects/level_exit.cpp:211
+msgid " Warp"
+msgstr " Vontatókötél"
+
+#: ../../src/objects/level_entry.cpp:369
+msgid "The direction to come out"
+msgstr "Az irány kifelé"
+
+#: ../../src/objects/level_entry.cpp:374
+msgid "Name for identification"
+msgstr "Név az azonosításhoz"
+
+#: ../../src/objects/level_exit.cpp:485
+msgid "Direction to move in"
+msgstr "A mozgás iránya"
+
+#: ../../src/objects/level_exit.cpp:510
+msgid "Motion"
+msgstr "Mozgás"
+
+#: ../../src/objects/level_exit.cpp:510
+msgid "Camera Motion"
+msgstr "Kamera mozgása"
+
+#: ../../src/objects/level_exit.cpp:514
+msgid "Destination Level"
+msgstr "Célszint"
+
+#: ../../src/objects/level_exit.cpp:514
+msgid ""
+"Name of the level that should be entered. If empty uses the current level."
+msgstr ""
+"A szint neve, amelyre be kell lépni. Ha üres, akkor a jelenlegi szintet "
+"használja."
+
+#: ../../src/objects/level_exit.cpp:521
+msgid "Destination Entry"
+msgstr "Célbejárat"
+
+#: ../../src/objects/level_exit.cpp:521
+msgid ""
+"Name of the Entry in the destination level. If empty the entry point is the "
+"player start position."
+msgstr ""
+"A bejárat neve a célszinten. Ha üres, akkor a belépési pont a játékos kezdő "
+"helyzete."
+
+#: ../../src/objects/level_exit.cpp:528
+msgid "Return Level"
+msgstr "Visszatérési szint"
+
+#: ../../src/objects/level_exit.cpp:528
+msgid "Name of the level that should be pushed onto return stack."
+msgstr "A szint neve, amelyet be kell tenni a visszatérési verembe."
+
+#: ../../src/objects/level_exit.cpp:535
+msgid "Return Entry"
+msgstr "Visszatérési bejárat"
+
+#: ../../src/objects/level_exit.cpp:535
+msgid "Name of the Entry in the return level."
+msgstr "A bejárat neve a visszatérési szinten."
+
+#: ../../src/objects/level_exit.cpp:542
+msgid "Exit Name"
+msgstr "Kijárat neve"
+
+#: ../../src/objects/level_exit.cpp:542
+msgid ""
+"Name of the Exit (use this in the overworld editor to set the path selected "
+"by this exit)."
+msgstr ""
+"A kijárat neve (használd ezt az áttekintő térkép szerkesztőjében a kijárat "
+"által kijelölt útvonal beállításához)."
+
+#: ../../src/objects/level_exit.cpp:549
+msgid "Name of the Path to use for the camera movement."
+msgstr "A kamera mozgásához használandó útvonal neve."
+
+#: ../../src/objects/moving_platform.cpp:939 ../../src/objects/path.cpp:745
+msgid "Move Type"
+msgstr "Mozgás típusa"
+
+#: ../../src/objects/moving_platform.cpp:939
+msgid "Movement type."
+msgstr "A mozgás típusa."
+
+#: ../../src/objects/moving_platform.cpp:962
+msgid ""
+"Movable distance into its direction if type is line or radius if circle."
+msgstr ""
+"Mozgatható távolság az irányába, ha a típus vonal vagy sugár egy kör "
+"esetében."
+
+#: ../../src/objects/moving_platform.cpp:978
+msgid "Touch time"
+msgstr "Érintés ideje"
+
+#: ../../src/objects/moving_platform.cpp:978
+msgid "Time when touched until shaking starts"
+msgstr "Az érintés ideje, amíg a rázkódás elkezdődik"
+
+#: ../../src/objects/moving_platform.cpp:986
+msgid "Shake time"
+msgstr "Rázkódás ideje"
+
+#: ../../src/objects/moving_platform.cpp:986
+msgid "Time it's shaking until falling"
+msgstr "A rázkódás ideje a leesésig"
+
+#: ../../src/objects/moving_platform.cpp:994
+msgid "Touch move time"
+msgstr "Érintés mozgási ideje"
+
+#: ../../src/objects/moving_platform.cpp:994
+msgid "If set does not move until this time has elapsed after touched"
+msgstr ""
+"Ha be van állítva, akkor nem mozog, amíg ez az idő el nem telik az érintés "
+"után"
+
+#: ../../src/objects/moving_platform.cpp:1002
+msgid "Hor image count"
+msgstr "Vízszintes kép darabszám"
+
+#: ../../src/objects/moving_platform.cpp:1002
+msgid "Horizontal middle image count"
+msgstr "Vízszintes középső kép darabszám"
+
+#: ../../src/objects/moving_platform.cpp:1012
+msgid "Image top left"
+msgstr "Bal felső kép"
+
+#: ../../src/objects/moving_platform.cpp:1019
+msgid "Image top middle"
+msgstr "Középen felül lévő kép"
+
+#: ../../src/objects/moving_platform.cpp:1026
+msgid "Image top right"
+msgstr "Jobb felső kép"
+
+#: ../../src/objects/moving_platform.cpp:1229
+msgid "Falling "
+msgstr "Leeső "
+
+#: ../../src/objects/moving_platform.cpp:1232
+msgid "Delayed "
+msgstr "Késleltetett "
+
+#: ../../src/objects/moving_platform.cpp:1235
+msgid "Moving "
+msgstr "Mozgó "
+
+#: ../../src/objects/moving_platform.cpp:1238
+msgid "Platform - "
+msgstr "platform – "
+
+#: ../../src/objects/path.cpp:482
+msgid "Path"
+msgstr "Útvonal"
+
+#: ../../src/objects/path.cpp:712
+msgid "Identifier"
+msgstr "Azonosító"
+
+#: ../../src/objects/path.cpp:712
+msgid ""
+"Identifier name of the Path. This is needed for objects that can link to "
+"this."
+msgstr ""
+"Az útvonal azonosító neve. Ez olyan objektumokhoz szükséges, amelyek ehhez "
+"kapcsolódhatnak."
+
+#: ../../src/objects/path.cpp:729
+msgid "Show Line"
+msgstr "Vonal megjelenítése"
+
+#: ../../src/objects/path.cpp:729
+msgid "Wether or not to show the path's moving line ingame."
+msgstr "Megjelenjen-e vagy sem az útvonal mozgási vonala a játékon belül."
+
+#: ../../src/objects/path.cpp:745
+msgid ""
+"Movement type. Mirror moves forth and back and rewind starts from the "
+"beginning again."
+msgstr ""
+"Mozgás típusa. A tükör előre és hátra mozog, valamint újraindul az elejétől "
+"ismét."
+
+#: ../../src/objects/path.cpp:757
+msgid "Segment"
+msgstr "Szakasz"
+
+#: ../../src/objects/path.cpp:757
+msgid "Select the Segment to edit."
+msgstr "A szakasz kijelölése szerkesztésre."
+
+#: ../../src/objects/path.cpp:761
+msgid "Add a Segment after the selected one."
+msgstr "Szakasz hozzáadása a kijelölt után."
+
+#: ../../src/objects/path.cpp:763
+msgid "Add"
+msgstr "Hozzáadás"
+
+#: ../../src/objects/path.cpp:768
+msgid "Delete the selected Segment."
+msgstr "A kijelölt szakasz törlése."
+
+#: ../../src/objects/path.cpp:775
+msgid "Pos X1"
+msgstr "X1 helyzet"
+
+#: ../../src/objects/path.cpp:775
+msgid "Line position X1"
+msgstr "X1 sorhelyzet"
+
+#: ../../src/objects/path.cpp:783
+msgid "Y1"
+msgstr "Y1"
+
+#: ../../src/objects/path.cpp:783
+msgid "Line position Y1"
+msgstr "Y1 sorhelyzet"
+
+#: ../../src/objects/path.cpp:791
+msgid "Pos X2"
+msgstr "X2 helyzet"
+
+#: ../../src/objects/path.cpp:791
+msgid "Line position X2"
+msgstr "X2 sorhelyzet"
+
+#: ../../src/objects/path.cpp:799
+msgid "Y2"
+msgstr "Y2"
+
+#: ../../src/objects/path.cpp:799
+msgid "Line position Y2"
+msgstr "Y2 sorhelyzet"
+
+#: ../../src/objects/powerup.cpp:228
+msgid "Life berry"
+msgstr "Életbogyó"
+
+#: ../../src/objects/powerup.cpp:449
+msgid "Fireberry"
+msgstr "Tűzbogyó"
+
+#: ../../src/objects/powerup.cpp:553
+msgid "Cookie (3-UP)"
+msgstr "Süti (3 élet)"
+
+#: ../../src/objects/secret_area.cpp:176
+msgid "You found a secret area!"
+msgstr "Találtál egy titkos területet!"
+
+#: ../../src/objects/spinbox.cpp:49
+msgid "Spinbox"
+msgstr "Léptetési lista"
+
+#: ../../src/objects/text_box.cpp:64
+msgid "Text Box"
+msgstr "Szövegdoboz"
+
+#: ../../src/objects/text_box.cpp:239
+msgid "Text"
+msgstr "Szöveg"
+
+#: ../../src/objects/text_box.cpp:239
+msgid "Text to display when activated"
+msgstr "A megjelenítendő szöveg, ha aktiválva van"
+
 #: ../../src/overworld/overworld.cpp:50
 msgid "Unnamed"
 msgstr "Névtelen"
-
-#: ../../src/overworld/overworld.cpp:54 ../../src/objects/bonusbox.cpp:458
-#: ../../src/objects/bonusbox.cpp:497
-msgid "Empty"
-msgstr "Üres"
 
 #: ../../src/overworld/overworld.cpp:71
 msgid "Couldn't save world description "
@@ -1365,18 +2008,6 @@ msgstr "Világ "
 #: ../../src/overworld/overworld.cpp:466
 msgid "Omega Mode unlocks all waypoints"
 msgstr ""
-
-#: ../../src/overworld/world_layer.cpp:50
-msgid "Line Start Point"
-msgstr "Vonal kezdőpontja"
-
-#: ../../src/overworld/world_layer.cpp:54
-msgid "Line End Point"
-msgstr "Vonal végpontja"
-
-#: ../../src/overworld/world_layer.cpp:289
-msgid "Waypoint origin"
-msgstr "Útvonalpont kezdete"
 
 #: ../../src/overworld/world_editor.cpp:67
 msgid "Create a new World"
@@ -1418,6 +2049,18 @@ msgstr ""
 msgid "Generic"
 msgstr ""
 
+#: ../../src/overworld/world_layer.cpp:50
+msgid "Line Start Point"
+msgstr "Vonal kezdőpontja"
+
+#: ../../src/overworld/world_layer.cpp:54
+msgid "Line End Point"
+msgstr "Vonal végpontja"
+
+#: ../../src/overworld/world_layer.cpp:289
+msgid "Waypoint origin"
+msgstr "Útvonalpont kezdete"
+
 #: ../../src/overworld/world_waypoint.cpp:126
 msgid "Waypoint"
 msgstr "Útvonalpont"
@@ -1456,33 +2099,6 @@ msgstr "Visszafelé irány"
 #: ../../src/overworld/world_waypoint.cpp:534
 msgid "Forward Direction"
 msgstr "Előre irány"
-
-#: ../../src/overworld/world_waypoint.cpp:540
-#: ../../src/overworld/world_waypoint.cpp:544
-#: ../../src/overworld/world_waypoint.cpp:662 ../../src/enemies/gee.cpp:586
-#: ../../src/enemies/gee.cpp:591 ../../src/enemies/gee.cpp:644
-#: ../../src/enemies/static.cpp:346 ../../src/enemies/static.cpp:350
-#: ../../src/enemies/static.cpp:419
-#: ../../src/enemies/bosses/turtle_boss.cpp:1035
-#: ../../src/enemies/bosses/turtle_boss.cpp:1039
-#: ../../src/enemies/bosses/turtle_boss.cpp:1096
-#: ../../src/enemies/furball.cpp:762 ../../src/enemies/furball.cpp:767
-#: ../../src/enemies/furball.cpp:784 ../../src/objects/bonusbox.cpp:506
-#: ../../src/objects/bonusbox.cpp:510 ../../src/objects/bonusbox.cpp:618
-msgid "Enabled"
-msgstr "Engedélyezve"
-
-#: ../../src/overworld/world_waypoint.cpp:541
-#: ../../src/overworld/world_waypoint.cpp:547 ../../src/enemies/gee.cpp:587
-#: ../../src/enemies/gee.cpp:594 ../../src/enemies/static.cpp:347
-#: ../../src/enemies/static.cpp:353
-#: ../../src/enemies/bosses/turtle_boss.cpp:1036
-#: ../../src/enemies/bosses/turtle_boss.cpp:1042
-#: ../../src/enemies/furball.cpp:763 ../../src/enemies/furball.cpp:770
-#: ../../src/objects/box.cpp:690 ../../src/objects/box.cpp:705
-#: ../../src/objects/bonusbox.cpp:507 ../../src/objects/bonusbox.cpp:513
-msgid "Disabled"
-msgstr "Letiltva"
 
 #: ../../src/overworld/world_waypoint.cpp:551
 msgid "Default Access"
@@ -1573,34 +2189,78 @@ msgstr ""
 "Ez a kijárat alapértelmezetten zárolva van? Állítsd be a hozzáférést "
 "engedélyezettre a cél útvonalponton, ha alapértelmezetten feloldod!"
 
+#: ../../src/scene/01_prologue.cpp:36
+msgid ""
+"The sinking sun sent out its last colourful beams over the Eastern Desert "
+"when a single individual was making his way through the ups and downs of the "
+"sandy dunes."
+msgstr ""
+"A lemenő nap az utolsó színes fénysugarait bocsátotta ki a keleti sivatag "
+"fölött, amikor egy magányos személy a homokdűnék buckái és völgyei között "
+"rótta az útját."
+
+#: ../../src/scene/01_prologue.cpp:37
+#, fuzzy
+msgid ""
+"When he reached the top of the highest dune, he gazed around, but to only "
+"see sand followed by more sand, by even more "
+"[colour='FFFFF000']sand[colour='FFFFFFFF']."
+msgstr ""
+"Amikor elérte a legmagasabb dűne csúcsát, körbenézett, és csak homokot, még "
+"több homokot és még annál is több homokot látott."
+
+#: ../../src/scene/01_prologue.cpp:38
+msgid ""
+"He took out a map, but with the stars not yet visible on the darkening sky "
+"there was no means of orientation in this infinite sea of equally hostile "
+"sand dunes."
+msgstr ""
+"Elővett egy térképet, de mivel a csillagok még nem látszottak a sötétedő "
+"égen, nem talált semmilyen biztos tájékozódási pontot az egyforma ellenséges "
+"homokdűnék végtelen tengerében."
+
 #. TRANS: Prompt issued in the game console
 #: ../../src/scripting/scripting.cpp:104
 msgid "(console)"
 msgstr "(konzol)"
 
-#: ../../src/video/img_manager.cpp:121
-msgid "Saving Textures"
-msgstr "Textúrák mentése"
+#: ../../src/user/savegame/savegame.cpp:271
+msgid "Savegame "
+msgstr "Játékmentés "
 
-#: ../../src/video/img_manager.cpp:167
-msgid "Restoring Textures"
-msgstr "Textúrák helyreállítása"
+#: ../../src/user/savegame/savegame.cpp:271
+msgid " loaded"
+msgstr " betöltve"
 
-#: ../../src/video/video.cpp:470
-msgid "Caching Images failed : Could not remove old images"
-msgstr ""
-"A képek gyorsítótárazása sikertelen: nem sikerült eltávolítani a régi képeket"
+#: ../../src/user/savegame/savegame.cpp:436
+msgid "Couldn't save savegame "
+msgstr "Nem sikerült menteni a játékmentést "
 
-#: ../../src/video/video.cpp:493
-msgid "Caching Images"
-msgstr "Képek gyorsítótárazása"
+#: ../../src/user/savegame/savegame.cpp:439
+msgid "Saved to Slot "
+msgstr "Mentve a helyre: "
 
-#. TRANS: Be careful with the length of this line, if
-#. TRANS: it is much longer than the English version,
-#. TRANS: it will be cut off.
-#: ../../src/video/loading_screen.cpp:65
-msgid "This program is distributed under the terms of the GPLv3"
-msgstr "Ez a program a GPLv3 feltételei szerint lett közreadva"
+#. TRANS: %u is replaced by the number of the save slot, starting with 1.
+#: ../../src/user/savegame/savegame.cpp:505
+#, c-format
+msgid "%u. Free Save"
+msgstr "%u. Szabad mentés"
+
+#: ../../src/user/savegame/savegame.cpp:527
+msgid " -  Level "
+msgstr " – Szint "
+
+#: ../../src/user/savegame/savegame.cpp:534
+msgid " -  Unknown"
+msgstr " – Ismeretlen"
+
+#: ../../src/user/savegame/savegame.cpp:538
+msgid " - Date "
+msgstr " – Dátum "
+
+#: ../../src/user/savegame/savegame_loader.cpp:75
+msgid "No description"
+msgstr "Nincs leírás"
 
 #: ../../src/video/animation.cpp:1384
 msgid "Position z"
@@ -1614,22 +2274,8 @@ msgstr "Kezdeti mélységi helyzet. Használj 0.00011 és 0.12 közötti érték
 #: ../../src/video/animation.cpp:1486 ../../src/video/animation.cpp:1566
 #: ../../src/video/animation.cpp:1582 ../../src/video/animation.cpp:1598
 #: ../../src/video/animation.cpp:1614 ../../src/video/animation.cpp:1630
-#: ../../src/objects/bonusbox.cpp:459 ../../src/objects/bonusbox.cpp:494
-#: ../../src/objects/bonusbox.cpp:601
-msgid "Random"
-msgstr "Véletlen"
-
-#: ../../src/video/animation.cpp:1392 ../../src/video/animation.cpp:1470
-#: ../../src/video/animation.cpp:1486 ../../src/video/animation.cpp:1566
-#: ../../src/video/animation.cpp:1582 ../../src/video/animation.cpp:1598
-#: ../../src/video/animation.cpp:1614 ../../src/video/animation.cpp:1630
 msgid "Additional random value"
 msgstr "További véletlen érték"
-
-#: ../../src/video/animation.cpp:1400 ../../src/enemies/static.cpp:315
-#: ../../src/objects/sprite.cpp:1454
-msgid "Image filename"
-msgstr "Kép fájlneve"
 
 #: ../../src/video/animation.cpp:1407
 msgid "Based on camera pos."
@@ -1791,672 +2437,29 @@ msgstr "Vágási mód"
 msgid "Clipping mode if particle is out the rectangle"
 msgstr "Vágási mód, ha a részecske a téglalapon kívül van"
 
-#: ../../src/enemies/krush.cpp:385 ../../src/enemies/gee.cpp:573
-#: ../../src/enemies/larry.cpp:422 ../../src/enemies/spikeball.cpp:515
-#: ../../src/enemies/bosses/turtle_boss.cpp:1006
-#: ../../src/enemies/beetle.cpp:270 ../../src/enemies/furball.cpp:746
-#: ../../src/enemies/army.cpp:927 ../../src/objects/moving_platform.cpp:958
-msgid "Starting direction."
-msgstr "Kezdőirány."
+#: ../../src/video/img_manager.cpp:121
+msgid "Saving Textures"
+msgstr "Textúrák mentése"
 
-#: ../../src/enemies/flyon.cpp:567 ../../src/enemies/rokko.cpp:581
-#: ../../src/enemies/thromp.cpp:686
-msgid "Direction it moves into."
-msgstr "Az irány, amelybe mozog."
+#: ../../src/video/img_manager.cpp:167
+msgid "Restoring Textures"
+msgstr "Textúrák helyreállítása"
 
-#: ../../src/enemies/flyon.cpp:571 ../../src/enemies/eato.cpp:288
-#: ../../src/enemies/thromp.cpp:690
-msgid "Image directory"
-msgstr "Kép könyvtára"
+#. TRANS: Be careful with the length of this line, if
+#. TRANS: it is much longer than the English version,
+#. TRANS: it will be cut off.
+#: ../../src/video/loading_screen.cpp:65
+msgid "This program is distributed under the terms of the GPLv3"
+msgstr "Ez a program a GPLv3 feltételei szerint lett közreadva"
 
-#: ../../src/enemies/flyon.cpp:571 ../../src/enemies/eato.cpp:288
-#: ../../src/enemies/thromp.cpp:690
-msgid "Directory containing the images"
-msgstr "A képeket tartalmazó könyvtár"
-
-#: ../../src/enemies/flyon.cpp:578 ../../src/enemies/gee.cpp:577
-#: ../../src/enemies/thromp.cpp:697 ../../src/objects/moving_platform.cpp:962
-msgid "Distance"
-msgstr "Távolság"
-
-#: ../../src/enemies/flyon.cpp:578
-msgid "Movable Distance into its direction"
-msgstr "Mozgatható távolság az irányába"
-
-#: ../../src/enemies/flyon.cpp:586 ../../src/enemies/rokko.cpp:585
-#: ../../src/enemies/static.cpp:337 ../../src/enemies/thromp.cpp:705
-#: ../../src/objects/moving_platform.cpp:970
-msgid "Speed"
-msgstr "Sebesség"
-
-#: ../../src/enemies/flyon.cpp:586
-msgid "Initial speed when jumping out"
-msgstr "Kezdeti sebesség kiugráskor"
-
-#: ../../src/enemies/gee.cpp:577
-msgid "Movable distance"
-msgstr "Mozgatható távolság"
-
-#: ../../src/enemies/gee.cpp:588
-msgid "Always fly"
-msgstr "Mindig repüljön"
-
-#: ../../src/enemies/gee.cpp:588
-msgid "Move without stopping at the fly distance"
-msgstr "Mozgás a repülési távolságnál történő megállás nélkül"
-
-#: ../../src/enemies/gee.cpp:601
-msgid "Wait time"
-msgstr "Várakozási idő"
-
-#: ../../src/enemies/gee.cpp:601
-msgid "Time to wait until moving again after a stop"
-msgstr "Várakozási idő egy megállás utáni ismételt mozgásig"
-
-#: ../../src/enemies/gee.cpp:609 ../../src/enemies/beetle_barrage.cpp:356
-msgid "Fly distance"
-msgstr "Repülési távolság"
-
-#: ../../src/enemies/gee.cpp:609
-msgid "The distance to move each time"
-msgstr "A távolság az egyes alkalmakkor történő mozgáshoz"
-
-#: ../../src/enemies/gee.cpp:681
-#, fuzzy
-msgid "Electro"
-msgstr "Áttekintő térkép kiválasztása"
-
-#: ../../src/enemies/gee.cpp:684 ../../src/objects/lava.cpp:55
-msgid "Lava"
-msgstr "Láva"
-
-#: ../../src/enemies/gee.cpp:687
-msgid "Venom"
+#: ../../src/video/video.cpp:470
+msgid "Caching Images failed : Could not remove old images"
 msgstr ""
-
-#: ../../src/enemies/rokko.cpp:585 ../../src/enemies/thromp.cpp:705
-msgid "Speed when activated"
-msgstr "Sebesség, ha aktiválva van"
-
-#: ../../src/enemies/static.cpp:315 ../../src/objects/sprite.cpp:1454
-msgid "Image"
-msgstr "Kép"
-
-#: ../../src/enemies/static.cpp:322
-msgid "Rotation Speed"
-msgstr "Forgatás sebesége"
-
-#: ../../src/enemies/static.cpp:330 ../../src/objects/moving_platform.cpp:943
-#: ../../src/objects/level_exit.cpp:549
-msgid "Path Identifier"
-msgstr "Útvonal azonosítója"
-
-#: ../../src/enemies/static.cpp:330 ../../src/objects/moving_platform.cpp:943
-msgid "Name of the Path to move along."
-msgstr "Az útvonal neve, amelyen végig kell menni."
-
-#: ../../src/enemies/static.cpp:337 ../../src/objects/moving_platform.cpp:970
-msgid "Maximum speed"
-msgstr "Legnagyobb sebesség"
-
-#: ../../src/enemies/static.cpp:357
-msgid "Fire Resistant"
-msgstr "Tűzálló"
-
-#: ../../src/enemies/static.cpp:357
-msgid "If it is resistant against fire"
-msgstr "Ha ellenáll a tűznek"
-
-#: ../../src/enemies/static.cpp:361
-msgid "Ice Resistance"
-msgstr "Jégálló"
-
-#: ../../src/enemies/static.cpp:361
-msgid "Resistance against Ice (0.0-1.0)"
-msgstr "Ellenállás a jégnek (0.0-1.0)"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1010
-msgid "Hits"
-msgstr "Találatok"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1010
-msgid "Hits until a downgrade"
-msgstr "Találatok egy visszafejlődésig"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1018
-#: ../../src/enemies/furball.cpp:754
-msgid "Downgrades"
-msgstr "Visszafejlődések"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1018
-#: ../../src/enemies/furball.cpp:754
-msgid "Downgrades until death"
-msgstr "Visszafejlődések a halálig"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1026
-msgid "Shell Time"
-msgstr "Kagylóidő"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1026
-msgid "Time running as shell to rise again"
-msgstr "A kagylóként eltelt idő az újra felemelkedéshez"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1045
-#: ../../src/enemies/furball.cpp:764
-msgid "End Level"
-msgstr "Szint befejezése"
-
-#: ../../src/enemies/bosses/turtle_boss.cpp:1045
-#: ../../src/enemies/furball.cpp:764
-msgid "End the level if it is killed."
-msgstr "A szint befejezése, ha megölték."
-
-#: ../../src/enemies/pip.cpp:369
-msgid "Starting direction"
-msgstr "Kezdeti irány"
-
-#: ../../src/enemies/beetle.cpp:281
-msgid "Color"
-msgstr "Szín"
-
-#: ../../src/enemies/beetle.cpp:281
-msgid "Color."
-msgstr "Szín."
-
-#: ../../src/enemies/furball.cpp:820
-msgid "Boss"
-msgstr ""
-
-#: ../../src/enemies/thromp.cpp:697
-msgid "Detection distance into its direction"
-msgstr "Felismerési távolság az irányába"
-
-#: ../../src/enemies/beetle_barrage.cpp:356
-msgid "Initial beetle flying distance"
-msgstr "Bogár repülésének kezdeti távolsága"
-
-#: ../../src/enemies/beetle_barrage.cpp:363
-msgid "Action range"
-msgstr "Művelet hatótávolsága"
-
-#: ../../src/enemies/beetle_barrage.cpp:363
-msgid "Radius in which it reacts on Alex"
-msgstr "Az a sugár, amelyben hatással van Alexre"
-
-#: ../../src/enemies/beetle_barrage.cpp:369
-msgid "Count"
-msgstr "Darabszám"
-
-#: ../../src/enemies/beetle_barrage.cpp:369
-msgid "Number of beetles spit out at a time"
-msgstr "Egyidőben kiköpött bogarak száma"
-
-#: ../../src/objects/enemystopper.cpp:61
-msgid "Enemystopper"
-msgstr "Ellenség-megállító"
-
-#: ../../src/objects/box.cpp:53
-msgid "Box"
-msgstr "Doboz"
-
-#: ../../src/objects/box.cpp:681
-msgid "Useable Count"
-msgstr "Használható darabszám"
-
-#: ../../src/objects/box.cpp:692 ../../src/objects/box.cpp:699
-#: ../../src/objects/box.cpp:735
-msgid "Ghost"
-msgstr "Szellem"
-
-#: ../../src/objects/box.cpp:693 ../../src/objects/box.cpp:702
-#: ../../src/objects/box.cpp:738
-msgid "Semi Massive"
-msgstr "Féltömeg"
-
-#: ../../src/objects/box.cpp:709
-msgid "Invisible"
-msgstr "Láthatatlan"
-
-#: ../../src/objects/box.cpp:709
-msgid ""
-"Massive is invisible until activated.\n"
-"Ghost is only visible and activateable if in ghost mode.\n"
-"Semi Massive is like Massive but only touchable in the activation direction."
-msgstr ""
-"A tömeg láthatatlan az aktiválásig.\n"
-"A szellem csak szellem módban látható és aktiválható.\n"
-"A féltömeg olyan mint a tömeg, de csak érinthető az aktiválási irányban."
-
-#: ../../src/objects/box.cpp:753
-msgid "(Invisible)"
-msgstr "(Láthatatlan)"
-
-#: ../../src/objects/box.cpp:756
-msgid "(Ghost block)"
-msgstr "(Szellem torlasz)"
-
-#: ../../src/objects/box.cpp:759
-msgid "(Invisible Semi Massive)"
-msgstr "(Láthatatlan féltömeg)"
-
-#: ../../src/objects/moving_platform.cpp:939 ../../src/objects/path.cpp:745
-msgid "Move Type"
-msgstr "Mozgás típusa"
-
-#: ../../src/objects/moving_platform.cpp:939
-msgid "Movement type."
-msgstr "A mozgás típusa."
-
-#: ../../src/objects/moving_platform.cpp:962
-msgid ""
-"Movable distance into its direction if type is line or radius if circle."
-msgstr ""
-"Mozgatható távolság az irányába, ha a típus vonal vagy sugár egy kör "
-"esetében."
-
-#: ../../src/objects/moving_platform.cpp:978
-msgid "Touch time"
-msgstr "Érintés ideje"
-
-#: ../../src/objects/moving_platform.cpp:978
-msgid "Time when touched until shaking starts"
-msgstr "Az érintés ideje, amíg a rázkódás elkezdődik"
-
-#: ../../src/objects/moving_platform.cpp:986
-msgid "Shake time"
-msgstr "Rázkódás ideje"
-
-#: ../../src/objects/moving_platform.cpp:986
-msgid "Time it's shaking until falling"
-msgstr "A rázkódás ideje a leesésig"
-
-#: ../../src/objects/moving_platform.cpp:994
-msgid "Touch move time"
-msgstr "Érintés mozgási ideje"
-
-#: ../../src/objects/moving_platform.cpp:994
-msgid "If set does not move until this time has elapsed after touched"
-msgstr ""
-"Ha be van állítva, akkor nem mozog, amíg ez az idő el nem telik az érintés "
-"után"
-
-#: ../../src/objects/moving_platform.cpp:1002
-msgid "Hor image count"
-msgstr "Vízszintes kép darabszám"
-
-#: ../../src/objects/moving_platform.cpp:1002
-msgid "Horizontal middle image count"
-msgstr "Vízszintes középső kép darabszám"
-
-#: ../../src/objects/moving_platform.cpp:1012
-msgid "Image top left"
-msgstr "Bal felső kép"
-
-#: ../../src/objects/moving_platform.cpp:1019
-msgid "Image top middle"
-msgstr "Középen felül lévő kép"
-
-#: ../../src/objects/moving_platform.cpp:1026
-msgid "Image top right"
-msgstr "Jobb felső kép"
-
-#: ../../src/objects/moving_platform.cpp:1229
-msgid "Falling "
-msgstr "Leeső "
-
-#: ../../src/objects/moving_platform.cpp:1232
-msgid "Delayed "
-msgstr "Késleltetett "
-
-#: ../../src/objects/moving_platform.cpp:1235
-msgid "Moving "
-msgstr "Mozgó "
-
-#: ../../src/objects/moving_platform.cpp:1238
-msgid "Platform - "
-msgstr "platform – "
-
-#: ../../src/objects/level_entry.cpp:133 ../../src/objects/level_exit.cpp:208
-msgid " Beam"
-msgstr " Fénysugár"
-
-#: ../../src/objects/level_entry.cpp:136 ../../src/objects/level_exit.cpp:211
-msgid " Warp"
-msgstr " Vontatókötél"
-
-#: ../../src/objects/level_entry.cpp:369
-msgid "The direction to come out"
-msgstr "Az irány kifelé"
-
-#: ../../src/objects/level_entry.cpp:374
-msgid "Name for identification"
-msgstr "Név az azonosításhoz"
-
-#: ../../src/objects/text_box.cpp:64
-msgid "Text Box"
-msgstr "Szövegdoboz"
-
-#: ../../src/objects/text_box.cpp:239
-msgid "Text"
-msgstr "Szöveg"
-
-#: ../../src/objects/text_box.cpp:239
-msgid "Text to display when activated"
-msgstr "A megjelenítendő szöveg, ha aktiválva van"
-
-#: ../../src/objects/path.cpp:482
-msgid "Path"
-msgstr "Útvonal"
-
-#: ../../src/objects/path.cpp:712
-msgid "Identifier"
-msgstr "Azonosító"
-
-#: ../../src/objects/path.cpp:712
-msgid ""
-"Identifier name of the Path. This is needed for objects that can link to "
-"this."
-msgstr ""
-"Az útvonal azonosító neve. Ez olyan objektumokhoz szükséges, amelyek ehhez "
-"kapcsolódhatnak."
-
-#: ../../src/objects/path.cpp:729
-msgid "Show Line"
-msgstr "Vonal megjelenítése"
-
-#: ../../src/objects/path.cpp:729
-msgid "Wether or not to show the path's moving line ingame."
-msgstr "Megjelenjen-e vagy sem az útvonal mozgási vonala a játékon belül."
-
-#: ../../src/objects/path.cpp:745
-msgid ""
-"Movement type. Mirror moves forth and back and rewind starts from the "
-"beginning again."
-msgstr ""
-"Mozgás típusa. A tükör előre és hátra mozog, valamint újraindul az elejétől "
-"ismét."
-
-#: ../../src/objects/path.cpp:757
-msgid "Segment"
-msgstr "Szakasz"
-
-#: ../../src/objects/path.cpp:757
-msgid "Select the Segment to edit."
-msgstr "A szakasz kijelölése szerkesztésre."
-
-#: ../../src/objects/path.cpp:761
-msgid "Add a Segment after the selected one."
-msgstr "Szakasz hozzáadása a kijelölt után."
-
-#: ../../src/objects/path.cpp:763
-msgid "Add"
-msgstr "Hozzáadás"
-
-#: ../../src/objects/path.cpp:768
-msgid "Delete the selected Segment."
-msgstr "A kijelölt szakasz törlése."
-
-#: ../../src/objects/path.cpp:775
-msgid "Pos X1"
-msgstr "X1 helyzet"
-
-#: ../../src/objects/path.cpp:775
-msgid "Line position X1"
-msgstr "X1 sorhelyzet"
-
-#: ../../src/objects/path.cpp:783
-msgid "Y1"
-msgstr "Y1"
-
-#: ../../src/objects/path.cpp:783
-msgid "Line position Y1"
-msgstr "Y1 sorhelyzet"
-
-#: ../../src/objects/path.cpp:791
-msgid "Pos X2"
-msgstr "X2 helyzet"
-
-#: ../../src/objects/path.cpp:791
-msgid "Line position X2"
-msgstr "X2 sorhelyzet"
-
-#: ../../src/objects/path.cpp:799
-msgid "Y2"
-msgstr "Y2"
-
-#: ../../src/objects/path.cpp:799
-msgid "Line position Y2"
-msgstr "Y2 sorhelyzet"
-
-#: ../../src/objects/goldpiece.cpp:106
-msgid "Red Falling Jewel"
-msgstr "Vörös leeső drágakő"
-
-#: ../../src/objects/goldpiece.cpp:112
-msgid "Falling Jewel"
-msgstr "Leeső drágakő"
-
-#: ../../src/objects/goldpiece.cpp:119
-msgid "Red Jewel"
-msgstr "Vörös drágakő"
-
-#: ../../src/objects/goldpiece.cpp:125 ../../src/objects/bonusbox.cpp:466
-#: ../../src/objects/bonusbox.cpp:488 ../../src/objects/bonusbox.cpp:595
-msgid "Jewel"
-msgstr "Drágakő"
-
-#: ../../src/objects/bonusbox.cpp:79 ../../src/objects/bonusbox.cpp:152
-msgid "Bonusbox Empty"
-msgstr "Bónuszdoboz: üres"
-
-#: ../../src/objects/bonusbox.cpp:161
-msgid "Bonusbox Berry"
-msgstr "Bónuszdoboz: bogyó"
-
-#: ../../src/objects/bonusbox.cpp:165
-msgid "Bonusbox Fire berry"
-msgstr "Bónuszdoboz: tűzbogyó"
-
-#: ../../src/objects/bonusbox.cpp:169
-msgid "Bonusbox Ice berry"
-msgstr "Bónuszdoboz: jégbogyó"
-
-#: ../../src/objects/bonusbox.cpp:173
-msgid "Bonusbox Ghost berry"
-msgstr "Bónuszdoboz: szellembogyó"
-
-#: ../../src/objects/bonusbox.cpp:177
-msgid "Bonusbox 1-Up berry"
-msgstr "Bónuszdoboz: életbogyó"
-
-#: ../../src/objects/bonusbox.cpp:181
-msgid "Bonusbox Lemon"
-msgstr "Bónuszdoboz: citrom"
-
-#: ../../src/objects/bonusbox.cpp:193
-msgid "Bonusbox Poisonous berry"
-msgstr "Bónuszdoboz: mérgező bogyó"
-
-#: ../../src/objects/bonusbox.cpp:241
-msgid "Bonusbox Jewel"
-msgstr "Bónuszdoboz: drágakő"
-
-#: ../../src/objects/bonusbox.cpp:245
-msgid "Bonusbox Red Jewel"
-msgstr "Bónuszdoboz: vörös drágakő"
-
-#: ../../src/objects/bonusbox.cpp:453
-msgid "Animation"
-msgstr "Animáció"
-
-#: ../../src/objects/bonusbox.cpp:453
-msgid ""
-"Use the Power animation if the box has a good or needed item for this level"
-msgstr ""
-"Használd az Erő animációt, ha a doboz jó vagy szükséges tárgyat tartalmaz "
-"ehhez a szinthez"
-
-#: ../../src/objects/bonusbox.cpp:460 ../../src/objects/bonusbox.cpp:470
-#: ../../src/objects/bonusbox.cpp:577 ../../src/objects/powerup.cpp:224
-msgid "Berry"
-msgstr "Bogyó"
-
-#: ../../src/objects/bonusbox.cpp:461 ../../src/objects/bonusbox.cpp:473
-#: ../../src/objects/bonusbox.cpp:580
-msgid "Fire berry"
-msgstr "Tűzbogyó"
-
-#: ../../src/objects/bonusbox.cpp:462 ../../src/objects/bonusbox.cpp:476
-#: ../../src/objects/bonusbox.cpp:583 ../../src/objects/powerup.cpp:236
-msgid "Ice berry"
-msgstr "Jégbogyó"
-
-#: ../../src/objects/bonusbox.cpp:463 ../../src/objects/bonusbox.cpp:479
-#: ../../src/objects/bonusbox.cpp:586 ../../src/objects/powerup.cpp:240
-msgid "Ghost berry"
-msgstr "Szellembogyó"
-
-#: ../../src/objects/bonusbox.cpp:464 ../../src/objects/bonusbox.cpp:482
-#: ../../src/objects/bonusbox.cpp:589
-msgid "1-UP berry"
-msgstr "Életbogyó"
-
-#: ../../src/objects/bonusbox.cpp:465 ../../src/objects/bonusbox.cpp:485
-#: ../../src/objects/bonusbox.cpp:592 ../../src/objects/star.cpp:64
-msgid "Lemon"
-msgstr "Citrom"
-
-#: ../../src/objects/bonusbox.cpp:467 ../../src/objects/bonusbox.cpp:491
-#: ../../src/objects/bonusbox.cpp:598 ../../src/objects/powerup.cpp:232
-msgid "Poisonous berry"
-msgstr "Mérgező bogyó"
-
-#: ../../src/objects/bonusbox.cpp:501
-msgid "The item that gets spawned"
-msgstr "A tárgy, amely létrejött"
-
-#: ../../src/objects/bonusbox.cpp:517
-msgid "Force item"
-msgstr "Tárgy kényszerítése"
-
-#: ../../src/objects/bonusbox.cpp:517
-msgid "Force best available item when activated"
-msgstr "Az elérhető legjobb tárgy kényszerítése, ha aktiválva van"
-
-#: ../../src/objects/bonusbox.cpp:527
-msgid "Jewel color"
-msgstr "Drágakő színe"
-
-#: ../../src/objects/bonusbox.cpp:527
-msgid "Jewel color if the item is a jewel"
-msgstr "A drágakő színe, ha a tárgy egy drágakő"
-
-#: ../../src/objects/crate.cpp:59
-msgid "Crate"
-msgstr "Láda"
-
-#: ../../src/objects/secret_area.cpp:176
-msgid "You found a secret area!"
-msgstr "Találtál egy titkos területet!"
-
-#: ../../src/objects/spinbox.cpp:49
-msgid "Spinbox"
-msgstr "Léptetési lista"
-
-#: ../../src/objects/powerup.cpp:228
-msgid "Life berry"
-msgstr "Életbogyó"
-
-#: ../../src/objects/powerup.cpp:449
-msgid "Fireberry"
-msgstr "Tűzbogyó"
-
-#: ../../src/objects/powerup.cpp:553
-msgid "Cookie (3-UP)"
-msgstr "Süti (3 élet)"
-
-#: ../../src/objects/level_exit.cpp:485
-msgid "Direction to move in"
-msgstr "A mozgás iránya"
-
-#: ../../src/objects/level_exit.cpp:510
-msgid "Motion"
-msgstr "Mozgás"
-
-#: ../../src/objects/level_exit.cpp:510
-msgid "Camera Motion"
-msgstr "Kamera mozgása"
-
-#: ../../src/objects/level_exit.cpp:514
-msgid "Destination Level"
-msgstr "Célszint"
-
-#: ../../src/objects/level_exit.cpp:514
-msgid ""
-"Name of the level that should be entered. If empty uses the current level."
-msgstr ""
-"A szint neve, amelyre be kell lépni. Ha üres, akkor a jelenlegi szintet "
-"használja."
-
-#: ../../src/objects/level_exit.cpp:521
-msgid "Destination Entry"
-msgstr "Célbejárat"
-
-#: ../../src/objects/level_exit.cpp:521
-msgid ""
-"Name of the Entry in the destination level. If empty the entry point is the "
-"player start position."
-msgstr ""
-"A bejárat neve a célszinten. Ha üres, akkor a belépési pont a játékos kezdő "
-"helyzete."
-
-#: ../../src/objects/level_exit.cpp:528
-msgid "Return Level"
-msgstr "Visszatérési szint"
-
-#: ../../src/objects/level_exit.cpp:528
-msgid "Name of the level that should be pushed onto return stack."
-msgstr "A szint neve, amelyet be kell tenni a visszatérési verembe."
-
-#: ../../src/objects/level_exit.cpp:535
-msgid "Return Entry"
-msgstr "Visszatérési bejárat"
-
-#: ../../src/objects/level_exit.cpp:535
-msgid "Name of the Entry in the return level."
-msgstr "A bejárat neve a visszatérési szinten."
-
-#: ../../src/objects/level_exit.cpp:542
-msgid "Exit Name"
-msgstr "Kijárat neve"
-
-#: ../../src/objects/level_exit.cpp:542
-msgid ""
-"Name of the Exit (use this in the overworld editor to set the path selected "
-"by this exit)."
-msgstr ""
-"A kijárat neve (használd ezt az áttekintő térkép szerkesztőjében a kijárat "
-"által kijelölt útvonal beállításához)."
-
-#: ../../src/objects/level_exit.cpp:549
-msgid "Name of the Path to use for the camera movement."
-msgstr "A kamera mozgásához használandó útvonal neve."
-
-#: ../../src/input/mouse.cpp:1149
-msgid "Snap to object mode enabled"
-msgstr "Illesztés az objektumhoz mód engedélyezve"
-
-#: ../../src/input/mouse.cpp:1152
-msgid "Snap to object mode disabled"
-msgstr "Illesztés az objektumhoz mód letiltva"
-
-#: ../../src/input/keyboard.cpp:256
-msgid "Debug mode disabled"
-msgstr "Hibakeresési mód letiltva"
-
-#: ../../src/input/keyboard.cpp:262
-msgid "Debug mode enabled"
-msgstr "Hibakeresési mód engedélyezve"
+"A képek gyorsítótárazása sikertelen: nem sikerült eltávolítani a régi képeket"
+
+#: ../../src/video/video.cpp:493
+msgid "Caching Images"
+msgstr "Képek gyorsítótárazása"
 
 #~ msgid "Version "
 #~ msgstr "Verzió "
