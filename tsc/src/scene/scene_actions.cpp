@@ -71,8 +71,13 @@ bool WaitReturn::Execute()
 
 bool WaitReturn::Key_Down(const sf::Event& evt)
 {
+    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    if (!keyPressed) {
+        return false;
+    }
+
     // React on some sensible keys
-    if (evt.key.code == pPreferences->m_key_jump || evt.key.code == pPreferences->m_key_shoot || evt.key.code == sf::Keyboard::Return) {
+    if (keyPressed->code == pPreferences->m_key_jump || keyPressed->code == pPreferences->m_key_shoot || keyPressed->code == sf::Keyboard::Key::Enter) {
         m_return_pressed = true;
         return true;
     }
@@ -130,8 +135,13 @@ bool Narration::Execute()
 
 bool Narration::Key_Down(const sf::Event& evt)
 {
+    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    if (!keyPressed) {
+        return false;
+    }
+
     // Mark message as read on keypress
-    if (evt.key.code == pPreferences->m_key_jump || evt.key.code == pPreferences->m_key_shoot || evt.key.code == sf::Keyboard::Return) {
+    if (keyPressed->code == pPreferences->m_key_jump || keyPressed->code == pPreferences->m_key_shoot || keyPressed->code == sf::Keyboard::Key::Enter) {
         m_read = true;
         return true;
     }

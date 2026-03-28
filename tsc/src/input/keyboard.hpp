@@ -40,8 +40,8 @@ namespace TSC {
         }
 
         // Check the state of the Shift and Ctrl keys.
-        inline bool Is_Shift_Down(){ return sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::RShift); }
-        inline bool Is_Ctrl_Down(){ return sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::RControl); }
+        inline bool Is_Shift_Down(){ return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift); }
+        inline bool Is_Ctrl_Down(){ return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl); }
 
         /* CEGUI Key Up handler
          * returns true if CEGUI processed the given key up event

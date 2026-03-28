@@ -135,15 +135,10 @@ void cMenuHandler::Update_Mouse(void)
 
     // check
     for (unsigned int i = 0; i < m_items.size(); i++) {
-        if (m_items[i].m_rect.contains(static_cast<float>(pMouseCursor->m_x), static_cast<float>(pMouseCursor->m_y))) {
+        if (m_items[i].m_rect.contains(sf::Vector2f(static_cast<float>(pMouseCursor->m_x), static_cast<float>(pMouseCursor->m_y)))) {
             found = i;
             break;
         }
-    }
-
-    // ignore mouse init
-    if (found < 0 && input_event.mouseMove.x == pMouseCursor->m_x) {
-        return;
     }
 
     Set_Active(found);
@@ -280,15 +275,8 @@ cMenuCore::~cMenuCore(void)
 
 bool cMenuCore::Handle_Event(const sf::Event& evt)
 {
-    switch (evt.type) {
-    case sf::Event::MouseMoved: {
+    if (evt.is<sf::Event::MouseMoved>()) {
         m_handler->Update_Mouse();
-        break;
-    }
-    // other events
-    default: {
-        break;
-    }
     }
 
     return 0;
@@ -296,8 +284,13 @@ bool cMenuCore::Handle_Event(const sf::Event& evt)
 
 bool cMenuCore::Key_Down(const sf::Event& evt)
 {
+    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    if (!keyPressed) {
+        return false;
+    }
+
     // Down (todo: detect event for joystick better)
-    if (evt.key.code == sf::Keyboard::Down || evt.key.code == pPreferences->m_key_down) {
+    if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == pPreferences->m_key_down) {
         if (m_handler->Get_Size() <= static_cast<unsigned int>(m_handler->m_active + 1)) {
             m_handler->Set_Active(0);
         }
@@ -306,7 +299,7 @@ bool cMenuCore::Key_Down(const sf::Event& evt)
         }
     }
     // Up (todo: detect event for joystick better)
-    else if (evt.key.code == sf::Keyboard::Up || evt.key.code == pPreferences->m_key_up) {
+    else if (keyPressed->code == sf::Keyboard::Key::Up || keyPressed->code == pPreferences->m_key_up) {
         if (m_handler->m_active <= 0) {
             m_handler->Set_Active(m_handler->Get_Size() - 1);
         }
@@ -315,13 +308,13 @@ bool cMenuCore::Key_Down(const sf::Event& evt)
         }
     }
     // Activate Button
-    else if (evt.key.code == sf::Keyboard::Return) {
+    else if (keyPressed->code == sf::Keyboard::Key::Enter) {
         if (m_menu_data) {
             m_menu_data->Item_Activated(m_handler->m_active);
         }
     }
     // exit
-    else if (evt.key.code == sf::Keyboard::Escape) {
+    else if (keyPressed->code == sf::Keyboard::Key::Escape) {
         m_menu_data->Exit();
     }
     else {
@@ -387,10 +380,10 @@ bool cMenuCore::Joy_Button_Up(unsigned int button)
 bool cMenuCore::Mouse_Down(sf::Mouse::Button button)
 {
     // nothing yet
-    if (button == sf::Mouse::Left) {
+    if (button == sf::Mouse::Button::Left) {
         sf::FloatRect itemrect = m_handler->Get_Active_Item_Rect();
 
-        if (itemrect.contains(static_cast<float>(pMouseCursor->m_x), static_cast<float>(pMouseCursor->m_y))) {
+        if (itemrect.contains(sf::Vector2f(static_cast<float>(pMouseCursor->m_x), static_cast<float>(pMouseCursor->m_y)))) {
             m_menu_data->Item_Activated(m_handler->m_active);
             return 1;
         }

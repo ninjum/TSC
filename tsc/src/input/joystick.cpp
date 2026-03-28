@@ -159,16 +159,21 @@ void cJoystick::Reset_keys(void)
 
 void cJoystick::Handle_Motion(const sf::Event& evt)
 {
-    if (evt.joystickMove.joystickId != m_current_joystick)
+    const auto* joyMoved = evt.getIf<sf::Event::JoystickMoved>();
+    if (!joyMoved) {
+        return;
+    }
+
+    if (joyMoved->joystickId != m_current_joystick)
         return;
 
     // Look through the axes and update their internal recorded states appropriately
     for (int i = 0; i < cPreferences::NUM_JOYSTICK_AXIS_TYPES; i++) {
         // Vertical Axis
-        if (evt.joystickMove.axis == pPreferences->m_joy_axis_ver[i]) {
+        if (joyMoved->axis == pPreferences->m_joy_axis_ver[i]) {
 
             // Up
-            if (evt.joystickMove.position < -m_joystick_neutral_bound) {
+            if (joyMoved->position < -m_joystick_neutral_bound) {
                 if (m_debug) {
                     cout << "Joystick " << m_current_joystick << " : Up Button pressed" << endl;
                 }
@@ -182,7 +187,7 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
                 }
             }
             // Down
-            else if (evt.joystickMove.position > m_joystick_neutral_bound) {
+            else if (joyMoved->position > m_joystick_neutral_bound) {
                 if (m_debug) {
                     cout << "Joystick " << m_current_joystick << " : Down Button pressed" << endl;
                 }
@@ -207,10 +212,10 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
             }
         }
         // Horizontal Axis
-        else if (evt.joystickMove.axis == pPreferences->m_joy_axis_hor[i]) {
+        else if (joyMoved->axis == pPreferences->m_joy_axis_hor[i]) {
 
             // Left
-            if (evt.joystickMove.position < -m_joystick_neutral_bound) {
+            if (joyMoved->position < -m_joystick_neutral_bound) {
                 if (m_debug) {
                     cout << "Joystick " << m_current_joystick << " : Left Button pressed" << endl;
                 }
@@ -224,7 +229,7 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
                 }
             }
             // Right
-            else if (evt.joystickMove.position > m_joystick_neutral_bound) {
+            else if (joyMoved->position > m_joystick_neutral_bound) {
                 if (m_debug) {
                     cout << "Joystick " << m_current_joystick << " : Right Button pressed" << endl;
                 }
@@ -284,12 +289,10 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
      * signal the change.  TSC is currently built to send notifications through the keyboard class
      * and then into the other classes so that they can respond to them.  The Key_Up event is what
      * is critical here now, since Key_Down is repeatedly fired by the Update() method now. */
-    sf::Event newevt;
 
     // Right change
     if (m_right != wasRight) {
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = pPreferences->m_key_right;
+        sf::Event newevt(sf::Event::KeyPressed{pPreferences->m_key_right, sf::Keyboard::Scancode::Unknown, false, false, false, false});
         if (m_right) {
             pKeyboard->Key_Down(newevt);
         }
@@ -300,8 +303,7 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
 
     // Left change
     if (m_left != wasLeft) {
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = pPreferences->m_key_left;
+        sf::Event newevt(sf::Event::KeyPressed{pPreferences->m_key_left, sf::Keyboard::Scancode::Unknown, false, false, false, false});
         if (m_left) {
             pKeyboard->Key_Down(newevt);
         }
@@ -312,8 +314,7 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
 
     // Up change
     if (m_up != wasUp) {
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = pPreferences->m_key_up;
+        sf::Event newevt(sf::Event::KeyPressed{pPreferences->m_key_up, sf::Keyboard::Scancode::Unknown, false, false, false, false});
         if (m_up) {
             pKeyboard->Key_Down(newevt);
         }
@@ -324,8 +325,7 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
 
     // Down change
     if (m_down != wasDown) {
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = pPreferences->m_key_down;
+        sf::Event newevt(sf::Event::KeyPressed{pPreferences->m_key_down, sf::Keyboard::Scancode::Unknown, false, false, false, false});
         if (m_down) {
             pKeyboard->Key_Down(newevt);
         }
@@ -338,75 +338,72 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
 
 bool cJoystick::Handle_Button_Down_Event(const sf::Event& evt)
 {
+    const auto* joyButtonPressed = evt.getIf<sf::Event::JoystickButtonPressed>();
+    if (!joyButtonPressed) {
+        return 0;
+    }
+
     // not enabled or opened
-    if (!pPreferences->m_joy_enabled || evt.joystickButton.joystickId != m_current_joystick) {
+    if (!pPreferences->m_joy_enabled || joyButtonPressed->joystickId != m_current_joystick) {
         return 0;
     }
 
     // handle button in the current mode
     if (Game_Mode == MODE_LEVEL) {
         // processed by the level
-        if (pActive_Level->Joy_Button_Down(evt.joystickButton.button)) {
+        if (pActive_Level->Joy_Button_Down(joyButtonPressed->button)) {
             return 1;
         }
     }
     else if (Game_Mode == MODE_OVERWORLD) {
         // processed by the overworld
-        if (pActive_Overworld->Joy_Button_Down(evt.joystickButton.button)) {
+        if (pActive_Overworld->Joy_Button_Down(joyButtonPressed->button)) {
             return 1;
         }
     }
     else if (Game_Mode == MODE_MENU) {
         // processed by the menu
-        if (pMenuCore->Joy_Button_Down(evt.joystickButton.button)) {
+        if (pMenuCore->Joy_Button_Down(joyButtonPressed->button)) {
             return 1;
         }
     }
     else if (Game_Mode == MODE_SCENE) {
         // processed by the active scene
-        if (pActive_Scene->Joy_Button_Down(evt.joystickButton.button)) {
+        if (pActive_Scene->Joy_Button_Down(joyButtonPressed->button)) {
             return 1;
         }
     }
 
     // Jump
-    if (evt.joystickButton.button == pPreferences->m_joy_button_jump) {
+    if (joyButtonPressed->button == pPreferences->m_joy_button_jump) {
         //
     }
     // Shoot
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_shoot) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = pPreferences->m_key_shoot;
+    else if (joyButtonPressed->button == pPreferences->m_joy_button_shoot) {
+        sf::Event newevt(sf::Event::KeyPressed{pPreferences->m_key_shoot, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Down(newevt);
         return 1;
     }
     // Request Itembox Item
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_item) {
+    else if (joyButtonPressed->button == pPreferences->m_joy_button_item) {
         // not handled
         return 1;
     }
     // Interaction
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_action) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = pPreferences->m_key_action;
+    else if (joyButtonPressed->button == pPreferences->m_joy_button_action) {
+        sf::Event newevt(sf::Event::KeyPressed{pPreferences->m_key_action, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Down(newevt);
         return 1;
     }
     // Exit
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_exit) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = sf::Keyboard::Escape;
+    else if (joyButtonPressed->button == pPreferences->m_joy_button_exit) {
+        sf::Event newevt(sf::Event::KeyPressed{sf::Keyboard::Key::Escape, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Down(newevt);
         return 1;
     }
     // Pause
-    else if (evt.joystickButton.button == 9) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyPressed;
-        newevt.key.code = sf::Keyboard::Pause;
+    else if (joyButtonPressed->button == 9) {
+        sf::Event newevt(sf::Event::KeyPressed{sf::Keyboard::Key::Pause, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Down(newevt);
         return 1;
     }
@@ -416,65 +413,62 @@ bool cJoystick::Handle_Button_Down_Event(const sf::Event& evt)
 
 bool cJoystick::Handle_Button_Up_Event(const sf::Event& evt)
 {
+    const auto* joyButtonReleased = evt.getIf<sf::Event::JoystickButtonReleased>();
+    if (!joyButtonReleased) {
+        return 0;
+    }
+
     // not enabled or opened
-    if (!pPreferences->m_joy_enabled || evt.joystickButton.joystickId != m_current_joystick) {
+    if (!pPreferences->m_joy_enabled || joyButtonReleased->joystickId != m_current_joystick) {
         return 0;
     }
 
     // handle button in the current mode
     if (Game_Mode == MODE_LEVEL) {
         // processed by the level
-        if (pActive_Level->Joy_Button_Up(evt.joystickButton.button)) {
+        if (pActive_Level->Joy_Button_Up(joyButtonReleased->button)) {
             return 1;
         }
     }
     else if (Game_Mode == MODE_OVERWORLD) {
         // processed by the overworld
-        if (pActive_Overworld->Joy_Button_Up(evt.joystickButton.button)) {
+        if (pActive_Overworld->Joy_Button_Up(joyButtonReleased->button)) {
             return 1;
         }
     }
     else if (Game_Mode == MODE_MENU) {
         // processed by the menu
-        if (pMenuCore->Joy_Button_Up(evt.joystickButton.button)) {
+        if (pMenuCore->Joy_Button_Up(joyButtonReleased->button)) {
             return 1;
         }
     }
     else if (Game_Mode == MODE_SCENE) {
         // processed by the active scene
-        if (pActive_Scene->Joy_Button_Up(evt.joystickButton.button)) {
+        if (pActive_Scene->Joy_Button_Up(joyButtonReleased->button)) {
             return 1;
         }
     }
 
-    if (evt.joystickButton.button == pPreferences->m_joy_button_jump) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyReleased;
-        newevt.key.code = pPreferences->m_key_jump;
+    if (joyButtonReleased->button == pPreferences->m_joy_button_jump) {
+        sf::Event newevt(sf::Event::KeyReleased{pPreferences->m_key_jump, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Up(newevt);
         return 1;
     }
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_shoot) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyReleased;
-        newevt.key.code = pPreferences->m_key_shoot;
+    else if (joyButtonReleased->button == pPreferences->m_joy_button_shoot) {
+        sf::Event newevt(sf::Event::KeyReleased{pPreferences->m_key_shoot, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Up(newevt);
         return 1;
     }
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_item) {
+    else if (joyButtonReleased->button == pPreferences->m_joy_button_item) {
         // not handled
     }
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_action) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyReleased;
-        newevt.key.code = pPreferences->m_key_action;
+    else if (joyButtonReleased->button == pPreferences->m_joy_button_action) {
+        sf::Event newevt(sf::Event::KeyReleased{pPreferences->m_key_action, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Up(newevt);
         return 1;
     }
-    else if (evt.joystickButton.button == pPreferences->m_joy_button_exit) {
-        sf::Event newevt;
-        newevt.type = sf::Event::KeyReleased;
-        newevt.key.code = sf::Keyboard::Escape;
+    else if (joyButtonReleased->button == pPreferences->m_joy_button_exit) {
+        sf::Event newevt(sf::Event::KeyReleased{sf::Keyboard::Key::Escape, sf::Keyboard::Scan::Unknown, false, false, false, false});
         pKeyboard->Key_Up(newevt);
         return 1;
     }

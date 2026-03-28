@@ -363,11 +363,16 @@ void cLevel_Settings::Draw(void)
 
 bool cLevel_Settings::Key_Down(const sf::Event& evt)
 {
+    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    if (!keyPressed) {
+        return false;
+    }
+
     if (!m_active) {
         return 0;
     }
 
-    if (evt.key.code == sf::Keyboard::Escape) {
+    if (keyPressed->code == sf::Keyboard::Key::Escape) {
         Exit();
     }
     else {

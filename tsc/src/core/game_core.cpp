@@ -63,8 +63,6 @@ const int game_res_h = 600;
 bool game_debug = 0;
 bool game_debug_performance = 0;
 
-sf::Event input_event;
-
 float global_upscalex = 1.0f;
 float global_upscaley = 1.0f;
 float global_downscalex = 1.0f;
@@ -337,7 +335,7 @@ void Enter_Game_Mode(const GameMode new_mode)
 
 void Clear_Input_Events(void)
 {
-    while (pVideo->PollEvent(input_event)) {
+    while (pVideo->PollEvent()) {
         // todo : keep Windowmanager quit events ?
         // ignore all events
     }

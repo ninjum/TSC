@@ -82,7 +82,7 @@ namespace TSC {
         cSound* m_data;
 
         // the current sound
-        sf::Sound m_sound;
+        std::optional<sf::Sound> m_sound;
         // the last used resource id
         int m_resource_id;
     };

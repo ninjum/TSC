@@ -194,9 +194,9 @@ namespace TSC {
         /* A wrapper over mp_window->pollEvent that prevents important events (e.g. joystick
         * events).
         */
-        bool PollEvent(sf::Event& event);
+        std::optional<sf::Event> PollEvent();
         // Same as above, but for waitEvent.
-        bool WaitEvent(sf::Event& event);
+        std::optional<sf::Event> WaitEvent();
 
         // available OpenGL version
         float m_opengl_version;

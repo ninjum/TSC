@@ -145,43 +145,33 @@ void cMouseCursor::Reset(bool clear_copy_buffer /* = 1 */)
 
 bool cMouseCursor::Handle_Event(const sf::Event& ev)
 {
-    switch (ev.type) {
-    case sf::Event::MouseMoved: {
-        CEGUI::System::getSingleton().getDefaultGUIContext().injectMousePosition(static_cast<float>(ev.mouseMove.x), static_cast<float>(ev.mouseMove.y));
+    if (const auto* mouseMoved = ev.getIf<sf::Event::MouseMoved>()) {
+        CEGUI::System::getSingleton().getDefaultGUIContext().injectMousePosition(static_cast<float>(mouseMoved->position.x), static_cast<float>(mouseMoved->position.y));
         Update_Position();
 
         if (Handle_Mouse_Move(ev)) {
             // processed
             return 1;
         }
-        break;
     }
-    case sf::Event::MouseButtonReleased: {
-        if (Handle_Mouse_Up(ev.mouseButton.button)) {
-            // processed
-            return 1;
-        }
-
-        break;
-    }
-    case sf::Event::MouseButtonPressed: {
-        if (Handle_Mouse_Down(ev.mouseButton.button)) {
-            // processed
-            return 1;
-        }
-
-        break;
-    }
-    case sf::Event::MouseWheelScrolled: {
-        if (ev.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel &&
-            Handle_Mouse_Wheel(ev.mouseWheelScroll.delta)) {
+    else if (const auto* mouseButtonReleased = ev.getIf<sf::Event::MouseButtonReleased>()) {
+        if (Handle_Mouse_Up(mouseButtonReleased->button)) {
             // processed
             return 1;
         }
     }
-    default: {
-        break;
+    else if (const auto* mouseButtonPressed = ev.getIf<sf::Event::MouseButtonPressed>()) {
+        if (Handle_Mouse_Down(mouseButtonPressed->button)) {
+            // processed
+            return 1;
+        }
     }
+    else if (const auto* mouseWheelScrolled = ev.getIf<sf::Event::MouseWheelScrolled>()) {
+        if (mouseWheelScrolled->wheel == sf::Mouse::Wheel::Vertical &&
+            Handle_Mouse_Wheel(mouseWheelScrolled->delta)) {
+            // processed
+            return 1;
+        }
     }
 
     return 0;
@@ -194,21 +184,21 @@ bool cMouseCursor::Handle_Mouse_Down(sf::Mouse::Button button)
     // First submit the event to CEGUI for processing
     switch (button) {
     // mouse buttons
-    case sf::Mouse::Left: {
+    case sf::Mouse::Button::Left: {
         if (gui_context.injectMouseButtonDown(CEGUI::LeftButton)) {
             return 1;
         }
         m_left = 1;
         break;
     }
-    case sf::Mouse::Middle: {
+    case sf::Mouse::Button::Middle: {
         if (gui_context.injectMouseButtonDown(CEGUI::MiddleButton)) {
             return 1;
         }
         m_middle = 1;
         break;
     }
-    case sf::Mouse::Right: {
+    case sf::Mouse::Button::Right: {
         if (gui_context.injectMouseButtonDown(CEGUI::RightButton)) {
             return 1;
         }
@@ -264,21 +254,21 @@ bool cMouseCursor::Handle_Mouse_Up(sf::Mouse::Button button)
 
     // First submit the button release to CEGUI
     switch (button) {
-    case sf::Mouse::Left: {
+    case sf::Mouse::Button::Left: {
         m_left = 0;
         if (gui_context.injectMouseButtonUp(CEGUI::LeftButton)) {
             return 1;
         }
     }
     break;
-    case sf::Mouse::Middle: {
+    case sf::Mouse::Button::Middle: {
         m_middle = 0;
         if (gui_context.injectMouseButtonUp(CEGUI::MiddleButton)) {
             return 1;
         }
     }
     break;
-    case sf::Mouse::Right: {
+    case sf::Mouse::Button::Right: {
         m_right = 0;
         if (gui_context.injectMouseButtonUp(CEGUI::RightButton)) {
             return 1;
@@ -1503,29 +1493,20 @@ void cMouseCursor::Mover_Update(int move_x, int move_y)
     sf::Vector2i center(m_mover_center_x, m_mover_center_y);
     sf::Mouse::setPosition(center, *pVideo->mp_window);
 
-    sf::Event inEvent;
+    while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+        const sf::Event& inEvent = *opt_event;
 
-    while (pVideo->PollEvent(inEvent)) {
-        switch (inEvent.type) {
-        case sf::Event::MouseButtonPressed: {
-            if (inEvent.mouseButton.button == sf::Mouse::Middle) {
+        if (const auto* mouseButtonPressed = inEvent.getIf<sf::Event::MouseButtonPressed>()) {
+            if (mouseButtonPressed->button == sf::Mouse::Button::Middle) {
                 m_mover_mode = 0;
             }
-            break;
         }
-        case sf::Event::KeyPressed: {
+        else if (const auto* keyPressed = inEvent.getIf<sf::Event::KeyPressed>()) {
             m_mover_mode = 0;
             pKeyboard->Key_Down(inEvent);
-            break;
         }
-        case sf::Event::Closed: {
+        else if (inEvent.is<sf::Event::Closed>()) {
             game_exit = 1;
-            break;
-        }
-        default: {
-            // ignore
-            break;
-        }
         }
     }
 }

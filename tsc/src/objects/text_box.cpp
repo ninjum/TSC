@@ -145,33 +145,35 @@ void cText_Box::Activate(void)
     bool display = 1;
 
     while (display) {
-        while (pVideo->PollEvent(input_event)) {
-            if (input_event.type == sf::Event::KeyPressed) {
+        while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+            const sf::Event& input_event = *opt_event;
+
+            if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
 
                 // exit keys
-                if (input_event.key.code == pPreferences->m_key_action || input_event.key.code == sf::Keyboard::Escape || input_event.key.code == sf::Keyboard::Return || input_event.key.code == sf::Keyboard::Space) {
+                if (keyPressed->code == pPreferences->m_key_action || keyPressed->code == sf::Keyboard::Key::Escape || keyPressed->code == sf::Keyboard::Key::Enter || keyPressed->code == sf::Keyboard::Key::Space) {
                     display = 0;
                     break;
                 }
                 // handled keys
-                else if (input_event.key.code == pPreferences->m_key_right || input_event.key.code == pPreferences->m_key_left) {
+                else if (keyPressed->code == pPreferences->m_key_right || keyPressed->code == pPreferences->m_key_left) {
                     pKeyboard->Key_Down(input_event);
                 }
             }
-            else if (input_event.type == sf::Event::KeyReleased) {
+            else if (const auto* keyReleased = input_event.getIf<sf::Event::KeyReleased>()) {
 
                 // handled keys
-                if (input_event.key.code == pPreferences->m_key_right || input_event.key.code == pPreferences->m_key_left) {
+                if (keyReleased->code == pPreferences->m_key_right || keyReleased->code == pPreferences->m_key_left) {
                     pKeyboard->Key_Up(input_event);
                 }
             }
-            else if (input_event.type == sf::Event::JoystickButtonPressed) {
-                if (input_event.joystickButton.button == pPreferences->m_joy_button_action || input_event.joystickButton.button == pPreferences->m_joy_button_exit) {
+            else if (const auto* joyButtonPressed = input_event.getIf<sf::Event::JoystickButtonPressed>()) {
+                if (joyButtonPressed->button == pPreferences->m_joy_button_action || joyButtonPressed->button == pPreferences->m_joy_button_exit) {
                     display = 0;
                     break;
                 }
             }
-            else if (input_event.type == sf::Event::JoystickMoved) {
+            else if (const auto* joyMoved = input_event.getIf<sf::Event::JoystickMoved>()) {
                 pJoystick->Handle_Motion(input_event);
                 break;
             }

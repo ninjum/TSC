@@ -95,6 +95,11 @@ void cEditor_Level::Disable(void)
 
 bool cEditor_Level::Key_Down(const sf::Event& evt)
 {
+    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    if (!keyPressed) {
+        return false;
+    }
+
     if (!m_enabled)
         return false;
 
@@ -107,7 +112,7 @@ bool cEditor_Level::Key_Down(const sf::Event& evt)
         return true;
     }
     // cycle levelexits
-    else if (evt.key.code == sf::Keyboard::End) {
+    else if (keyPressed->code == sf::Keyboard::Key::End) {
         std::vector<cLevel_Exit*> level_exits;
         for (cSprite_List::iterator itr = mp_edited_sprite_manager->objects.begin(); itr != mp_edited_sprite_manager->objects.end(); ++itr) {
             cSprite* obj = (*itr);
@@ -130,23 +135,23 @@ bool cEditor_Level::Key_Down(const sf::Event& evt)
         }
     }
     // Move camera to level top edge
-    else if (evt.key.code == sf::Keyboard::PageUp && evt.key.shift) {
+    else if (keyPressed->code == sf::Keyboard::Key::PageUp && keyPressed->shift) {
         pActive_Camera->Set_Pos(pActive_Camera->m_x, pActive_Level->m_camera_limits.m_h);
     }
     // Move camera to level bottom edge
-    else if (evt.key.code == sf::Keyboard::PageDown && evt.key.shift) {
+    else if (keyPressed->code == sf::Keyboard::Key::PageDown && keyPressed->shift) {
         pActive_Camera->Set_Pos(pActive_Camera->m_x, -static_cast<float>(game_res_h));
     }
     // Move camera to level left edge
-    else if (evt.key.code == sf::Keyboard::PageUp) {
+    else if (keyPressed->code == sf::Keyboard::Key::PageUp) {
         pActive_Camera->Set_Pos(0, pActive_Camera->m_y);
     }
     // Move camera to level right edge
-    else if (evt.key.code == sf::Keyboard::PageDown) {
+    else if (keyPressed->code == sf::Keyboard::Key::PageDown) {
         pActive_Camera->Set_Pos(pActive_Level->m_camera_limits.m_w - static_cast<float>(game_res_w), pActive_Camera->m_y);
     }
     // Handle level-editor-specific commands
-    else if (evt.key.code == sf::Keyboard::M) {
+    else if (keyPressed->code == sf::Keyboard::Key::M) {
         if (!pMouseCursor->m_selected_objects.empty()) {
             cSprite* mouse_obj = pMouseCursor->m_selected_objects[0]->m_obj;
 
