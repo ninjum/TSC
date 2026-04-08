@@ -471,9 +471,6 @@ void Exit_Game(void)
 
 bool Handle_Input_Global(const sf::Event& ev)
 {
-    // Note: SFML 3 uses a std::variant-based event system, so the
-    // traditional switch/case on ev.type is no longer possible.
-    // The if/else if chain below is the equivalent construct.
     if (ev.is<sf::Event::Closed>()) {
         game_exit = 1;
         Clear_Input_Events();
