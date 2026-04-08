@@ -15,6 +15,7 @@
 #include "../video/renderer.hpp"
 #include "../core/sprite_manager.hpp"
 #include "../overworld/overworld.hpp"
+#include <cassert>
 #include "../core/i18n.hpp"
 #include "../core/filesystem/filesystem.hpp"
 #include "../core/filesystem/resource_manager.hpp"
@@ -95,10 +96,8 @@ void cEditor_Level::Disable(void)
 
 bool cEditor_Level::Key_Down(const sf::Event& evt)
 {
-    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
-    if (!keyPressed) {
-        return false;
-    }
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
 
     if (!m_enabled)
         return false;

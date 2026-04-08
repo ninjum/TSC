@@ -15,6 +15,7 @@
 */
 
 #include "../core/global_basic.hpp"
+#include <cassert>
 #include "../gui/menu.hpp"
 #include "../gui/menu_data.hpp"
 #include "debug_window.hpp"
@@ -284,10 +285,8 @@ bool cMenuCore::Handle_Event(const sf::Event& evt)
 
 bool cMenuCore::Key_Down(const sf::Event& evt)
 {
-    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
-    if (!keyPressed) {
-        return false;
-    }
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
 
     // Down (todo: detect event for joystick better)
     if (keyPressed->code == sf::Keyboard::Key::Down || keyPressed->code == pPreferences->m_key_down) {
