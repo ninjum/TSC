@@ -234,6 +234,61 @@ bool cKeyboard::Key_Down(const sf::Event& evt)
 
         game_debug_performance = !game_debug_performance;
     }
+    // set fixed speed factor mode
+    else if (keyPressed->code == sf::Keyboard::Key::F5) {
+        float fixed_speedfactor = string_to_float(Box_Text_Input(float_to_string(pFramerate->m_force_speed_factor, 2), "Set Fixed Speedfactor", 1));
+
+        // disable
+        if (Is_Float_Equal(fixed_speedfactor, 0.0f)) {
+            pFramerate->Set_Fixed_Speedfacor(0.0f);
+            gp_hud->Set_Text("Fixed speed factor disabled");
+        }
+        // below minimum
+        else if (fixed_speedfactor <= 0.04f) {
+            gp_hud->Set_Text("Fixed speed factor must be greater than 0.04");
+        }
+        // enable
+        else {
+            pFramerate->Set_Fixed_Speedfacor(fixed_speedfactor);
+            gp_hud->Set_Text("Fixed speed factor enabled");
+        }
+    }
+    // take a screenshot
+    else if (keyPressed->code == pPreferences->m_key_screenshot) {
+        pVideo->Save_Screenshot();
+    }
+
+    // ## then handle key in the current mode
+    if (Game_Mode == MODE_LEVEL) {
+        // processed by the level
+        if (pActive_Level->Key_Down(evt)) {
+            return 1;
+        }
+    }
+    else if (Game_Mode == MODE_OVERWORLD) {
+        // processed by the overworld
+        if (pActive_Overworld->Key_Down(evt)) {
+            return 1;
+        }
+    }
+    else if (Game_Mode == MODE_MENU) {
+        // processed by the menu
+        if (pMenuCore->Key_Down(evt)) {
+            return 1;
+        }
+    }
+    else if (Game_Mode == MODE_LEVEL_SETTINGS) {
+        // processed by the level settings
+        if (pLevel_Editor->m_settings_screen.Key_Down(evt)) {
+            return 1;
+        }
+    }
+    else if (Game_Mode == MODE_SCENE) {
+        // processed by the scene
+        if (pActive_Scene->Key_Down(evt)) {
+            return 1;
+        }
+    }
 
     return 0;
 }

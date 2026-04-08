@@ -50,9 +50,6 @@ namespace TSC {
     extern bool game_debug;
     extern bool game_debug_performance;
 
-// Game Input event
-    extern sf::Event input_event;
-
 // global up scale ( f.e. default image scale )
     extern float global_upscalex;
     extern float global_upscaley;
