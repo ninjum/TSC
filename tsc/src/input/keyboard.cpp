@@ -61,10 +61,8 @@ bool cKeyboard::CEGUI_Handle_Key_Up(sf::Keyboard::Key key) const
 
 bool cKeyboard::Key_Up(const sf::Event& evt)
 {
-    const auto* keyReleased = evt.getIf<sf::Event::KeyReleased>();
-    if (!keyReleased) {
-        return false;
-    }
+    const sf::Event::KeyReleased* keyReleased = evt.getIf<sf::Event::KeyReleased>();
+    assert(keyReleased); // Caller in Handle_Input_Global() ensures this is a KeyReleased event
 
     // input was processed by the gui system
     if (CEGUI_Handle_Key_Up(keyReleased->code)) {
@@ -107,10 +105,8 @@ bool cKeyboard::CEGUI_Handle_Key_Down(sf::Keyboard::Key key) const
 
 bool cKeyboard::Key_Down(const sf::Event& evt)
 {
-    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
-    if (!keyPressed) {
-        return false;
-    }
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
 
     // input was processed by the gui system
     if (CEGUI_Handle_Key_Down(keyPressed->code)) {
@@ -254,10 +250,8 @@ bool cKeyboard::CEGUI_Handle_Text_Entered(uint32_t character)
 
 bool cKeyboard::Text_Entered(const sf::Event& evt)
 {
-    const auto* textEntered = evt.getIf<sf::Event::TextEntered>();
-    if (!textEntered) {
-        return false;
-    }
+    const sf::Event::TextEntered* textEntered = evt.getIf<sf::Event::TextEntered>();
+    assert(textEntered); // Caller in Handle_Input_Global() ensures this is a TextEntered event
     if (CEGUI_Handle_Text_Entered(textEntered->unicode)) {
         // input got processed by the gui system
         return 1;

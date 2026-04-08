@@ -406,10 +406,8 @@ void cEditor::Draw(void)
 
 bool cEditor::Key_Down(const sf::Event& evt)
 {
-    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
-    if (!keyPressed) {
-        return false;
-    }
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
 
     if (!m_enabled)
         return false;

@@ -471,6 +471,9 @@ void Exit_Game(void)
 
 bool Handle_Input_Global(const sf::Event& ev)
 {
+    // Note: SFML 3 uses a std::variant-based event system, so the
+    // traditional switch/case on ev.type is no longer possible.
+    // The if/else if chain below is the equivalent construct.
     if (ev.is<sf::Event::Closed>()) {
         game_exit = 1;
         Clear_Input_Events();
@@ -478,46 +481,38 @@ bool Handle_Input_Global(const sf::Event& ev)
         // handle on all handlers ?
         return 0;
     }
-
-    if (const auto* resized = ev.getIf<sf::Event::Resized>()) {
+    else if (const sf::Event::Resized* resized = ev.getIf<sf::Event::Resized>()) {
         CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef(static_cast<float>(resized->size.x), static_cast<float>(resized->size.y)));
     }
-
-    if (const auto* textEntered = ev.getIf<sf::Event::TextEntered>()) {
+    else if (ev.is<sf::Event::TextEntered>()) {
         if (pKeyboard->Text_Entered(ev)) {
             return 1;
         }
     }
-
-    if (const auto* keyPressed = ev.getIf<sf::Event::KeyPressed>()) {
+    else if (ev.is<sf::Event::KeyPressed>()) {
         if (pKeyboard->Key_Down(ev)) {
             return 1;
         }
     }
-
-    if (const auto* keyReleased = ev.getIf<sf::Event::KeyReleased>()) {
+    else if (ev.is<sf::Event::KeyReleased>()) {
         if (pKeyboard->Key_Up(ev)) {
             return 1;
         }
     }
-
-    if (const auto* joyButtonPressed = ev.getIf<sf::Event::JoystickButtonPressed>()) {
+    else if (ev.is<sf::Event::JoystickButtonPressed>()) {
         if (pJoystick->Handle_Button_Down_Event(ev)) {
             return 1;
         }
     }
-
-    if (const auto* joyButtonReleased = ev.getIf<sf::Event::JoystickButtonReleased>()) {
+    else if (ev.is<sf::Event::JoystickButtonReleased>()) {
         if (pJoystick->Handle_Button_Up_Event(ev)) {
             return 1;
         }
     }
-
-    if (const auto* joyMoved = ev.getIf<sf::Event::JoystickMoved>()) {
+    else if (ev.is<sf::Event::JoystickMoved>()) {
         pJoystick->Handle_Motion(ev);
     }
-
-    if (ev.is<sf::Event::FocusLost>()) {
+    else if (ev.is<sf::Event::FocusLost>()) {
         // lost visibility
         bool music_paused = false;
         // pause music
@@ -590,8 +585,7 @@ void Update_Game(void)
     Handle_Game_Events();
 
     // ## input
-    // Actually `input_event' is a global variable that is also queried elsewhere
-    // in the code (uaaah, poor design).
+    // Events are polled from the window and dispatched to the appropriate handlers.
     while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
         // handle
         Handle_Input_Global(*opt_event);

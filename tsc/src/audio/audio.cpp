@@ -86,8 +86,8 @@ bool cAudio_Sound::Play(int use_res_id /* = -1 */, bool loops /* = false */)
 
     m_resource_id = use_res_id;
     // play sound
-    m_sound->setBuffer(m_data->m_buffer);
-    m_sound->play();
+    mp_sound->setBuffer(m_data->m_buffer);
+    mp_sound->play();
 
     return 1;
 }
@@ -99,7 +99,7 @@ void cAudio_Sound::Stop(void)
         return;
     }
 
-    m_sound->stop();
+    mp_sound->stop();
 }
 
 /* *** *** *** *** *** *** *** *** Audio *** *** *** *** *** *** *** *** *** */
@@ -295,7 +295,7 @@ bool cAudio::Play_Sound(fs::path filename, int res_id /* = -1 */, int volume /* 
         }
 
         // set volume
-        sound->m_sound->setVolume(volume);
+        sound->mp_sound->setVolume(volume);
     }
 
     return 1;
@@ -370,7 +370,7 @@ cAudio_Sound* cAudio::Get_Playing_Sound(fs::path filename)
         cAudio_Sound* obj = (*itr);
 
         // if not playing
-        if (obj->m_sound->getStatus() != sf::SoundSource::Status::Playing) {
+        if (obj->mp_sound->getStatus() != sf::SoundSource::Status::Playing) {
             continue;
         }
 
@@ -395,7 +395,7 @@ cAudio_Sound* cAudio::Create_Sound_Channel(void)
         cAudio_Sound* obj = (*itr);
 
         // if not playing
-        if (obj->m_sound->getStatus() != sf::SoundSource::Status::Playing) {
+        if (obj->mp_sound->getStatus() != sf::SoundSource::Status::Playing) {
             // found a free channel
             obj->Free();
             return obj;
@@ -541,7 +541,7 @@ void cAudio::Set_Sound_Volume(uint8_t volume)
         cAudio_Sound* obj = (*itr);
 
         // set volume
-        obj->m_sound->setVolume(volume);
+        obj->mp_sound->setVolume(volume);
     }
 }
 

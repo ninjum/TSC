@@ -735,10 +735,8 @@ void cLevel::Process_Input(void)
 
 bool cLevel::Key_Down(const sf::Event& evt)
 {
-    const auto* keyPressed = evt.getIf<sf::Event::KeyPressed>();
-    if (!keyPressed) {
-        return false;
-    }
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
 
     // debug key F2
     if (keyPressed->code == sf::Keyboard::Key::F2 && game_debug && !editor_level_enabled) {
@@ -847,10 +845,8 @@ bool cLevel::Key_Down(const sf::Event& evt)
 
 bool cLevel::Key_Up(const sf::Event& evt)
 {
-    const auto* keyReleased = evt.getIf<sf::Event::KeyReleased>();
-    if (!keyReleased) {
-        return false;
-    }
+    const sf::Event::KeyReleased* keyReleased = evt.getIf<sf::Event::KeyReleased>();
+    assert(keyReleased); // Caller in Handle_Input_Global() ensures this is a KeyReleased event
 
     // only if not in Editor
     if (editor_level_enabled) {

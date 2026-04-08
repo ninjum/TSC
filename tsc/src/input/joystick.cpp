@@ -159,10 +159,8 @@ void cJoystick::Reset_keys(void)
 
 void cJoystick::Handle_Motion(const sf::Event& evt)
 {
-    const auto* joyMoved = evt.getIf<sf::Event::JoystickMoved>();
-    if (!joyMoved) {
-        return;
-    }
+    const sf::Event::JoystickMoved* joyMoved = evt.getIf<sf::Event::JoystickMoved>();
+    assert(joyMoved); // Caller in Handle_Input_Global() ensures this is a JoystickMoved event
 
     if (joyMoved->joystickId != m_current_joystick)
         return;
@@ -338,10 +336,8 @@ void cJoystick::Handle_Motion(const sf::Event& evt)
 
 bool cJoystick::Handle_Button_Down_Event(const sf::Event& evt)
 {
-    const auto* joyButtonPressed = evt.getIf<sf::Event::JoystickButtonPressed>();
-    if (!joyButtonPressed) {
-        return 0;
-    }
+    const sf::Event::JoystickButtonPressed* joyButtonPressed = evt.getIf<sf::Event::JoystickButtonPressed>();
+    assert(joyButtonPressed); // Caller in Handle_Input_Global() ensures this is a JoystickButtonPressed event
 
     // not enabled or opened
     if (!pPreferences->m_joy_enabled || joyButtonPressed->joystickId != m_current_joystick) {
@@ -413,10 +409,8 @@ bool cJoystick::Handle_Button_Down_Event(const sf::Event& evt)
 
 bool cJoystick::Handle_Button_Up_Event(const sf::Event& evt)
 {
-    const auto* joyButtonReleased = evt.getIf<sf::Event::JoystickButtonReleased>();
-    if (!joyButtonReleased) {
-        return 0;
-    }
+    const sf::Event::JoystickButtonReleased* joyButtonReleased = evt.getIf<sf::Event::JoystickButtonReleased>();
+    assert(joyButtonReleased); // Caller in Handle_Input_Global() ensures this is a JoystickButtonReleased event
 
     // not enabled or opened
     if (!pPreferences->m_joy_enabled || joyButtonReleased->joystickId != m_current_joystick) {
