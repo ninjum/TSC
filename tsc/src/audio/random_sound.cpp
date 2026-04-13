@@ -320,7 +320,8 @@ void cRandom_Sound::Update(void)
             // set to mixer volume
             sound_volume *= static_cast<float>(MAX_VOLUME);
             // set volume
-            sound->mp_sound->setVolume(static_cast<uint8_t>(sound_volume));
+            if (sound->mp_sound)
+                sound->mp_sound->setVolume(static_cast<uint8_t>(sound_volume));
 
             // update volume every 100 ms
             m_volume_update_counter = 100.0f;

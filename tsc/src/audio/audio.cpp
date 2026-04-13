@@ -53,6 +53,7 @@ void cAudio_Sound::Free(void)
 {
     Stop();
 
+    mp_sound.reset();
 
     if (m_data) {
         m_data = NULL;
@@ -86,7 +87,7 @@ bool cAudio_Sound::Play(int use_res_id /* = -1 */, bool loops /* = false */)
 
     m_resource_id = use_res_id;
     // play sound
-    mp_sound->setBuffer(m_data->m_buffer);
+    mp_sound.emplace(m_data->m_buffer);
     mp_sound->play();
 
     return 1;
@@ -95,7 +96,7 @@ bool cAudio_Sound::Play(int use_res_id /* = -1 */, bool loops /* = false */)
 void cAudio_Sound::Stop(void)
 {
     // if not loaded
-    if (!m_data) {
+    if (!m_data || !mp_sound) {
         return;
     }
 
@@ -295,7 +296,8 @@ bool cAudio::Play_Sound(fs::path filename, int res_id /* = -1 */, int volume /* 
         }
 
         // set volume
-        sound->mp_sound->setVolume(volume);
+        if (sound->mp_sound)
+            sound->mp_sound->setVolume(volume);
     }
 
     return 1;
@@ -370,12 +372,12 @@ cAudio_Sound* cAudio::Get_Playing_Sound(fs::path filename)
         cAudio_Sound* obj = (*itr);
 
         // if not playing
-        if (obj->mp_sound->getStatus() != sf::SoundSource::Status::Playing) {
+        if (!obj->mp_sound || obj->mp_sound->getStatus() != sf::SoundSource::Status::Playing) {
             continue;
         }
 
         // found it
-        if (obj->m_data->m_filename.compare(filename) == 0) {
+        if (obj->m_data && obj->m_data->m_filename.compare(filename) == 0) {
             // return first found
             return obj;
         }
@@ -395,7 +397,7 @@ cAudio_Sound* cAudio::Create_Sound_Channel(void)
         cAudio_Sound* obj = (*itr);
 
         // if not playing
-        if (obj->mp_sound->getStatus() != sf::SoundSource::Status::Playing) {
+        if (!obj->mp_sound || obj->mp_sound->getStatus() != sf::SoundSource::Status::Playing) {
             // found a free channel
             obj->Free();
             return obj;
@@ -541,7 +543,8 @@ void cAudio::Set_Sound_Volume(uint8_t volume)
         cAudio_Sound* obj = (*itr);
 
         // set volume
-        obj->mp_sound->setVolume(volume);
+        if (obj->mp_sound)
+            obj->mp_sound->setVolume(volume);
     }
 }
 
