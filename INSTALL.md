@@ -1,7 +1,7 @@
 Installation instructions for TSC
 =================================
 
-Time-stamp: <2024-10-04 20:55:07 quintus>
+Time-stamp: <2026-04-18 09:25:53 quintus>
 
 TSC uses [CMake][1] as the build system, so the first thing you have to
 ensure is that you have CMake installed.
@@ -79,7 +79,7 @@ install to.
   from version 2.8 to version 3.0.
 * The Freetype library.
 * Boost >= 1.50.0 (to be exact: boost_system, boost_filesystem, boost_thread)
-* SFML >= 2.3.0
+* SFML >= 3.0.0
 * X11 development headers, namely for libx11 and libxt
 * gperf
 
