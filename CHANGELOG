@@ -1,6 +1,7 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Dependencies: Update SFML to version 3 (#729 by Andrea Brancaleoni)
 	* Dependencies: Removed dependency on tinyclipboard, use
 		sf::Clipboard instead (#690 by Marvin Gülker, PR #695 by
 		Bálint Kiss).
