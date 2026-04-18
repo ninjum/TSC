@@ -140,17 +140,17 @@ namespace TSC {
     inline bool Col_Box(const sf::IntRect& a, const GL_rect& b)
     {
         // check if their bounding boxes touch
-        if (b.m_x + b.m_w < a.left) {
+        if (b.m_x + b.m_w < a.position.x) {
             return 0;
         }
-        if (b.m_x > a.left + a.width) {
+        if (b.m_x > a.position.x + a.size.x) {
             return 0;
         }
 
-        if (b.m_y + b.m_h < a.top) {
+        if (b.m_y + b.m_h < a.position.y) {
             return 0;
         }
-        if (b.m_y > a.top + a.height) {
+        if (b.m_y > a.position.y + a.size.y) {
             return 0;
         }
 
@@ -164,16 +164,16 @@ namespace TSC {
     */
     inline bool Col_Box_full(const sf::IntRect& a, const sf::IntRect& b)
     {
-        if (a.left <= b.left) {
+        if (a.position.x <= b.position.x) {
             return 0;
         }
-        if (a.left + a.width >= b.left + b.width) {
+        if (a.position.x + a.size.x >= b.position.x + b.size.x) {
             return 0;
         }
-        if (a.top <= b.top) {
+        if (a.position.y <= b.position.y) {
             return 0;
         }
-        if (a.top + a.height >= b.top + b.height) {
+        if (a.position.y + a.size.y >= b.position.y + b.size.y) {
             return 0;
         }
 

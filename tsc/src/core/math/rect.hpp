@@ -39,25 +39,13 @@ namespace TSC {
         // returns an sf::Rect
         inline sf::IntRect Get_Rect(void) const
         {
-            sf::IntRect rect;
-            rect.left   = static_cast<int16_t>(m_x);
-            rect.top    = static_cast<int16_t>(m_y);
-            rect.width  = static_cast<uint16_t>(m_w);
-            rect.height = static_cast<uint16_t>(m_h);
-
-            return rect;
+            return sf::IntRect({static_cast<int16_t>(m_x), static_cast<int16_t>(m_y)}, {static_cast<uint16_t>(m_w), static_cast<uint16_t>(m_h)});
         }
 
         // returns this as sf::IntRect
         sf::IntRect Get_Rect_pos(float posx, float posy) const
         {
-            sf::IntRect rect;
-            rect.left   = static_cast<int16_t>(m_x + posx);
-            rect.top    = static_cast<int16_t>(m_y + posy);
-            rect.width  = static_cast<uint16_t>(m_w);
-            rect.height = static_cast<uint16_t>(m_h);
-
-            return rect;
+            return sf::IntRect({static_cast<int16_t>(m_x + posx), static_cast<int16_t>(m_y + posy)}, {static_cast<uint16_t>(m_w), static_cast<uint16_t>(m_h)});
         }
 
         // returns the point in the middle of the rect

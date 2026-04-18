@@ -284,17 +284,18 @@ void cLevel_Player::DownGrade_Player(bool delayed /* = true */, bool force /* = 
     float i;
 
     for (i = 0.0f; i < 7.0f; i += pFramerate->m_speed_factor) {
-        while (pVideo->PollEvent(input_event)) {
-            if (input_event.type == sf::Event::KeyPressed) {
-                if (input_event.key.code == sf::Keyboard::Escape) {
+        while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+            const sf::Event& input_event = *opt_event;
+            if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->code == sf::Keyboard::Key::Escape) {
                     goto animation_end;
                 }
-                else if (input_event.key.code == pPreferences->m_key_screenshot) {
+                else if (keyPressed->code == pPreferences->m_key_screenshot) {
                     pVideo->Save_Screenshot();
                 }
             }
-            else if (input_event.type == sf::Event::JoystickButtonPressed) {
-                if (input_event.joystickButton.button == pPreferences->m_joy_button_exit) {
+            else if (const auto* joyButtonPressed = input_event.getIf<sf::Event::JoystickButtonPressed>()) {
+                if (joyButtonPressed->button == pPreferences->m_joy_button_exit) {
                     goto animation_end;
                 }
             }
@@ -316,17 +317,18 @@ void cLevel_Player::DownGrade_Player(bool delayed /* = true */, bool force /* = 
     m_walk_count = 0.0f;
 
     for (i = 0.0f; m_col_rect.m_y < pActive_Camera->m_y + game_res_h; i++) {
-        while (pVideo->PollEvent(input_event)) {
-            if (input_event.type == sf::Event::KeyPressed) {
-                if (input_event.key.code == sf::Keyboard::Escape) {
+        while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+            const sf::Event& input_event = *opt_event;
+            if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->code == sf::Keyboard::Key::Escape) {
                     goto animation_end;
                 }
-                else if (input_event.key.code == pPreferences->m_key_screenshot) {
+                else if (keyPressed->code == pPreferences->m_key_screenshot) {
                     pVideo->Save_Screenshot();
                 }
             }
-            else if (input_event.type == sf::Event::JoystickButtonPressed) {
-                if (input_event.joystickButton.button == pPreferences->m_joy_button_exit) {
+            else if (const auto* joyButtonPressed = input_event.getIf<sf::Event::JoystickButtonPressed>()) {
+                if (joyButtonPressed->button == pPreferences->m_joy_button_exit) {
                     goto animation_end;
                 }
             }
@@ -383,9 +385,10 @@ animation_end:
         anim->Set_Const_Rotation_Z(-2.0f, 4.0f);
 
         for (i = 10.0f; i > 0.0f; i -= 0.011f * pFramerate->m_speed_factor) {
-            while (pVideo->PollEvent(input_event)) {
-                if (input_event.type == sf::Event::KeyPressed) {
-                    if (input_event.key.code == pPreferences->m_key_screenshot) {
+            while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+                const sf::Event& input_event = *opt_event;
+                if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
+                    if (keyPressed->code == pPreferences->m_key_screenshot) {
                         pVideo->Save_Screenshot();
                     }
                 }
@@ -394,7 +397,7 @@ animation_end:
             // TODO: Why is the below not simply handled as events in the above event loop?
 
             // Escape stops
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) || sf::Keyboard::isKeyPressed(sf::Keyboard::Return) ||sf::Keyboard::isKeyPressed(sf::Keyboard::Space) || sf::Keyboard::isKeyPressed(pPreferences->m_key_action)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) || sf::Keyboard::isKeyPressed(pPreferences->m_key_action)) {
                 break;
             }
 

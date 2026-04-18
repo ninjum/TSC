@@ -963,212 +963,210 @@ std::string Get_Difficulty_Name(uint8_t difficulty)
 string Get_SFML_Key_Name(sf::Keyboard::Key key)
 {
     switch (key) {
-        case sf::Keyboard::Unknown:
+        case sf::Keyboard::Key::Unknown:
             return "unknown key";
-        case sf::Keyboard::A:
+        case sf::Keyboard::Key::A:
             return "a";
-        case sf::Keyboard::B:
+        case sf::Keyboard::Key::B:
             return "b";
-        case sf::Keyboard::C:
+        case sf::Keyboard::Key::C:
             return "c";
-        case sf::Keyboard::D:
+        case sf::Keyboard::Key::D:
             return "d";
-        case sf::Keyboard::E:
+        case sf::Keyboard::Key::E:
             return "e";
-        case sf::Keyboard::F:
+        case sf::Keyboard::Key::F:
             return "f";
-        case sf::Keyboard::G:
+        case sf::Keyboard::Key::G:
             return "g";
-        case sf::Keyboard::H:
+        case sf::Keyboard::Key::H:
             return "h";
-        case sf::Keyboard::I:
+        case sf::Keyboard::Key::I:
             return "i";
-        case sf::Keyboard::J:
+        case sf::Keyboard::Key::J:
             return "j";
-        case sf::Keyboard::K:
+        case sf::Keyboard::Key::K:
             return "k";
-        case sf::Keyboard::L:
+        case sf::Keyboard::Key::L:
             return "l";
-        case sf::Keyboard::M:
+        case sf::Keyboard::Key::M:
             return "m";
-        case sf::Keyboard::N:
+        case sf::Keyboard::Key::N:
             return "n";
-        case sf::Keyboard::O:
+        case sf::Keyboard::Key::O:
             return "o";
-        case sf::Keyboard::P:
+        case sf::Keyboard::Key::P:
             return "p";
-        case sf::Keyboard::Q:
+        case sf::Keyboard::Key::Q:
             return "q";
-        case sf::Keyboard::R:
+        case sf::Keyboard::Key::R:
             return "r";
-        case sf::Keyboard::S:
+        case sf::Keyboard::Key::S:
             return "s";
-        case sf::Keyboard::T:
+        case sf::Keyboard::Key::T:
             return "t";
-        case sf::Keyboard::U:
+        case sf::Keyboard::Key::U:
             return "u";
-        case sf::Keyboard::V:
+        case sf::Keyboard::Key::V:
             return "v";
-        case sf::Keyboard::W:
+        case sf::Keyboard::Key::W:
             return "w";
-        case sf::Keyboard::X:
+        case sf::Keyboard::Key::X:
             return "x";
-        case sf::Keyboard::Y:
+        case sf::Keyboard::Key::Y:
             return "y";
-        case sf::Keyboard::Z:
+        case sf::Keyboard::Key::Z:
             return "z";
-        case sf::Keyboard::Num0:
+        case sf::Keyboard::Key::Num0:
             return "0";
-        case sf::Keyboard::Num1:
+        case sf::Keyboard::Key::Num1:
             return "1";
-        case sf::Keyboard::Num2:
+        case sf::Keyboard::Key::Num2:
             return "2";
-        case sf::Keyboard::Num3:
+        case sf::Keyboard::Key::Num3:
             return "3";
-        case sf::Keyboard::Num4:
+        case sf::Keyboard::Key::Num4:
             return "4";
-        case sf::Keyboard::Num5:
+        case sf::Keyboard::Key::Num5:
             return "5";
-        case sf::Keyboard::Num6:
+        case sf::Keyboard::Key::Num6:
             return "6";
-        case sf::Keyboard::Num7:
+        case sf::Keyboard::Key::Num7:
             return "7";
-        case sf::Keyboard::Num8:
+        case sf::Keyboard::Key::Num8:
             return "8";
-        case sf::Keyboard::Num9:
+        case sf::Keyboard::Key::Num9:
             return "9";
-        case sf::Keyboard::Escape:
+        case sf::Keyboard::Key::Escape:
             return "escape";
-        case sf::Keyboard::LControl:
+        case sf::Keyboard::Key::LControl:
             return "left control";
-        case sf::Keyboard::LShift:
+        case sf::Keyboard::Key::LShift:
             return "left shift";
-        case sf::Keyboard::LAlt:
+        case sf::Keyboard::Key::LAlt:
             return "left alt";
-        case sf::Keyboard::LSystem:
+        case sf::Keyboard::Key::LSystem:
             return "left system";
-        case sf::Keyboard::RControl:
+        case sf::Keyboard::Key::RControl:
             return "right control";
-        case sf::Keyboard::RShift:
+        case sf::Keyboard::Key::RShift:
             return "right shift";
-        case sf::Keyboard::RAlt:
+        case sf::Keyboard::Key::RAlt:
             return "right alt";
-        case sf::Keyboard::RSystem:
+        case sf::Keyboard::Key::RSystem:
             return "right system";
-        case sf::Keyboard::Menu:
+        case sf::Keyboard::Key::Menu:
             return "menu";
-        case sf::Keyboard::LBracket:
+        case sf::Keyboard::Key::LBracket:
             return "[";
-        case sf::Keyboard::RBracket:
+        case sf::Keyboard::Key::RBracket:
             return "]";
-        case sf::Keyboard::SemiColon:
+        case sf::Keyboard::Key::Semicolon:
             return ";";
-        case sf::Keyboard::Comma:
+        case sf::Keyboard::Key::Comma:
             return ",";
-        case sf::Keyboard::Period:
+        case sf::Keyboard::Key::Period:
             return ".";
-        case sf::Keyboard::Quote:
+        case sf::Keyboard::Key::Apostrophe:
             return "'";
-        case sf::Keyboard::Slash:
+        case sf::Keyboard::Key::Slash:
             return "/";
-        case sf::Keyboard::BackSlash:
+        case sf::Keyboard::Key::Backslash:
             return "\\";
-        case sf::Keyboard::Tilde:
+        case sf::Keyboard::Key::Grave:
             return "~";
-        case sf::Keyboard::Equal:
+        case sf::Keyboard::Key::Equal:
             return "=";
-        case sf::Keyboard::Dash:
+        case sf::Keyboard::Key::Hyphen:
             return "-";
-        case sf::Keyboard::Space:
+        case sf::Keyboard::Key::Space:
             return "space";
-        case sf::Keyboard::Return:
+        case sf::Keyboard::Key::Enter:
             return "return";
-        case sf::Keyboard::BackSpace:
+        case sf::Keyboard::Key::Backspace:
             return "backspace";
-        case sf::Keyboard::Tab:
+        case sf::Keyboard::Key::Tab:
             return "tab";
-        case sf::Keyboard::PageUp:
+        case sf::Keyboard::Key::PageUp:
             return "pageup";
-        case sf::Keyboard::PageDown:
+        case sf::Keyboard::Key::PageDown:
             return "pagedown";
-        case sf::Keyboard::End:
+        case sf::Keyboard::Key::End:
             return "end";
-        case sf::Keyboard::Home:
+        case sf::Keyboard::Key::Home:
             return "home";
-        case sf::Keyboard::Insert:
+        case sf::Keyboard::Key::Insert:
             return "insert";
-        case sf::Keyboard::Delete:
+        case sf::Keyboard::Key::Delete:
             return "delete";
-        case sf::Keyboard::Add:
+        case sf::Keyboard::Key::Add:
             return "+";
-        case sf::Keyboard::Subtract:
+        case sf::Keyboard::Key::Subtract:
             return "-";
-        case sf::Keyboard::Multiply:
+        case sf::Keyboard::Key::Multiply:
             return "*";
-        case sf::Keyboard::Divide:
+        case sf::Keyboard::Key::Divide:
             return "/";
-        case sf::Keyboard::Left:
+        case sf::Keyboard::Key::Left:
             return "left";
-        case sf::Keyboard::Right:
+        case sf::Keyboard::Key::Right:
             return "right";
-        case sf::Keyboard::Up:
+        case sf::Keyboard::Key::Up:
             return "up";
-        case sf::Keyboard::Down:
+        case sf::Keyboard::Key::Down:
             return "down";
-        case sf::Keyboard::Numpad0:
+        case sf::Keyboard::Key::Numpad0:
             return "numpad 0";
-        case sf::Keyboard::Numpad1:
+        case sf::Keyboard::Key::Numpad1:
             return "numpad 1";
-        case sf::Keyboard::Numpad2:
+        case sf::Keyboard::Key::Numpad2:
             return "numpad 2";
-        case sf::Keyboard::Numpad3:
+        case sf::Keyboard::Key::Numpad3:
             return "numpad 3";
-        case sf::Keyboard::Numpad4:
+        case sf::Keyboard::Key::Numpad4:
             return "numpad 4";
-        case sf::Keyboard::Numpad5:
+        case sf::Keyboard::Key::Numpad5:
             return "numpad 5";
-        case sf::Keyboard::Numpad6:
+        case sf::Keyboard::Key::Numpad6:
             return "numpad 6";
-        case sf::Keyboard::Numpad7:
+        case sf::Keyboard::Key::Numpad7:
             return "numpad 7";
-        case sf::Keyboard::Numpad8:
+        case sf::Keyboard::Key::Numpad8:
             return "numpad 8";
-        case sf::Keyboard::Numpad9:
+        case sf::Keyboard::Key::Numpad9:
             return "numpad 9";
-        case sf::Keyboard::F1:
+        case sf::Keyboard::Key::F1:
             return "f1";
-        case sf::Keyboard::F2:
+        case sf::Keyboard::Key::F2:
             return "f2";
-        case sf::Keyboard::F3:
+        case sf::Keyboard::Key::F3:
             return "f3";
-        case sf::Keyboard::F4:
+        case sf::Keyboard::Key::F4:
             return "f4";
-        case sf::Keyboard::F5:
+        case sf::Keyboard::Key::F5:
             return "f5";
-        case sf::Keyboard::F6:
+        case sf::Keyboard::Key::F6:
             return "f6";
-        case sf::Keyboard::F7:
+        case sf::Keyboard::Key::F7:
             return "f7";
-        case sf::Keyboard::F8:
+        case sf::Keyboard::Key::F8:
             return "f8";
-        case sf::Keyboard::F9:
+        case sf::Keyboard::Key::F9:
             return "f9";
-        case sf::Keyboard::F10:
+        case sf::Keyboard::Key::F10:
             return "f10";
-        case sf::Keyboard::F11:
+        case sf::Keyboard::Key::F11:
             return "f11";
-        case sf::Keyboard::F12:
+        case sf::Keyboard::Key::F12:
             return "f12";
-        case sf::Keyboard::F13:
+        case sf::Keyboard::Key::F13:
             return "f13";
-        case sf::Keyboard::F14:
+        case sf::Keyboard::Key::F14:
             return "f14";
-        case sf::Keyboard::F15:
+        case sf::Keyboard::Key::F15:
             return "f15";
-        case sf::Keyboard::Pause:
+        case sf::Keyboard::Key::Pause:
             return "pause";
-        case sf::Keyboard::KeyCount:
-            return "Number of keys recognized by SFML";
         default: // Should never happen, just silence compiler warning
             return "Unknown key";
     }

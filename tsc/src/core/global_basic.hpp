@@ -116,6 +116,10 @@
 // System-specific includes
 #ifdef __unix__
 #include <GL/glx.h>
+// Undefine the X11 Status macro that conflicts with SFML's Status enum
+#ifdef Status
+#undef Status
+#endif
 #endif
 
 #ifdef _WIN32

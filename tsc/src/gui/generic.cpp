@@ -122,30 +122,32 @@ std::string cDialogBox_Text::Enter(std::string default_text, std::string title_t
     finished = 0;
 
     while (!finished) {
-        while (pVideo->PollEvent(input_event)) {
-            if (input_event.type == sf::Event::TextEntered) {
+        while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+            const sf::Event& input_event = *opt_event;
+
+            if (const auto* textEntered = input_event.getIf<sf::Event::TextEntered>()) {
                 pKeyboard->Text_Entered(input_event);
             }
-            else if (input_event.type == sf::Event::KeyPressed) {
+            else if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
                 if (auto_no_text && default_text.compare(box_editbox->getText().c_str()) == 0) {
                     box_editbox->setText("");
                     // only the first time
                     auto_no_text = 0;
                 }
 
-                if (input_event.key.code == sf::Keyboard::Escape) {
+                if (keyPressed->code == sf::Keyboard::Key::Escape) {
                     box_editbox->setText("");
                     finished = 1;
                 }
-                else if (input_event.key.code == sf::Keyboard::Return) {
+                else if (keyPressed->code == sf::Keyboard::Key::Enter) {
                     finished = 1;
                 }
                 else {
-                    pKeyboard->CEGUI_Handle_Key_Down(input_event.key.code);
+                    pKeyboard->CEGUI_Handle_Key_Down(keyPressed->code);
                 }
             }
-            else if (input_event.type == sf::Event::KeyReleased) {
-                pKeyboard->CEGUI_Handle_Key_Up(input_event.key.code);
+            else if (const auto* keyReleased = input_event.getIf<sf::Event::KeyReleased>()) {
+                pKeyboard->CEGUI_Handle_Key_Up(keyReleased->code);
             }
             else {
                 pMouseCursor->Handle_Event(input_event);
@@ -241,12 +243,14 @@ int cDialogBox_Question::Enter(std::string text, bool with_cancel /* = 0 */)
     while (!finished) {
         Draw();
 
-        while (pVideo->PollEvent(input_event)) {
-            if (input_event.type == sf::Event::TextEntered) {
+        while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+            const sf::Event& input_event = *opt_event;
+
+            if (const auto* textEntered = input_event.getIf<sf::Event::TextEntered>()) {
                 pKeyboard->Text_Entered(input_event);
             }
-            else if (input_event.type == sf::Event::KeyPressed) {
-                if (input_event.key.code == sf::Keyboard::Escape) {
+            else if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->code == sf::Keyboard::Key::Escape) {
                     if (with_cancel) {
                         return_value = -1;
                     }
@@ -256,25 +260,25 @@ int cDialogBox_Question::Enter(std::string text, bool with_cancel /* = 0 */)
 
                     finished = 1;
                 }
-                else if (input_event.key.code == sf::Keyboard::Return) {
+                else if (keyPressed->code == sf::Keyboard::Key::Enter) {
                     return_value = 1;
                     finished = 1;
                 }
                 else {
-                    pKeyboard->CEGUI_Handle_Key_Down(input_event.key.code);
+                    pKeyboard->CEGUI_Handle_Key_Down(keyPressed->code);
                 }
             }
-            else if (input_event.type == sf::Event::KeyReleased) {
-                pKeyboard->CEGUI_Handle_Key_Up(input_event.key.code);
+            else if (const auto* keyReleased = input_event.getIf<sf::Event::KeyReleased>()) {
+                pKeyboard->CEGUI_Handle_Key_Up(keyReleased->code);
             }
-            else if (input_event.type == sf::Event::JoystickButtonPressed) {
-                if (input_event.joystickButton.button == pPreferences->m_joy_button_action ||
-                    input_event.joystickButton.button == pPreferences->m_joy_button_jump  ||
-                    input_event.joystickButton.button == pPreferences->m_joy_button_shoot) {
+            else if (const auto* joyButtonPressed = input_event.getIf<sf::Event::JoystickButtonPressed>()) {
+                if (joyButtonPressed->button == pPreferences->m_joy_button_action ||
+                    joyButtonPressed->button == pPreferences->m_joy_button_jump  ||
+                    joyButtonPressed->button == pPreferences->m_joy_button_shoot) {
                     return_value = 1;
                     finished = 1;
                 }
-                else if (input_event.joystickButton.button == pPreferences->m_joy_button_exit) {
+                else if (joyButtonPressed->button == pPreferences->m_joy_button_exit) {
                     return_value = with_cancel ? -1 : 0;
                     finished = 1;
                 }
@@ -282,7 +286,7 @@ int cDialogBox_Question::Enter(std::string text, bool with_cancel /* = 0 */)
                     pJoystick->Handle_Button_Down_Event(input_event);
                 }
             }
-            else if (input_event.type == sf::Event::JoystickButtonReleased) {
+            else if (const auto* joyButtonReleased = input_event.getIf<sf::Event::JoystickButtonReleased>()) {
                 pJoystick->Handle_Button_Up_Event(input_event);
             }
             else {
@@ -385,8 +389,9 @@ void Draw_Static_Text(const std::string& text, const Color* color_text /* = &whi
         pVideo->Render();
 
         if (wait_for_input) {
-            while (pVideo->PollEvent(input_event)) {
-                if (input_event.type == sf::Event::KeyPressed || input_event.type == sf::Event::JoystickButtonPressed || input_event.type == sf::Event::MouseButtonPressed) {
+            while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
+                const sf::Event& input_event = *opt_event;
+                if (input_event.is<sf::Event::KeyPressed>() || input_event.is<sf::Event::JoystickButtonPressed>() || input_event.is<sf::Event::MouseButtonPressed>()) {
                     draw = 0;
                 }
             }

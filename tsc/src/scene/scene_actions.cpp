@@ -15,6 +15,7 @@
 */
 
 #include "scene_actions.hpp"
+#include <cassert>
 #include "../core/framerate.hpp"
 #include "../audio/audio.hpp"
 #include "../user/preferences.hpp"
@@ -71,8 +72,11 @@ bool WaitReturn::Execute()
 
 bool WaitReturn::Key_Down(const sf::Event& evt)
 {
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
+
     // React on some sensible keys
-    if (evt.key.code == pPreferences->m_key_jump || evt.key.code == pPreferences->m_key_shoot || evt.key.code == sf::Keyboard::Return) {
+    if (keyPressed->code == pPreferences->m_key_jump || keyPressed->code == pPreferences->m_key_shoot || keyPressed->code == sf::Keyboard::Key::Enter) {
         m_return_pressed = true;
         return true;
     }
@@ -130,8 +134,11 @@ bool Narration::Execute()
 
 bool Narration::Key_Down(const sf::Event& evt)
 {
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
+
     // Mark message as read on keypress
-    if (evt.key.code == pPreferences->m_key_jump || evt.key.code == pPreferences->m_key_shoot || evt.key.code == sf::Keyboard::Return) {
+    if (keyPressed->code == pPreferences->m_key_jump || keyPressed->code == pPreferences->m_key_shoot || keyPressed->code == sf::Keyboard::Key::Enter) {
         m_read = true;
         return true;
     }

@@ -243,10 +243,10 @@ void cMenu_Main::Init(void)
 
     m_start_index = pMenuCore
         ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(mp_start_inactive->m_pos_x,
-                                      mp_start_inactive->m_pos_y,
-                                      mp_start_inactive->m_col_rect.m_w,
-                                      mp_start_inactive->m_col_rect.m_h), NULL);
+        ->Add_Menu_Item(sf::FloatRect(sf::Vector2f(mp_start_inactive->m_pos_x,
+                                                  mp_start_inactive->m_pos_y),
+                                      sf::Vector2f(mp_start_inactive->m_col_rect.m_w,
+                                                  mp_start_inactive->m_col_rect.m_h)), NULL);
 
     // Options
     m_menu_pos_y += 60;
@@ -262,10 +262,10 @@ void cMenu_Main::Init(void)
 
     m_options_index = pMenuCore
         ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(mp_options_inactive->m_pos_x,
-                                      mp_options_inactive->m_pos_y,
-                                      mp_options_inactive->m_col_rect.m_w,
-                                      mp_options_inactive->m_col_rect.m_h), NULL);
+        ->Add_Menu_Item(sf::FloatRect(sf::Vector2f(mp_options_inactive->m_pos_x,
+                                                  mp_options_inactive->m_pos_y),
+                                      sf::Vector2f(mp_options_inactive->m_col_rect.m_w,
+                                                  mp_options_inactive->m_col_rect.m_h)), NULL);
 
     // Load
     m_menu_pos_y += 60;
@@ -281,10 +281,10 @@ void cMenu_Main::Init(void)
 
     m_load_index = pMenuCore
         ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(mp_load_inactive->m_pos_x,
-                                      mp_load_inactive->m_pos_y,
-                                      mp_load_inactive->m_col_rect.m_w,
-                                      mp_load_inactive->m_col_rect.m_h), NULL);
+        ->Add_Menu_Item(sf::FloatRect(sf::Vector2f(mp_load_inactive->m_pos_x,
+                                                  mp_load_inactive->m_pos_y),
+                                      sf::Vector2f(mp_load_inactive->m_col_rect.m_w,
+                                                  mp_load_inactive->m_col_rect.m_h)), NULL);
 
     // Save
     m_menu_pos_y += 60;
@@ -300,10 +300,10 @@ void cMenu_Main::Init(void)
 
     m_save_index = pMenuCore
         ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(mp_save_inactive->m_pos_x,
-                                      mp_save_inactive->m_pos_y,
-                                      mp_save_inactive->m_col_rect.m_w,
-                                      mp_save_inactive->m_col_rect.m_h), NULL);
+        ->Add_Menu_Item(sf::FloatRect(sf::Vector2f(mp_save_inactive->m_pos_x,
+                                                  mp_save_inactive->m_pos_y),
+                                      sf::Vector2f(mp_save_inactive->m_col_rect.m_w,
+                                                  mp_save_inactive->m_col_rect.m_h)), NULL);
 
     // Quit
     m_menu_pos_y += 60;
@@ -319,10 +319,10 @@ void cMenu_Main::Init(void)
 
     m_quit_index = pMenuCore
         ->m_handler
-        ->Add_Menu_Item(sf::FloatRect(mp_quit_inactive->m_pos_x,
-                                      mp_quit_inactive->m_pos_y,
-                                      mp_quit_inactive->m_col_rect.m_w,
-                                      mp_quit_inactive->m_col_rect.m_h), NULL);
+        ->Add_Menu_Item(sf::FloatRect(sf::Vector2f(mp_quit_inactive->m_pos_x,
+                                                  mp_quit_inactive->m_pos_y),
+                                      sf::Vector2f(mp_quit_inactive->m_col_rect.m_w,
+                                                  mp_quit_inactive->m_col_rect.m_h)), NULL);
 
     // Only show the credit menu entry and the SFML logo on the title
     // screen, not in the in-game menu.
@@ -337,7 +337,7 @@ void cMenu_Main::Init(void)
 
         // Only to make the menu handler code happy. CEGUI does its own coordinate mapping
         // for mouse clicks.
-        m_credits_index = pMenuCore->m_handler->Add_Menu_Item(sf::FloatRect(0, 0, 0, 0), NULL);
+        m_credits_index = pMenuCore->m_handler->Add_Menu_Item(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(0, 0)), NULL);
 
         // SFML logo
         cHudSprite* hud_sprite = new cHudSprite(pMenuCore->m_handler->m_level->m_sprite_manager);
@@ -2359,32 +2359,34 @@ void cMenu_Options::Set_Shortcut(std::string name, void* data, bool joystick /* 
 
     while (!sub_done) {
         // no event
-        if (!pVideo->PollEvent(input_event)) {
+        std::optional<sf::Event> opt_event = pVideo->PollEvent();
+        if (!opt_event) {
             continue;
         }
+        const sf::Event& input_event = *opt_event;
 
-        if (input_event.key.code == sf::Keyboard::Escape || input_event.key.code == sf::Keyboard::BackSpace) {
-            sub_done = 1;
-            break;
+        if (const auto* keyPressed = input_event.getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Escape || keyPressed->code == sf::Keyboard::Key::Backspace) {
+                sub_done = 1;
+                break;
+            }
         }
 
-        if (!joystick && input_event.type != sf::Event::KeyReleased) {
-            continue;
-        }
-        else if (joystick && input_event.type != sf::Event::JoystickButtonPressed) {
-            continue;
-        }
-
-        // Keyboard
         if (!joystick) {
+            if (!input_event.is<sf::Event::KeyReleased>()) {
+                continue;
+            }
+            const auto* keyReleased = input_event.getIf<sf::Event::KeyReleased>();
             sf::Keyboard::Key* key = static_cast<sf::Keyboard::Key*>(data);
-            *key = input_event.key.code;
+            *key = keyReleased->code;
         }
-        // Joystick
         else {
+            if (!input_event.is<sf::Event::JoystickButtonPressed>()) {
+                continue;
+            }
+            const auto* joyButtonPressed = input_event.getIf<sf::Event::JoystickButtonPressed>();
             uint8_t* button = static_cast<uint8_t*>(data);
-            unsigned int buttonTemp = input_event.joystickButton.button;
-            *button = static_cast<uint8_t>(buttonTemp);
+            *button = static_cast<uint8_t>(joyButtonPressed->button);
         }
 
         sub_done = 1;
@@ -3553,7 +3555,7 @@ void cMenu_Credits::Update(void)
         Exit();
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) || sf::Keyboard::isKeyPressed(sf::Keyboard::Return) ||
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Enter) ||
             pJoystick->Button(pPreferences->m_joy_button_action) || pJoystick->Button(pPreferences->m_joy_button_exit)) {
         Exit();
     }

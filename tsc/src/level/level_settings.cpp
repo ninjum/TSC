@@ -15,6 +15,7 @@
 */
 
 #include "../core/global_basic.hpp"
+#include <cassert>
 #include "../core/game_core.hpp"
 #include "../level/level_settings.hpp"
 #include "../input/mouse.hpp"
@@ -363,11 +364,14 @@ void cLevel_Settings::Draw(void)
 
 bool cLevel_Settings::Key_Down(const sf::Event& evt)
 {
+    const sf::Event::KeyPressed* keyPressed = evt.getIf<sf::Event::KeyPressed>();
+    assert(keyPressed); // Caller in Handle_Input_Global() ensures this is a KeyPressed event
+
     if (!m_active) {
         return 0;
     }
 
-    if (evt.key.code == sf::Keyboard::Escape) {
+    if (keyPressed->code == sf::Keyboard::Key::Escape) {
         Exit();
     }
     else {

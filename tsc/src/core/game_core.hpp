@@ -50,9 +50,6 @@ namespace TSC {
     extern bool game_debug;
     extern bool game_debug_performance;
 
-// Game Input event
-    extern sf::Event input_event;
-
 // global up scale ( f.e. default image scale )
     extern float global_upscalex;
     extern float global_upscaley;
@@ -132,6 +129,14 @@ namespace TSC {
     {
         Add_Property(p_element, name, uint_to_string(value));
     }
+    inline void Add_Property(xmlpp::Element* p_element, const Glib::ustring& name, sf::Keyboard::Key value)
+    {
+        Add_Property(p_element, name, int_to_string(static_cast<int>(value)));
+    }
+    inline void Add_Property(xmlpp::Element* p_element, const Glib::ustring& name, sf::Joystick::Axis value)
+    {
+        Add_Property(p_element, name, int_to_string(static_cast<int>(value)));
+    }
 
 // Replace a property if it exists (or add it if it does not exist)
     void Replace_Property(xmlpp::Element* p_element, const Glib::ustring& name, const Glib::ustring& value);
@@ -159,6 +164,14 @@ namespace TSC {
     inline void Replace_Property(xmlpp::Element* p_element, const Glib::ustring& name, unsigned int value)
     {
         Replace_Property(p_element, name, uint_to_string(value));
+    }
+    inline void Replace_Property(xmlpp::Element* p_element, const Glib::ustring& name, sf::Keyboard::Key value)
+    {
+        Replace_Property(p_element, name, int_to_string(static_cast<int>(value)));
+    }
+    inline void Replace_Property(xmlpp::Element* p_element, const Glib::ustring& name, sf::Joystick::Axis value)
+    {
+        Replace_Property(p_element, name, int_to_string(static_cast<int>(value)));
     }
 
     /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */

@@ -168,45 +168,41 @@ void cVideo::Init_Video(bool reload_textures_from_file /* = false */, bool use_p
 {
     Render_Finish();
 
-    sf::VideoMode videomode(800, 600, 16); // defaults
+    sf::VideoMode videomode(sf::Vector2u(800, 600)); // defaults (width, height)
     sf::VideoMode desktopmode(sf::VideoMode::getDesktopMode());
     if (use_preferences) {
-        videomode.width        = pPreferences->m_video_screen_w;
-        videomode.height       = pPreferences->m_video_screen_h;
+        videomode.size.x        = pPreferences->m_video_screen_w;
+        videomode.size.y       = pPreferences->m_video_screen_h;
         videomode.bitsPerPixel = pPreferences->m_video_screen_bpp;
 
         // Emulate old SDL behaviour for user preferences of value 0
-        if (videomode.width == 0)
-            videomode.width = desktopmode.width;
-        if (videomode.height == 0)
-            videomode.height = desktopmode.height;
+        if (videomode.size.x == 0)
+            videomode.size.x = desktopmode.size.x;
+        if (videomode.size.y == 0)
+            videomode.size.y = desktopmode.size.y;
     }
 
     // test screen mode
     if (!videomode.isValid()) {
-        cerr << "Warning : Video Resolution " << videomode.width << "x" << videomode.height << " is not supported" << endl;
+        cerr << "Warning : Video Resolution " << videomode.size.x << "x" << videomode.size.y << " is not supported" << endl;
         cerr << "Falling back to lowest available settings." << endl;
 
         // set lowest available settings
-        videomode.width = 640;
-        videomode.height = 480;
+        videomode.size.x = 640;
+        videomode.size.y = 480;
         videomode.bitsPerPixel = 16;
 
         // overwrite user settings
         if (use_preferences) {
-            pPreferences->m_video_screen_w = videomode.width;
-            pPreferences->m_video_screen_h = videomode.height;
+            pPreferences->m_video_screen_w = videomode.size.x;
+            pPreferences->m_video_screen_h = videomode.size.y;
         }
     }
 
-    uint32_t style;
+    uint32_t style = sf::Style::Default;
+    sf::State state = pPreferences->m_video_fullscreen ? sf::State::Fullscreen : sf::State::Windowed;
 
-    if (pPreferences->m_video_fullscreen)
-        style = sf::Style::Fullscreen;
-    else
-        style = sf::Style::Default;
-
-    mp_window->create(videomode, CAPTION, style);
+    mp_window->create(videomode, CAPTION, style, state);
     mp_window->setMouseCursorVisible(false);
 
     if (use_preferences && pPreferences->m_video_vsync) {
@@ -256,7 +252,7 @@ void cVideo::Init_Video(bool reload_textures_from_file /* = false */, bool use_p
         mp_cegui_renderer->restoreTextures();
 
         // send new size to CEGUI
-        CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef(static_cast<float>(videomode.width), static_cast<float>(videomode.height)));
+        CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef(static_cast<float>(videomode.size.x), static_cast<float>(videomode.size.y)));
 
         Loading_Screen_Init();
 
@@ -636,7 +632,7 @@ void cVideo::Init_Image_Cache(bool recreate /* = 0 */)
 
 int cVideo::Test_Video(int width, int height, int bpp, int flags /* = 0 */) const
 {
-    return sf::VideoMode(width, height, bpp).isValid();
+    return sf::VideoMode(sf::Vector2u(width, height)).isValid();
 }
 
 vector<cSize_Int> cVideo::Get_Supported_Resolutions(int flags /* = 0 */) const
@@ -656,7 +652,7 @@ vector<cSize_Int> cVideo::Get_Supported_Resolutions(int flags /* = 0 */) const
     else {
         std::vector<sf::VideoMode>::const_iterator iter;
         for(iter=valid_modes.begin(); iter != valid_modes.end(); iter++) {
-            valid_resolutions.push_back(cSize_Int((*iter).width, (*iter).height));
+            valid_resolutions.push_back(cSize_Int((*iter).size.x, (*iter).size.y));
         }
     }
 
@@ -967,9 +963,9 @@ sf::Image* cVideo::Convert_To_Final_Software_Image(sf::Image* p_sf_image) const
     if (width != cursize.x || height != cursize.y) {
         // create power of 2 surface
         sf::Image* new_image = new sf::Image();
-        new_image->create(width, height, sf::Color::Transparent);
+        new_image->resize(sf::Vector2u(width, height), sf::Color::Transparent);
         // copy over the old image into the new one (i.e., blit it onto it)
-        new_image->copy(*p_sf_image, 0, 0);
+        new_image->copy(*p_sf_image, {0, 0});
         // delete original surface
         delete p_sf_image;
         // set new surface
@@ -1041,7 +1037,7 @@ cGL_Surface* cVideo::Create_Texture(sf::Image* p_sf_image, bool mipmap /* = 0 */
         Downscale_Image(static_cast<const unsigned char*>(p_sf_image->getPixelsPtr()), p_sf_image->getSize().x, p_sf_image->getSize().y, 8 /* getPixelsPtr() guarantees 8 BPP */, new_pixels, reduce_block_x, reduce_block_y);
 
         sf::Image* p_new_image = new sf::Image();
-        p_new_image->create(texture_width, texture_height, static_cast<const uint8_t*>(new_pixels));
+        p_new_image->resize(sf::Vector2u(texture_width, texture_height), static_cast<const uint8_t*>(new_pixels));
 
         delete p_sf_image;
         p_sf_image = p_new_image;
@@ -1524,31 +1520,25 @@ void cVideo::Save_Surface(const fs::path& filename, const unsigned char* data, u
 
 static void Handle_Important_Events(const sf::Event& event)
 {
-    switch (event.type) {
-    case sf::Event::JoystickConnected:
-    case sf::Event::JoystickDisconnected:
+    if (event.is<sf::Event::JoystickConnected>() || event.is<sf::Event::JoystickDisconnected>()) {
         pJoystick->Init();
-        break;
-    default: break;
     }
 }
 
-bool cVideo::PollEvent(sf::Event& event) {
-    if (mp_window->pollEvent(event)) {
-        Handle_Important_Events(event);
-        return true;
-    } else {
-        return false;
+std::optional<sf::Event> cVideo::PollEvent() {
+    std::optional<sf::Event> opt_event = mp_window->pollEvent();
+    if (opt_event) {
+        Handle_Important_Events(*opt_event);
     }
+    return opt_event;
 }
 
-bool cVideo::WaitEvent(sf::Event& event) {
-    if (mp_window->waitEvent(event)) {
-        Handle_Important_Events(event);
-        return true;
-    } else {
-        return false;
+std::optional<sf::Event> cVideo::WaitEvent() {
+    std::optional<sf::Event> opt_event = mp_window->waitEvent();
+    if (opt_event) {
+        Handle_Important_Events(*opt_event);
     }
+    return opt_event;
 }
 
 /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */

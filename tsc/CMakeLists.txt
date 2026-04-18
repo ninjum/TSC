@@ -57,9 +57,9 @@ option(USE_LIBXMLPP3 "Use libxml++3.0 instead of libxml++2.6 (experimental)" OFF
 ########################################
 # Compiler config
 
-# We use some C++11. For portability it's important to not rely on
+# We use C++17 for SFML 3 compatibility. For portability it's important to not rely on
 # compiler-specific extensions, so we'll disable them.
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Include CEGUI's weird location into the runtime library search path.

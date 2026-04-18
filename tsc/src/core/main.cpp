@@ -471,53 +471,45 @@ void Exit_Game(void)
 
 bool Handle_Input_Global(const sf::Event& ev)
 {
-    switch (ev.type) {
-    case sf::Event::Closed: {
+    if (ev.is<sf::Event::Closed>()) {
         game_exit = 1;
         Clear_Input_Events();
 
         // handle on all handlers ?
         return 0;
     }
-    case sf::Event::Resized: {
-        CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef(static_cast<float>(ev.size.width), static_cast<float>(ev.size.height)));
-        break;
+    else if (const sf::Event::Resized* resized = ev.getIf<sf::Event::Resized>()) {
+        CEGUI::System::getSingleton().notifyDisplaySizeChanged(CEGUI::Sizef(static_cast<float>(resized->size.x), static_cast<float>(resized->size.y)));
     }
-    case sf::Event::TextEntered: {
+    else if (ev.is<sf::Event::TextEntered>()) {
         if (pKeyboard->Text_Entered(ev)) {
             return 1;
         }
-        break;
     }
-    case sf::Event::KeyPressed: {
+    else if (ev.is<sf::Event::KeyPressed>()) {
         if (pKeyboard->Key_Down(ev)) {
             return 1;
         }
-        break;
     }
-    case sf::Event::KeyReleased: {
+    else if (ev.is<sf::Event::KeyReleased>()) {
         if (pKeyboard->Key_Up(ev)) {
             return 1;
         }
-        break;
     }
-    case sf::Event::JoystickButtonPressed: {
+    else if (ev.is<sf::Event::JoystickButtonPressed>()) {
         if (pJoystick->Handle_Button_Down_Event(ev)) {
             return 1;
         }
-        break;
     }
-    case sf::Event::JoystickButtonReleased: {
+    else if (ev.is<sf::Event::JoystickButtonReleased>()) {
         if (pJoystick->Handle_Button_Up_Event(ev)) {
             return 1;
         }
-        break;
     }
-    case sf::Event::JoystickMoved: {
+    else if (ev.is<sf::Event::JoystickMoved>()) {
         pJoystick->Handle_Motion(ev);
-        break;
     }
-    case sf::Event::LostFocus: {
+    else if (ev.is<sf::Event::FocusLost>()) {
         // lost visibility
         bool music_paused = false;
         // pause music
@@ -526,15 +518,17 @@ bool Handle_Input_Global(const sf::Event& ev)
             music_paused = true;
         }
 
-        // Wait until we get focus again. This “freezes” the
+        // Wait until we get focus again. This "freezes" the
         // game instead of updating it further.
-        sf::Event focusin_event;
         while (true) {
-            pVideo->WaitEvent(focusin_event);
-            if (focusin_event.type == sf::Event::GainedFocus) {
+            std::optional<sf::Event> focusin_event = pVideo->WaitEvent();
+            if (!focusin_event) {
+                continue;
+            }
+            if (focusin_event->is<sf::Event::FocusGained>()) {
                 break;
             }
-            else if (focusin_event.type == sf::Event::Closed) {
+            else if (focusin_event->is<sf::Event::Closed>()) {
                 // Window was closed while it didn't have the focus; exit game now
                 game_exit = 1;
                 Clear_Input_Events();
@@ -546,22 +540,19 @@ bool Handle_Input_Global(const sf::Event& ev)
             pAudio->Resume_Music();
         }
         return 1;
-
     }
-    default: { // other events (event type filters in the respective subhandlers)
-        // mouse
-        if (pMouseCursor->Handle_Event(ev)) {
+
+    // other events (event type filters in the respective subhandlers)
+    // mouse
+    if (pMouseCursor->Handle_Event(ev)) {
+        return 1;
+    }
+
+    // send events
+    if (Game_Mode == MODE_MENU) {
+        if (pMenuCore->Handle_Event(ev)) {
             return 1;
         }
-
-        // send events
-        if (Game_Mode == MODE_MENU) {
-            if (pMenuCore->Handle_Event(ev)) {
-                return 1;
-            }
-        }
-        break;
-    }
     }
 
     return 0;
@@ -591,11 +582,10 @@ void Update_Game(void)
     Handle_Game_Events();
 
     // ## input
-    // Actually `input_event' is a global variable that is also queried elsewhere
-    // in the code (uaaah, poor design).
-    while (pVideo->PollEvent(input_event)) {
+    // Events are polled from the window and dispatched to the appropriate handlers.
+    while (std::optional<sf::Event> opt_event = pVideo->PollEvent()) {
         // handle
-        Handle_Input_Global(input_event);
+        Handle_Input_Global(*opt_event);
     }
 
     pMouseCursor->Update();
