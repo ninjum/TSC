@@ -584,7 +584,7 @@ void cRokko::Editor_Activate(void)
     CEGUI::Editbox* editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_rokko_speed"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Speed"), UTF8_("Speed when activated"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_speed, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRokko::Editor_Speed_Text_Changed, this));
 

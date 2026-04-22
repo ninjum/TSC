@@ -12,7 +12,6 @@ find_package(DevIL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(PCRE REQUIRED)
 
 # No cmake module for glm, do it manually. CEGUI needs glm.
 find_path(GLM_HEADER NAMES glm/glm.hpp glm.hpp)
@@ -42,7 +41,6 @@ set(CEGUI_LIBRARIES ${CEGUI_LIBRARIES}
   "${IL_LIBRARIES}"
   "${EXPAT_LIBRARIES}"
   "${FREETYPE_LIBRARIES}"
-  "${GLEW_LIBRARIES}"
-  "${PCRE_LIBRARIES}")
+  "${GLEW_LIBRARIES}")
 
 set(CEGUI_INCLUDE_DIR "${TSC_BINARY_DIR}/cegui-install/include/cegui-0")

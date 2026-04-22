@@ -321,7 +321,7 @@ void cStaticEnemy::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_static_enemy_rotation_speed"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Rotation Speed"), UTF8_("Rotation Speed"), editbox);
 
-    editbox->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_rotation_speed, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cStaticEnemy::Editor_Rotation_Speed_Text_Changed, this));
 
@@ -336,7 +336,7 @@ void cStaticEnemy::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_static_enemy_speed"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Speed"), UTF8_("Maximum speed"), editbox);
 
-    editbox->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_speed, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cStaticEnemy::Editor_Speed_Text_Changed, this));
 
@@ -360,7 +360,7 @@ void cStaticEnemy::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_static_enemy_ice_resistance"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Ice Resistance"), UTF8_("Resistance against Ice (0.0-1.0)"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_ice_resistance, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cStaticEnemy::Editor_Ice_Resistance_Text_Changed, this));
 

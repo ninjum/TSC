@@ -576,7 +576,7 @@ void cGee::Editor_Activate(void)
     CEGUI::Editbox* editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_gee_max_distance"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Distance"), UTF8_("Movable distance"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_max_distance));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cGee::Editor_Max_Distance_Text_Changed, this));
 
@@ -600,7 +600,7 @@ void cGee::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_gee_wait_time"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Wait time"), UTF8_("Time to wait until moving again after a stop"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_wait_time, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cGee::Editor_Wait_Time_Text_Changed, this));
 
@@ -608,7 +608,7 @@ void cGee::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_gee_fly_distance"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Fly distance"), UTF8_("The distance to move each time"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_fly_distance));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cGee::Editor_Fly_Distance_Text_Changed, this));
 

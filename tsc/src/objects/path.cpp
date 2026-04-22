@@ -774,7 +774,7 @@ void cPath::Editor_Activate(void)
     mp_x1_box = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "path_segment_x1"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Pos X1"), UTF8_("Line position X1"), mp_x1_box);
 
-    mp_x1_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
+    // mp_x1_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
     mp_x1_box->setText(int_to_string(static_cast<int>(m_segments[m_editor_selected_segment].m_x1)));
     mp_x1_box->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cPath::Editor_Pos_X1_Text_Changed, this));
 
@@ -782,7 +782,7 @@ void cPath::Editor_Activate(void)
     mp_y1_box = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "path_segment_y1"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Y1"), UTF8_("Line position Y1"), mp_y1_box);
 
-    mp_y1_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
+    // mp_y1_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
     mp_y1_box->setText(int_to_string(static_cast<int>(m_segments[m_editor_selected_segment].m_y1)));
     mp_y1_box->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cPath::Editor_Pos_Y1_Text_Changed, this));
 
@@ -790,7 +790,7 @@ void cPath::Editor_Activate(void)
     mp_x2_box = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "path_segment_x2"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Pos X2"), UTF8_("Line position X2"), mp_x2_box);
 
-    mp_x2_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
+    // mp_x2_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
     mp_x2_box->setText(int_to_string(static_cast<int>(m_segments[m_editor_selected_segment].m_x2)));
     mp_x2_box->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cPath::Editor_Pos_X2_Text_Changed, this));
 
@@ -798,7 +798,7 @@ void cPath::Editor_Activate(void)
     mp_y2_box = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "path_segment_y2"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Y2"), UTF8_("Line position Y2"), mp_y2_box);
 
-    mp_y2_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
+    // mp_y2_box->setValidationString("[-+]?[0-9]*\\.?[0-9]*");
     mp_y2_box->setText(int_to_string(static_cast<int>(m_segments[m_editor_selected_segment].m_y2)));
     mp_y2_box->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cPath::Editor_Pos_Y2_Text_Changed, this));
 

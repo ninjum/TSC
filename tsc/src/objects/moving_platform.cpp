@@ -961,7 +961,7 @@ void cMoving_Platform::Editor_Activate(void)
     mp_distance_box = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_moving_platform_max_distance"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Distance"), UTF8_("Movable distance into its direction if type is line or radius if circle."), mp_distance_box);
 
-    mp_distance_box->setValidationString("^[+]?\\d*$");
+    // mp_distance_box->setValidationString("^[+]?\\d*$");
     mp_distance_box->setText(int_to_string(m_max_distance));
     mp_distance_box->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cMoving_Platform::Editor_Max_Distance_Text_Changed, this));
 
@@ -969,7 +969,7 @@ void cMoving_Platform::Editor_Activate(void)
     CEGUI::Editbox* editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_moving_platform_speed"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Speed"), UTF8_("Maximum speed"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_speed, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cMoving_Platform::Editor_Speed_Text_Changed, this));
 
@@ -977,7 +977,7 @@ void cMoving_Platform::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_moving_platform_touch_time"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Touch time"), UTF8_("Time when touched until shaking starts"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_touch_time, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cMoving_Platform::Editor_Touch_Time_Text_Changed, this));
 
@@ -985,7 +985,7 @@ void cMoving_Platform::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_moving_platform_shake_time"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Shake time"), UTF8_("Time it's shaking until falling"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_shake_time, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cMoving_Platform::Editor_Shake_Time_Text_Changed, this));
 
@@ -993,7 +993,7 @@ void cMoving_Platform::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_moving_platform_move_time"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Touch move time"), UTF8_("If set does not move until this time has elapsed after touched"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_touch_move_time, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cMoving_Platform::Editor_Touch_Move_Time_Text_Changed, this));
 
@@ -1001,7 +1001,7 @@ void cMoving_Platform::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_moving_platform_hor_middle_count"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Hor image count"), UTF8_("Horizontal middle image count"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_middle_count));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cMoving_Platform::Editor_Hor_Middle_Count_Text_Changed, this));
 

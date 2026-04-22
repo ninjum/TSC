@@ -465,7 +465,7 @@ void cRandom_Sound::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_sound_delay_min"));
     p_editor->Add_Config_Widget(UTF8_("Delay Minimum"), UTF8_("Minimal delay until played again"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_delay_min));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRandom_Sound::Editor_Delay_Min_Text_Changed, this));
 
@@ -473,7 +473,7 @@ void cRandom_Sound::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_sound_delay_max"));
     p_editor->Add_Config_Widget(UTF8_("Maximum"), UTF8_("Maximal delay until played again"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_delay_max));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRandom_Sound::Editor_Delay_Max_Text_Changed, this));
 
@@ -481,7 +481,7 @@ void cRandom_Sound::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_sound_volume_min"));
     p_editor->Add_Config_Widget(UTF8_("Volume Minimum"), UTF8_("Minimal random volume for each play"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(static_cast<int>(m_volume_min)));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRandom_Sound::Editor_Volume_Min_Text_Changed, this));
 
@@ -489,7 +489,7 @@ void cRandom_Sound::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_sound_volume_max"));
     p_editor->Add_Config_Widget(UTF8_("Maximum"), UTF8_("Maximal random volume for each play"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(static_cast<int>(m_volume_max)));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRandom_Sound::Editor_Volume_Max_Text_Changed, this));
 
@@ -497,7 +497,7 @@ void cRandom_Sound::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_sound_volume_reduction_begin"));
     p_editor->Add_Config_Widget(UTF8_("Volume Reduction Begin"), UTF8_("Volume reduction begins gradually at this distance"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(static_cast<int>(m_volume_reduction_begin)));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRandom_Sound::Editor_Volume_Reduction_Begin_Text_Changed, this));
 
@@ -505,7 +505,7 @@ void cRandom_Sound::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_sound_volume_reduction_end"));
     p_editor->Add_Config_Widget(UTF8_("End"), UTF8_("Volume reduction ends at this distance. Sound is not played beyond this."), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(static_cast<int>(m_volume_reduction_end)));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cRandom_Sound::Editor_Volume_Reduction_End_Text_Changed, this));
 

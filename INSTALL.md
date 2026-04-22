@@ -1,7 +1,7 @@
 Installation instructions for TSC
 =================================
 
-Time-stamp: <2026-04-18 09:25:53 quintus>
+Time-stamp: <2026-04-22 19:51:00 quintus>
 
 TSC uses [CMake][1] as the build system, so the first thing you have to
 ensure is that you have CMake installed.
@@ -72,7 +72,6 @@ install to.
 * GNU Gettext.
 * The LibPNG library.
 * The DevIL library.
-* The libPCRE regular expression library.
 * The Expat library.
 * The libxml++ library < 3.0.0. Versions >= 3.0.0 will not be
   supported until the libxml++ developers provide a porting guide
@@ -88,7 +87,7 @@ install to.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sudo dnf install ruby rubygem-rake gperf pkgconf bison libGLEW \
-freeglut-devel gettext libpng-devel pcre-devel libxml++-devel \
+freeglut-devel gettext libpng-devel libxml++-devel \
 freetype-devel DevIL-devel boost SFML-devel gcc-c++ \
 cegui-devel cmake @development-tools git libXt-devel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +101,7 @@ Install core dependencies:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sudo apt install ruby-full rake gperf pkg-config bison libglew-dev \
-  freeglut3-dev gettext libpng-dev libpcre3-dev libxml++2.6-dev \
+  freeglut3-dev gettext libpng-dev libxml++2.6-dev \
   libfreetype6-dev libdevil-dev libboost1.58-all-dev libsfml-dev \
   libxt-dev libexpat1-dev cmake build-essential git git-core
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -288,7 +288,7 @@ void cLayer_Line_Point_Start::Editor_Activate(void)
     CEGUI::Editbox* editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "layer_line_origin"));
     pWorld_Editor->Add_Config_Widget(UTF8_("Waypoint origin"), UTF8_("Waypoint origin"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_origin));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cLayer_Line_Point_Start::Editor_Origin_Text_Changed, this));
 

@@ -696,7 +696,7 @@ void cThromp::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_thromp_max_distance"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Distance"), UTF8_("Detection distance into its direction"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(static_cast<int>(m_max_distance)));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cThromp::Editor_Max_Distance_Text_Changed, this));
 
@@ -704,7 +704,7 @@ void cThromp::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_thromp_speed"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Speed"), UTF8_("Speed when activated"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_speed, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cThromp::Editor_Speed_Text_Changed, this));
 

@@ -109,7 +109,6 @@ endif()
 find_package(SFML COMPONENTS audio graphics window system REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PNG REQUIRED)
-find_package(PCRE REQUIRED)
 
 if (USE_SYSTEM_CEGUI)
   find_package(CEGUI COMPONENTS OpenGL REQUIRED)
@@ -156,7 +155,6 @@ include_directories(
   ${PodParser_INCLUDE_DIRS}
   ${CEGUI_INCLUDE_DIR}
   ${OPENGL_INCLUDE_DIR}
-  ${PCRE_INCLUDE_DIRS}
   ${MRuby_INCLUDE_DIR}
   ${X11_INCLUDE_DIR}
   ${PNG_INCLUDE_DIRS})
@@ -209,8 +207,7 @@ target_link_libraries(tsc
   ${OPENGL_LIBRARIES}
   ${PNG_LIBRARIES}
   ${MRuby_LIBRARIES}
-  ${LibXmlPP_LIBRARIES}
-  ${PCRE_LIBRARIES})
+  ${LibXmlPP_LIBRARIES})
 
 # Passing --as-needed to ld ensures that we get the Win32 ld's behaviour
 # even on Linux and discover linking problems before building for Win32.

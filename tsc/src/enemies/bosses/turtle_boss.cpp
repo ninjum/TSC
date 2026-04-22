@@ -1009,7 +1009,7 @@ void cTurtleBoss::Editor_Activate(void)
     CEGUI::Editbox* editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_turtle_boss_max_hits"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Hits"), UTF8_("Hits until a downgrade"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_max_hits));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cTurtleBoss::Editor_Max_Hits_Text_Changed, this));
 
@@ -1017,7 +1017,7 @@ void cTurtleBoss::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_turtle_boss_max_downgrade_count"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Downgrades"), UTF8_("Downgrades until death"), editbox);
 
-    editbox->setValidationString("^[+]?\\d*$");
+    // editbox->setValidationString("^[+]?\\d*$");
     editbox->setText(int_to_string(m_max_downgrade_count));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cTurtleBoss::Editor_Max_Downgrade_Counts_Text_Changed, this));
 
@@ -1025,7 +1025,7 @@ void cTurtleBoss::Editor_Activate(void)
     editbox = static_cast<CEGUI::Editbox*>(wmgr.createWindow("TSCLook256/Editbox", "editor_turtle_boss_max_shell_time"));
     pLevel_Editor->Add_Config_Widget(UTF8_("Shell Time"), UTF8_("Time running as shell to rise again"), editbox);
 
-    editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
+    // editbox->setValidationString("[+]?[0-9]*\\.?[0-9]*");
     editbox->setText(float_to_string(m_shell_time, 6, 0));
     editbox->subscribeEvent(CEGUI::Editbox::EventTextChanged, CEGUI::Event::Subscriber(&cTurtleBoss::Editor_Shell_Time_Text_Changed, this));
 
