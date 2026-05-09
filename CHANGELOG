@@ -1,6 +1,8 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Dependencies: Patch CEGUI so it compiles with CMake 4.2.3 (#732
+		by Jhonny Oliveira).
 	* Dependencies: Drop dependency on libpcre3. This currently allows
 		to enter invalid values into editor's edit boxes, but as long as
 		TSC is stuck with the version of CEGUI in the repository this
