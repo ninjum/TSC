@@ -108,11 +108,6 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
-    # Empty `only` means every entry, which is what release-all.yml passes.
-    # release-all-missing.yml passes just the ones the release does not
-    # carry, so the matrix below stays the single list of what TSC ships and
-    # only the selection changes.
-    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.name) }}
     name: ${{ matrix.name }}
     needs: version
     runs-on: windows-2022
@@ -132,13 +127,26 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    # WHICH entries this run wants, decided here because it cannot be decided
+    # where it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes
+    # that context to runs-on, env, name, steps and a few others, but not to a
+    # job's own condition - and a workflow that tries answers
+    #   Unrecognized named-value: 'matrix'
+    # and refuses to load at all, taking every workflow that CALLS it with it.
+    # A job-level env CAN see matrix, so the answer is computed once here and
+    # every step below asks for it.
+    env:
+      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.name) }}
+
     steps:
       - uses: actions/checkout@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           submodules: recursive
           fetch-depth: 0
 
       - uses: msys2/setup-msys2@v2
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           msystem: ${{ matrix.msystem }}
           update: true
@@ -163,6 +171,7 @@ jobs:
             ${{ matrix.prefix }}-nsis
 
       - name: Build TSC
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           cd tsc
@@ -172,6 +181,7 @@ jobs:
           cmake --build build -j "$(nproc)"
 
       - name: Make the installer
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           cd tsc/build
@@ -181,6 +191,7 @@ jobs:
       # The names the release uses, matching the .deb and AppImage assets:
       # what it is, which version, what it runs on.
       - name: Name the files and checksum them
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           version='${{ needs.version.outputs.version }}'
@@ -202,6 +213,7 @@ jobs:
           ls -l dist
 
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: windows-${{ matrix.name }}
           path: dist/

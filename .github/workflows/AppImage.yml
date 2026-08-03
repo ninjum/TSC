@@ -115,11 +115,6 @@ jobs:
           echo "CHANGELOG says TSC is at $version; publishing to $tag"
 
   build:
-    # Empty `only` means every entry, which is what release-all.yml passes.
-    # release-all-missing.yml passes just the ones the release does not
-    # carry, so the matrix below stays the single list of what TSC ships and
-    # only the selection changes.
-    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
     name: AppImage ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}
@@ -139,17 +134,30 @@ jobs:
             docker_platform: linux/arm/v7
             runs_on: ubuntu-24.04
             emulated: true
+    # WHICH entries this run wants, decided here because it cannot be decided
+    # where it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes
+    # that context to runs-on, env, name, steps and a few others, but not to a
+    # job's own condition - and a workflow that tries answers
+    #   Unrecognized named-value: 'matrix'
+    # and refuses to load at all, taking every workflow that CALLS it with it.
+    # A job-level env CAN see matrix, so the answer is computed once here and
+    # every step below asks for it.
+    env:
+      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
+
     steps:
       - uses: actions/checkout@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Register the emulator
-        if: matrix.emulated
+        if: ${{ env.BUILD_THIS == 'true' && (matrix.emulated) }}
         uses: docker/setup-qemu-action@v3
 
       - name: Build TSC and pack the AppImage
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           # TSC_SFML=source: bookworm ships SFML 2, and an AppImage bundles its
@@ -170,6 +178,7 @@ jobs:
             '
 
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: appimage-${{ matrix.arch }}
           path: dist/

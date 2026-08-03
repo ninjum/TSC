@@ -106,11 +106,6 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
-    # Empty `only` means every entry, which is what release-all.yml passes.
-    # release-all-missing.yml passes just the ones the release does not
-    # carry, so the matrix below stays the single list of what TSC ships and
-    # only the selection changes.
-    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.macos, matrix.arch)) }}
     name: macOS ${{ matrix.macos }} ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}
@@ -132,14 +127,27 @@ jobs:
             macos: '15'
             arch: x86_64
             deployment_target: '13.0'
+    # WHICH entries this run wants, decided here because it cannot be decided
+    # where it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes
+    # that context to runs-on, env, name, steps and a few others, but not to a
+    # job's own condition - and a workflow that tries answers
+    #   Unrecognized named-value: 'matrix'
+    # and refuses to load at all, taking every workflow that CALLS it with it.
+    # A job-level env CAN see matrix, so the answer is computed once here and
+    # every step below asks for it.
+    env:
+      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.macos, matrix.arch)) }}
+
     steps:
       - uses: actions/checkout@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           submodules: recursive
           fetch-depth: 0
 
       # No cegui and no mruby: TSC compiles both itself from its submodules.
       - name: Install the dependencies
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           brew update
@@ -148,6 +156,7 @@ jobs:
           echo "$(brew --prefix bison)/bin" >> "$GITHUB_PATH"
 
       - name: Build TSC
+        if: ${{ env.BUILD_THIS == 'true' }}
         env:
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
         run: |
@@ -166,6 +175,7 @@ jobs:
       # the tree goes into Resources and the binary into MacOS, with a wrapper
       # that points TSC at its data.
       - name: Make TSC.app and its disk image
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           version='${{ needs.version.outputs.version }}'
@@ -221,6 +231,7 @@ jobs:
           tar czf "TSC-app-${{ matrix.arch }}.tar.gz" "$app"
 
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: mac-${{ matrix.macos }}-${{ matrix.arch }}
           path: |

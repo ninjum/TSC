@@ -102,11 +102,6 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
-    # Empty `only` means every entry, which is what release-all.yml passes.
-    # release-all-missing.yml passes just the ones the release does not
-    # carry, so the matrix below stays the single list of what TSC ships and
-    # only the selection changes.
-    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.distro, matrix.arch)) }}
     name: ${{ matrix.distro }} ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}
@@ -187,10 +182,22 @@ jobs:
             docker_platform: linux/riscv64
             runs_on: ubuntu-24.04
             emulated: true
+    # WHICH entries this run wants, decided here because it cannot be decided
+    # where it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes
+    # that context to runs-on, env, name, steps and a few others, but not to a
+    # job's own condition - and a workflow that tries answers
+    #   Unrecognized named-value: 'matrix'
+    # and refuses to load at all, taking every workflow that CALLS it with it.
+    # A job-level env CAN see matrix, so the answer is computed once here and
+    # every step below asks for it.
+    env:
+      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.distro, matrix.arch)) }}
+
     steps:
       # CEGUI, mruby and pod-parser are submodules TSC compiles itself, and
       # CEGUI has submodules of its own.
       - uses: actions/checkout@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           submodules: recursive
           fetch-depth: 0
@@ -198,10 +205,11 @@ jobs:
       # Only for the emulated architectures. amd64 on an amd64 runner and arm64
       # on an arm64 runner need no binfmt handler and are not slowed by one.
       - name: Register the emulator
-        if: matrix.emulated
+        if: ${{ env.BUILD_THIS == 'true' && (matrix.emulated) }}
         uses: docker/setup-qemu-action@v3
 
       - name: Build TSC and package it
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           docker run --rm --platform ${{ matrix.docker_platform }} \
@@ -224,6 +232,7 @@ jobs:
       # built the package and the DEBIAN metadata that went into it. It is the
       # record of how the .deb on the release was made.
       - name: Collect the build scripts, as <distro>-build-deb.zip does
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           d='${{ matrix.distro }}/${{ matrix.arch }}'
@@ -238,12 +247,14 @@ jobs:
           fi
 
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: deb-${{ matrix.distro }}-${{ matrix.arch }}
           path: dist/
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: build-deb-${{ matrix.distro }}-${{ matrix.arch }}
           path: build-deb/

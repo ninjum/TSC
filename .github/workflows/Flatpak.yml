@@ -84,11 +84,6 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
-    # Empty `only` means every entry, which is what release-all.yml passes.
-    # release-all-missing.yml passes just the ones the release does not
-    # carry, so the matrix below stays the single list of what TSC ships and
-    # only the selection changes.
-    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
     name: flatpak ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}
@@ -102,13 +97,26 @@ jobs:
             runs_on: ubuntu-24.04
           - arch: aarch64
             runs_on: ubuntu-24.04-arm
+    # WHICH entries this run wants, decided here because it cannot be decided
+    # where it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes
+    # that context to runs-on, env, name, steps and a few others, but not to a
+    # job's own condition - and a workflow that tries answers
+    #   Unrecognized named-value: 'matrix'
+    # and refuses to load at all, taking every workflow that CALLS it with it.
+    # A job-level env CAN see matrix, so the answer is computed once here and
+    # every step below asks for it.
+    env:
+      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
+
     steps:
       - uses: actions/checkout@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           submodules: recursive
           fetch-depth: 0
 
       - name: Install flatpak and flatpak-builder
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           sudo apt-get update
@@ -126,6 +134,7 @@ jobs:
       # --repo writes an OSTree repository as well as building, so the bundle
       # and the repository come from one build rather than two.
       - name: Build
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           flatpak-builder --user --force-clean --disable-rofiles-fuse \
@@ -133,6 +142,7 @@ jobs:
             build org.secretchronicles.TSC.json
 
       - name: Make the single-file bundle
+        if: ${{ env.BUILD_THIS == 'true' }}
         run: |
           set -euo pipefail
           version='${{ needs.version.outputs.version }}'
@@ -145,6 +155,7 @@ jobs:
           ls -l dist
 
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: flatpak-${{ matrix.arch }}
           path: dist/
@@ -153,6 +164,7 @@ jobs:
       # The per-architecture half of the repository. The publish job merges the
       # two into the one multi-architecture repository users add.
       - uses: actions/upload-artifact@v4
+        if: ${{ env.BUILD_THIS == 'true' }}
         with:
           name: flatpak-repo-${{ matrix.arch }}
           path: repo/
