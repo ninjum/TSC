@@ -118,13 +118,18 @@ cp "$repo_root/CHANGELOG" "$datadir/DEBIAN/CHANGELOG"
 mkdir -p "$out"
 
 # ── The data package: Architecture: all, the same file on every CPU ──────────
-data_installed_size="$(du -ks --exclude=DEBIAN "$datadir" | cut -f1)"
+# du can fail in a 32-bit userland: "cannot read directory ...: Value too large
+# for defined data type" is EOVERFLOW, a 32-bit process meeting a 64-bit inode
+# number on the host filesystem, and it happened building armhf under emulation.
+# Installed-Size is informational - dpkg-deb builds a perfectly good package
+# without it - so a package that cannot be measured is still worth shipping.
+data_installed_size="$(du -ks --exclude=DEBIAN "$datadir" 2>/dev/null | cut -f1)"
 {
     echo "Package: tsc-data"
     echo "Version: $version"
     echo "Architecture: all"
     echo "Maintainer: Lauri Ojansivu <x@xet7.org>"
-    echo "Installed-Size: $data_installed_size"
+    [ -n "$data_installed_size" ] && echo "Installed-Size: $data_installed_size"
     echo "Section: games"
     echo "Priority: optional"
     echo "Homepage: https://secretchronicles.org"
@@ -154,7 +159,7 @@ if [ "${TSC_DATA_ONLY:-0}" = "1" ]; then
 fi
 
 # ── The architecture package: the binary and what goes with it ───────────────
-installed_size="$(du -ks --exclude=DEBIAN "$pkgdir" | cut -f1)"
+installed_size="$(du -ks --exclude=DEBIAN "$pkgdir" 2>/dev/null | cut -f1)"
 
 # dpkg-shlibdeps needs a control file to exist before it will run, and it
 # writes its answer into debian/substvars, so give it a minimal one first.
@@ -202,7 +207,7 @@ fi
     echo "Architecture: $arch"
     echo "Maintainer: Lauri Ojansivu <x@xet7.org>"
     echo "Original-Maintainer: Muammar El Khatib <muammar@debian.org>"
-    echo "Installed-Size: $installed_size"
+    [ -n "$installed_size" ] && echo "Installed-Size: $installed_size"
     echo "Depends: $depends"
     echo "Section: games"
     echo "Priority: optional"

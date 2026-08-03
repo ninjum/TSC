@@ -31,6 +31,14 @@ name: AppImage
 # marked continue-on-error: a slow emulated build must not hold up the two that
 # run on real hardware.
 #
+# armhf FAILS UNDER EMULATION, and not for a reason this workflow can fix.
+# linuxdeploy ships its armhf build as a static-PIE executable, and qemu-user -
+# which is what runs an armhf binary on an x86_64 runner - cannot load those:
+# the job gets "cannot execute binary file: Exec format error" AFTER building
+# TSC successfully. It is continue-on-error, so it reports that and the two
+# native architectures still publish. Building it for real needs an armhf
+# runner, not a change here.
+#
 # ONE PER CPU, AND THERE IS NO MULTI-CPU ONE. An AppImage begins with a runtime
 # binary for one architecture - that is what the kernel executes when the file is
 # run - so a single AppImage holding several CPUs is not a thing the format can

@@ -83,6 +83,26 @@
 		with a live boost URL and SFML 3.0.2 now, and its cegui and
 		mruby modules are gone - TSC compiles both itself, so building
 		them into /app built something nothing used. (by Lauri Ojansivu)
+	* Fix: GLEW was found and then reported missing, stopping the
+		build on Debian 14, macOS and Windows while Ubuntu 26.04 built
+		fine. GLEW 2.3 ships a CMake CONFIG package and 2.2 does not:
+		where the config package wins, cmake says "Found GLEW:
+		.../glew-config.cmake" and exports the targets GLEW::glew and
+		GLEW::glew_s WITHOUT setting the module variables, so
+		${GLEW_LIBRARIES} carried GLEW_LIBRARY-NOTFOUND into the
+		generate step. ProvideCEGUI.cmake asks for a target first and
+		falls back to the variable. (by Lauri Ojansivu)
+	* Fix: The Flatpak build stopped on "module boost: Failed to
+		execute child process eu-strip". flatpak-builder strips debug
+		info out of every module it builds and does not pull in
+		elfutils, which provides eu-strip; the workflow installs it.
+		(by Lauri Ojansivu)
+	* Fix: The armhf .deb died measuring itself - "du: cannot read
+		directory: Value too large for defined data type", EOVERFLOW
+		from a 32-bit process meeting a 64-bit inode number under
+		emulation. Installed-Size is informational and dpkg-deb builds
+		a good package without it, so a package that cannot be measured
+		is still shipped rather than failing. (by Lauri Ojansivu)
 	* Fix: The first release-all run failed on every platform, on five
 		separate causes, none of which had reached a compiler. cmake
 		stopped at the first line of tsc/CMakeLists.txt on Windows,

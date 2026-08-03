@@ -13,6 +13,33 @@ find_package(Freetype REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(GLEW REQUIRED)
 
+# Which name GLEW answers to depends on HOW it was found, and that differs by
+# platform. GLEW 2.3 ships a CMake CONFIG package; 2.2 does not.
+#
+#   Ubuntu 26.04, GLEW 2.2.0   no config package, so CMake's own FindGLEW
+#                              module runs and sets GLEW_LIBRARIES.
+#   Debian 14 and macOS, 2.3.1 the config package wins -
+#                              "Found GLEW: .../cmake/glew/glew-config.cmake" -
+#                              and it exports the imported targets GLEW::glew
+#                              and GLEW::glew_s WITHOUT setting the module
+#                              variables. ${GLEW_LIBRARIES} then carried
+#                              GLEW_LIBRARY-NOTFOUND, and the generate step
+#                              stopped with "variables ... set to NOTFOUND:
+#                              GLEW_LIBRARY" after configuring had said Found.
+#
+# So ask for a target first and fall back to the variable, rather than assuming
+# one of the two ways GLEW can arrive.
+if (TARGET GLEW::GLEW)
+  set(TSC_GLEW_LIBRARIES GLEW::GLEW)      # CMake's FindGLEW module
+elseif (TARGET GLEW::glew)
+  set(TSC_GLEW_LIBRARIES GLEW::glew)      # GLEW's own config package, shared
+elseif (TARGET GLEW::glew_s)
+  set(TSC_GLEW_LIBRARIES GLEW::glew_s)    # ditto, static-only install
+else()
+  set(TSC_GLEW_LIBRARIES ${GLEW_LIBRARIES})
+endif()
+message(STATUS "GLEW links as: ${TSC_GLEW_LIBRARIES}")
+
 # No cmake module for glm, do it manually. CEGUI needs glm.
 find_path(GLM_HEADER NAMES glm/glm.hpp glm.hpp)
 if (GLM_HEADER)
@@ -41,6 +68,6 @@ set(CEGUI_LIBRARIES ${CEGUI_LIBRARIES}
   "${IL_LIBRARIES}"
   "${EXPAT_LIBRARIES}"
   "${FREETYPE_LIBRARIES}"
-  "${GLEW_LIBRARIES}")
+  ${TSC_GLEW_LIBRARIES})
 
 set(CEGUI_INCLUDE_DIR "${TSC_BINARY_DIR}/cegui-install/include/cegui-0")
