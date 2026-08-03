@@ -1,0 +1,265 @@
+name: Repos
+
+# Build the package repositories the website serves - apt, AppImage and Flatpak -
+# out of the files already attached to a TSC release.
+#
+# The other workflows produce PACKAGES; this produces the REPOSITORIES that hand
+# them out. The difference matters to whoever installs TSC: a package is a file
+# you fetch and install once, and finding the next one is your problem. A
+# repository is what makes `apt upgrade`, `zsync` and `flatpak update` bring the
+# next release down by themselves.
+#
+# Nothing is rebuilt here. Every file comes off a GitHub release, so what the
+# repository hands out is the same byte-for-byte file the release page does.
+#
+# WHERE IT GOES. The website is a separate repository
+# (Secretchronicles/secretchronicles.github.io), so this uploads the three trees
+# as one artifact and, if a WEBSITE_TOKEN secret exists, commits them there
+# directly. Without the secret it stops at the artifact and says so - a workflow
+# should not need a credential to be useful, and copying three directories by
+# hand is a small price for not having to hold a token.
+#
+# THEY ARE UNSIGNED. Signing needs a GPG key, which is a secret rather than
+# something a build can invent, so the apt list line uses [trusted=yes] and the
+# flatpak remote --no-gpg-verify. The README written beside them sets out what to
+# change once a key exists; the download page says the same thing to readers.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release to build the repositories from (empty = newest)'
+        required: false
+        type: string
+      push_to_website:
+        description: 'Commit them to the website repository (needs WEBSITE_TOKEN)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tsc-repos
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build the repositories
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect the release assets
+        id: assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='${{ inputs.tag }}'
+          [ -n "$tag" ] || tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
+          if [ -z "$tag" ]; then
+            echo "::error::No release to build the repositories from."
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+          mkdir -p assets
+          cd assets
+          # Whatever this release has. A repository with only some of the
+          # package types is still a working repository for those types.
+          gh release download "$tag" --pattern '*.deb'      --clobber || true
+          gh release download "$tag" --pattern '*.AppImage' --clobber || true
+          gh release download "$tag" --pattern '*.flatpak'  --clobber || true
+          ls -lh
+          for kind in deb AppImage flatpak; do
+            n=$(ls -1 *."$kind" 2>/dev/null | wc -l)
+            echo "$kind: $n"
+            [ "$n" -gt 0 ] || echo "::warning::$tag has no .$kind - that repository will be empty"
+          done
+
+      - name: Install the tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            dpkg-dev apt-utils zsync flatpak ostree
+
+      # ---- apt --------------------------------------------------------------
+      #
+      # A flat repository: the .deb files and a Packages index beside them, which
+      # is the "deb [trusted=yes] <url> ./" form on the download page. It needs no
+      # pool/dists layout and no distribution name, which is what lets one
+      # repository serve Ubuntu and Debian at once.
+      - name: Build the apt repository
+        run: |
+          set -euo pipefail
+          mkdir -p site/apt
+          cp assets/*.deb site/apt/ 2>/dev/null || true
+          cd site/apt
+          if ! ls *.deb >/dev/null 2>&1; then
+            echo "No .deb on this release; the apt repository is empty."
+            exit 0
+          fi
+          dpkg-scanpackages --multiversion . > Packages
+          gzip -9c Packages > Packages.gz
+          apt-ftparchive release . > Release
+          echo "apt repository:"
+          grep -c '^Package: ' Packages | sed 's/^/  packages: /'
+
+      # ---- AppImage ---------------------------------------------------------
+      #
+      # An AppImage updates itself with zsync, which needs a .zsync control file
+      # beside the image. The file names drop the version, because the URL in the
+      # .zsync is what people keep in their update command - it has to stay the
+      # same across releases or the update stops working.
+      - name: Build the AppImage repository
+        run: |
+          set -euo pipefail
+          mkdir -p site/appimage
+          shopt -s nullglob
+          n=0
+          for f in assets/*.AppImage; do
+            base="$(basename "$f")"
+            arch="${base##*-}"; arch="${arch%.AppImage}"
+            stable="TSC-${arch}.AppImage"
+            cp "$f" "site/appimage/$stable"
+            ( cd site/appimage
+              zsyncmake -u "https://secretchronicles.org/appimage/$stable" \
+                        -o "${stable}.zsync" "$stable"
+              sha256sum "$stable" > "${stable}.sha256sum" )
+            # The versioned name too, so a particular release stays fetchable.
+            cp "$f" "site/appimage/$base"
+            n=$((n + 1))
+          done
+          echo "AppImage repository: $n image(s)"
+
+      # ---- Flatpak ----------------------------------------------------------
+      #
+      # The bundles are single-arch files; the repository is what serves every
+      # architecture at once and what `flatpak update` talks to.
+      - name: Build the Flatpak repository
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          bundles=(assets/*.flatpak)
+          if [ ${#bundles[@]} -eq 0 ]; then
+            echo "No .flatpak on this release; the Flatpak repository is skipped."
+            exit 0
+          fi
+          mkdir -p site/flatpak
+          ostree init --repo=site/flatpak --mode=archive-z2
+          for b in "${bundles[@]}"; do
+            echo "Adding $(basename "$b")"
+            # A bundle is a self-contained repository; import it and re-export.
+            flatpak build-import-bundle --no-update-summary site/flatpak "$b"
+          done
+          flatpak build-update-repo --prune site/flatpak
+          cat > site/flatpak/tsc.flatpakrepo <<'REPO'
+          [Flatpak Repo]
+          Title=The Secret Chronicles of Dr. M.
+          Url=https://secretchronicles.org/flatpak/
+          Homepage=https://secretchronicles.org
+          Comment=TSC releases, built by the workflows in Secretchronicles/TSC
+          Description=Flatpak repository for The Secret Chronicles of Dr. M. (TSC)
+          REPO
+          echo "Flatpak repository: ${#bundles[@]} bundle(s)"
+
+      - name: Write the README that says how to sign them
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          cat > site/README.txt <<TXT
+          Package repositories for The Secret Chronicles of Dr. M. (TSC),
+          built from the assets of release ${{ steps.assets.outputs.tag }}.
+
+          Copy these three directories to the website root:
+
+            apt/        ->  https://secretchronicles.org/apt/
+            appimage/   ->  https://secretchronicles.org/appimage/
+            flatpak/    ->  https://secretchronicles.org/flatpak/
+
+          The download page already documents how to use them.
+
+          THEY ARE NOT SIGNED. Signing needs a GPG key, which is a secret rather
+          than something a build can invent, so the instructions tell apt
+          [trusted=yes] and flatpak --no-gpg-verify. Anyone installing from them
+          is trusting whoever serves the files.
+
+          To sign them, once a key exists:
+
+            1. Make the key, on a machine you trust, and keep the private half
+               off the internet:
+                 gpg --quick-generate-key "TSC <tsc@secretchronicles.org>" default default never
+                 gpg --export KEYID > tsc-archive.gpg
+                 gpg --export-secret-keys --armor KEYID    # this goes in the secret
+
+            2. Put the private half in this repository's Actions secrets as
+               GPG_PRIVATE_KEY, and import it in this workflow before the steps
+               below.
+
+            3. apt: sign the Release file and publish the public key.
+                 gpg --default-key KEYID -abs -o apt/Release.gpg apt/Release
+                 gpg --default-key KEYID --clearsign -o apt/InRelease apt/Release
+                 cp tsc-archive.gpg apt/
+               Then the download page's line becomes
+                 deb [signed-by=/usr/share/keyrings/tsc-archive.gpg] https://secretchronicles.org/apt ./
+               after the user installs that key into /usr/share/keyrings.
+
+            4. flatpak: sign the repository and name the key in the .flatpakrepo.
+                 flatpak build-update-repo --gpg-sign=KEYID flatpak
+                 GPGKey=\$(base64 -w0 tsc-archive.gpg)   # add this line to tsc.flatpakrepo
+               Then --no-gpg-verify can be dropped from the remote-add.
+
+            5. AppImage: zsync has no signing of its own; publish the
+               .sha256sum files next to the images (they are already here) and
+               sign those.
+          TXT
+          find site -maxdepth 2 -type d | sort
+          du -sh site/* 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website-repos
+          path: site/
+          if-no-files-found: error
+
+      # Optional, and only when a token exists: a workflow that needs a
+      # credential to do anything useful is a workflow nobody can run.
+      - name: Commit them to the website
+        if: ${{ inputs.push_to_website && env.WEBSITE_TOKEN != '' }}
+        env:
+          WEBSITE_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 \
+            "https://x-access-token:${WEBSITE_TOKEN}@github.com/Secretchronicles/secretchronicles.github.io.git" website
+          rm -rf website/apt website/appimage website/flatpak
+          cp -a site/apt site/appimage site/flatpak website/ 2>/dev/null || true
+          cd website
+          git config user.name "Lauri Ojansivu"
+          git config user.email "x@xet7.org"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The repositories are unchanged."
+            exit 0
+          fi
+          git commit -m "Package repositories from ${{ steps.assets.outputs.tag }}"
+          git push
+          echo "Pushed to the website."
+
+      - name: Say what to do next
+        if: ${{ !inputs.push_to_website || env.WEBSITE_TOKEN == '' }}
+        env:
+          WEBSITE_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: |
+          echo "The repositories are in the website-repos artifact of this run."
+          echo "Download it and copy apt/, appimage/ and flatpak/ into the root"
+          echo "of Secretchronicles/secretchronicles.github.io."
+          if [ -z "${WEBSITE_TOKEN:-}" ]; then
+            echo "Set a WEBSITE_TOKEN secret and re-run with push_to_website to"
+            echo "have this workflow commit them instead."
+          fi

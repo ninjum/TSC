@@ -55,6 +55,17 @@
 		with a live boost URL and SFML 3.0.2 now, and its cegui and
 		mruby modules are gone - TSC compiles both itself, so building
 		them into /app built something nothing used. (by Lauri Ojansivu)
+	* Misc: Added GitHub workflow Repos.yml, which builds the apt,
+		AppImage and Flatpak repositories the website serves out of the
+		files already attached to a release. The other workflows produce
+		packages; this produces the repositories that hand them out, so
+		`apt upgrade`, `zsync` and `flatpak update` bring the next
+		release down by themselves instead of it being another visit to
+		the download page. Nothing is rebuilt - every file comes off the
+		release, so a repository hands out the same bytes the release
+		page does. They are unsigned, and the README written beside them
+		sets out how to sign them once a GPG key exists.
+		(by Lauri Ojansivu)
 	* Misc: The release version is read from this file. The topmost
 		entry that carries a number is the version the workflows tag
 		and name their files after, so a release cannot be built for a
