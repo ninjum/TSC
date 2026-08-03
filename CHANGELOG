@@ -5,6 +5,13 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: The build failed to link on FreeBSD with "ld: error: unable
+		to find library -liconv". iconv and intl were named as bare
+		linker flags, which asks the linker to find them on its default
+		search path, and the BSD ports tree puts them under
+		/usr/local/lib, which is not on it. They are resolved to full
+		paths by find_package now, the way every other dependency in the
+		file already was. (#693 by Lauri Ojansivu)
 	* Fix: Taking a screenshot crashed the game. The buffer was sized
 		from the resolution TSC was configured for while glReadPixels
 		filled it from the framebuffer TSC actually had, and OpenGL pads

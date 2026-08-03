@@ -220,7 +220,19 @@ else()
     ${X11_LIBRARIES}
     ${CMAKE_DL_LIBS})
   if (CMAKE_SYSTEM_NAME MATCHES "BSD")
-    target_link_libraries(tsc iconv intl)
+    # These were named as bare -liconv and -lintl, which asks the linker to
+    # find them on its own default search path. On the BSDs they are not on it:
+    # the ports tree installs them under /usr/local/lib, and the link failed
+    # with "ld: error: unable to find library -liconv" on a machine that had
+    # them installed all along. Every other dependency in this file is resolved
+    # to a full path by a find_package before being linked; these two are now
+    # resolved the same way. FindLibIntl.cmake is this project's own module;
+    # FindIconv is CMake's own, shipped since CMake 3.11, and on systems where
+    # iconv lives in libc it correctly answers with no library to link at all.
+    # Only the BSD branch uses it, and every current BSD is far past 3.11.
+    find_package(Iconv REQUIRED)
+    find_package(LibIntl REQUIRED)
+    target_link_libraries(tsc ${Iconv_LIBRARIES} ${LIBINTL_LIBRARIES})
   endif()
 endif()
 
