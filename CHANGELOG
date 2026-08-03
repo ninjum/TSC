@@ -36,9 +36,12 @@
 	* Misc: Added GitHub workflow Mac.yml, which builds macOS 13, 14
 		and 15 disk images on Intel and Apple silicon and welds the two
 		CPUs into one universal disk image with lipo, so there is a
-		single file that runs on both. It replaces the hand-made zip on
-		a file-sharing site that #691 offered with a build anyone can
-		re-run from a commit. (#691, #719 by Lauri Ojansivu)
+		single file that runs on both. Only that universal image is
+		published: shipping the per-CPU images beside it would be three
+		downloads where one will do, and three chances to take the
+		wrong one. It replaces the hand-made zip on a file-sharing site
+		that #691 offered with a build anyone can re-run from a commit.
+		(#691, #719 by Lauri Ojansivu)
 	* Misc: Added GitHub workflow Flatpak.yml, which builds Flatpaks
 		for x86_64 and aarch64, attaches the single-file bundles to the
 		release, and publishes a multi-architecture Flatpak REPOSITORY
