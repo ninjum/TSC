@@ -1119,8 +1119,15 @@ void cVideo::Create_GL_Texture(unsigned int width, unsigned int height, const vo
 Color cVideo::Get_Pixel(int x, int y) const
 {
     GLubyte* pixel = new GLubyte[3];
-    // read it
+    // read it. The same GL_PACK_ALIGNMENT trap as in Save_Screenshot, and a
+    // single pixel is the worst case for it: one RGB row is 3 bytes, the
+    // default alignment of 4 rounds that up to 4, and the fourth byte lands
+    // one past the end of this buffer.
+    GLint old_pack_alignment = 4;
+    glGetIntegerv(GL_PACK_ALIGNMENT, &old_pack_alignment);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+    glPixelStorei(GL_PACK_ALIGNMENT, old_pack_alignment);
 
     // convert to color
     Color color = Color(pixel[0], pixel[1], pixel[2]);
@@ -1415,16 +1422,43 @@ void cVideo::Save_Screenshot(void)
 
     fs::path filename;
 
+    // The size to read is the size the framebuffer ACTUALLY has, which is what
+    // the window reports, not pPreferences->m_video_screen_w/h - the resolution
+    // TSC was configured for. The two are the same until the window is resized
+    // or the display scales it, and when they differ glReadPixels fills the
+    // real framebuffer's worth of pixels into a buffer sized for the configured
+    // one and writes past its end. That is what makes the next free() abort
+    // with "free(): invalid next size (normal)" instead of the screenshot being
+    // merely the wrong size.
+    //
+    // The other half of the same crash is row padding: GL_PACK_ALIGNMENT
+    // defaults to 4, so OpenGL pads every ROW of an RGB image out to a multiple
+    // of 4 bytes. At any width whose *3 is not a multiple of 4 - 1366, a common
+    // laptop width, gives 4098 - that padding is written past the end of a
+    // tightly packed buffer even when the size is right. It is set to 1 below,
+    // which is what "tightly packed" means, and restored afterwards so nothing
+    // else that reads pixels is affected.
+    const sf::Vector2u window_size = mp_window->getSize();
+    const unsigned int width = window_size.x;
+    const unsigned int height = window_size.y;
+
     for (unsigned int i = 1; i < 1000; i++) {
         filename = pResource_Manager->Get_User_Screenshot_Directory() / utf8_to_path(int_to_string(i) + ".png");
 
         if (!File_Exists(filename)) {
             // create image data
-            GLubyte* data = new GLubyte[pPreferences->m_video_screen_w * pPreferences->m_video_screen_h * 3];
-            // read opengl screen
-            glReadPixels(0, 0, pPreferences->m_video_screen_w, pPreferences->m_video_screen_h, GL_RGB, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
+            GLubyte* data = new GLubyte[width * height * 3];
+            // read opengl screen. GL_PACK_ALIGNMENT decides how OpenGL is
+            // allowed to write into `data', and its default of 4 does not
+            // match a tightly packed RGB buffer - see the note above the
+            // declaration of width.
+            GLint old_pack_alignment = 4;
+            glGetIntegerv(GL_PACK_ALIGNMENT, &old_pack_alignment);
+            glPixelStorei(GL_PACK_ALIGNMENT, 1);
+            glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
+            glPixelStorei(GL_PACK_ALIGNMENT, old_pack_alignment);
             // save
-            Save_Surface(filename, data, pPreferences->m_video_screen_w, pPreferences->m_video_screen_h, 3, 1);
+            Save_Surface(filename, data, width, height, 3, 1);
             // clear data
             delete[] data;
 

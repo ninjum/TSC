@@ -253,7 +253,14 @@ void cLevel_Player::DownGrade_Player(bool delayed /* = true */, bool force /* = 
 
     Set_Type(ALEX_DEAD, 0, 0);
     gp_hud->Reset_Elapsed_Time();
-    gp_hud->Reset_Points();
+    // The score is NOT reset here. Losing a life costs the life and the level's
+    // elapsed time; the points are what the whole playthrough has earned so far
+    // and they carry across lives, as they do in the games this one is shaped
+    // like. Resetting them here meant a single death threw away everything
+    // scored since the game began. The score does still go back to zero when a
+    // playthrough ends and a new one starts - cHud::Reset(), reached through
+    // cLevel_Player::Reset_Save() on the reset_save game action - which is the
+    // place that means "start again".
     Ball_Clear();
     gp_hud->Add_Lives(-1);
     pAudio->Halt_Music();

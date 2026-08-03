@@ -5,6 +5,27 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: Taking a screenshot crashed the game. The buffer was sized
+		from the resolution TSC was configured for while glReadPixels
+		filled it from the framebuffer TSC actually had, and OpenGL pads
+		every row of an RGB image out to a multiple of 4 bytes unless it
+		is told not to - either one writes past the end of the buffer,
+		which is the "free(): invalid next size (normal)" abort in the
+		report. cVideo::Get_Pixel had the same padding bug in its worst
+		form: a 3-byte buffer for a row OpenGL rounds up to 4. (#723 by
+		Lauri Ojansivu)
+	* Fix: Losing a life reset the score to 0. The points are what the
+		whole playthrough has earned and they carry across lives, as
+		they do in the games this one is shaped like; a single death
+		threw all of them away. The score still goes back to zero when a
+		playthrough ends and a new one starts. (#707 by Lauri Ojansivu)
+	* Fix: The .deb packages were missing their DevIL dependency, so
+		tsc would not start - "libIL.so.1: cannot open shared object
+		file" - until libdevil1c2 was installed by hand. The Depends
+		line was written out by hand and DevIL was left off it; Deb.yml
+		reads the dependency list off the compiled binary with
+		dpkg-shlibdeps instead, so a library TSC links against cannot be
+		missing from it. (#724 by Lauri Ojansivu)
 	* Misc: Added GitHub workflow AppImage.yml, which builds an
 		AppImage for each CPU architecture AppImage has a runtime for
 		(x86_64, aarch64, armhf) and attaches them to the release this
