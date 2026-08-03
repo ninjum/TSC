@@ -59,6 +59,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["armhf","x86_64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
   workflow_dispatch:
     inputs:
       publish:
@@ -66,6 +71,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["armhf","x86_64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
       draft:
         description: 'Create the release as a draft if it does not exist yet'
         required: false
@@ -105,6 +115,11 @@ jobs:
           echo "CHANGELOG says TSC is at $version; publishing to $tag"
 
   build:
+    # Empty `only` means every entry, which is what release-all.yml passes.
+    # release-all-missing.yml passes just the ones the release does not
+    # carry, so the matrix below stays the single list of what TSC ships and
+    # only the selection changes.
+    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
     name: AppImage ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}

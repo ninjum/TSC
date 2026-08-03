@@ -31,8 +31,8 @@ name: Windows
 # leftover that is no longer in mingw32.db, so pacman cannot see it and no
 # amount of retrying will install it.
 #
-# The job is kept
-# because that is a fact about MSYS2 today rather than about TSC, and it should
+# The job is kept because that is a fact about MSYS2 today rather than about
+# TSC, and it should
 # be a job whose log says so on every run rather than a platform that quietly
 # disappeared from the release. If 32-bit matters more than this, the way back
 # is to build the dependency chain from source for i686 (as the AppImage build
@@ -63,6 +63,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["win64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -74,6 +79,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["win64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -98,6 +108,11 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
+    # Empty `only` means every entry, which is what release-all.yml passes.
+    # release-all-missing.yml passes just the ones the release does not
+    # carry, so the matrix below stays the single list of what TSC ships and
+    # only the selection changes.
+    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.name) }}
     name: ${{ matrix.name }}
     needs: version
     runs-on: windows-2022

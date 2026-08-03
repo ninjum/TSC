@@ -34,6 +34,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["aarch64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -45,6 +50,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["aarch64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
       publish_repo:
         description: 'Publish the Flatpak repository as a workflow artifact for the website'
         required: false
@@ -74,6 +84,11 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
+    # Empty `only` means every entry, which is what release-all.yml passes.
+    # release-all-missing.yml passes just the ones the release does not
+    # carry, so the matrix below stays the single list of what TSC ships and
+    # only the selection changes.
+    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
     name: flatpak ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}

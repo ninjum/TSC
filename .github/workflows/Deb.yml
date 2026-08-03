@@ -52,6 +52,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["resolute-armhf","forky-amd64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -63,6 +68,11 @@ on:
         required: false
         default: true
         type: boolean
+      only:
+        description: 'Only build these matrix entries, as a JSON array (e.g. ["resolute-armhf","forky-amd64"]); empty = all of them'
+        required: false
+        default: ''
+        type: string
 
 permissions:
   contents: write
@@ -92,6 +102,11 @@ jobs:
           echo "CHANGELOG says TSC is at $version"
 
   build:
+    # Empty `only` means every entry, which is what release-all.yml passes.
+    # release-all-missing.yml passes just the ones the release does not
+    # carry, so the matrix below stays the single list of what TSC ships and
+    # only the selection changes.
+    if: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.distro, matrix.arch)) }}
     name: ${{ matrix.distro }} ${{ matrix.arch }}
     needs: version
     runs-on: ${{ matrix.runs_on }}

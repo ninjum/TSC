@@ -1,0 +1,294 @@
+name: Release all missing
+
+# Build only the packages a release does not already carry.
+#
+# WHY: release-all.yml runs five build workflows over 27 assets - twelve .deb
+# architectures across two distributions, three AppImages, two Flatpaks, two
+# Windows installers plus a combined one, three macOS images plus a universal
+# one - and the emulated ones take hours. When a run ends with some of them
+# missing, as every run so far has, the only way to fill the gap was to run all
+# 27 again. The v2.2.0-beta2 release is the case in point: 44 assets published,
+# eleven packages absent, and re-running would have rebuilt the 16 that were
+# already correct.
+#
+# HOW: work out which of the 27 are absent, then call the SAME five workflows
+# release-all.yml calls, each with an `only` filter naming just its share. A
+# workflow with nothing to do is not called at all.
+#
+# The naming lives in .github/scripts/expected-assets.sh, in one place, because
+# knowing what a complete release looks like is the whole job here. That script
+# prints `<kind> <selector> <asset> <sums|nosums>`, and the selector is exactly
+# what each workflow's `only` input filters its matrix on.
+#
+# An asset counts as present only when its CHECKSUMS are there too (.md5sum and
+# .sha256sum, named with the extension dropped). A package whose checksum upload
+# failed is a half-published release, and calling it present would leave it that
+# way. The build-script zips are the exception - they are published without
+# checksums, so expected-assets.sh marks them `nosums`.
+#
+# WHAT THIS CANNOT FIX: a package that is missing because it CANNOT be built
+# will be attempted again on every run. Today that is win32 (MSYS2's mingw32 has
+# a toolchain but no libraries) and the armhf AppImage (linuxdeploy is a
+# static-pie ARM binary qemu-user cannot load). Both are documented in their own
+# workflows, both are continue-on-error there, and neither makes this run fail -
+# but neither will ever stop being reported as missing, and that is honest
+# rather than a bug.
+#
+# Usage:
+#   gh workflow run release-all-missing.yml
+#   gh workflow run release-all-missing.yml -f release=v2.2.0-beta2
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release to complete, e.g. v2.2.0-beta2 (empty = the version CHANGELOG names)'
+        required: false
+        type: string
+      build_repos:
+        description: 'Rebuild the apt/AppImage/Flatpak repositories afterwards'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+# The same group release-all.yml uses, so filling in the gaps and a full run
+# cannot upload to one release at the same time.
+concurrency:
+  group: tsc-release-all-${{ inputs.release || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: what the release is missing
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.plan.outputs.tag }}
+      version: ${{ steps.plan.outputs.version }}
+      deb: ${{ steps.plan.outputs.deb }}
+      appimage: ${{ steps.plan.outputs.appimage }}
+      flatpak: ${{ steps.plan.outputs.flatpak }}
+      windows: ${{ steps.plan.outputs.windows }}
+      mac: ${{ steps.plan.outputs.mac }}
+      total: ${{ steps.plan.outputs.total }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          tag='${{ inputs.release }}'
+          if [ -z "$tag" ]; then
+            tag="v$(bash .github/scripts/changelog-version.sh)"
+            echo "No release given; CHANGELOG says $tag."
+          fi
+          version="${tag#v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release view "$tag" --json assets --jq '.assets[].name' | sort > existing.txt
+          else
+            echo "No release $tag yet - everything is missing."
+            : > existing.txt
+          fi
+          echo "$tag carries $(wc -l < existing.txt | tr -d ' ') asset(s)."
+
+          bash .github/scripts/expected-assets.sh "$version" > expected.txt
+
+          : > missing.txt
+          present=0
+          while read -r kind selector asset sums; do
+            need="$asset"
+            if [ "$sums" = "sums" ]; then
+              base="${asset%.*}"
+              need="$need ${base}.md5sum ${base}.sha256sum"
+            fi
+            have=yes
+            for n in $need; do
+              grep -qxF "$n" existing.txt || have=no
+            done
+            if [ "$have" = yes ]; then
+              present=$((present + 1))
+            else
+              echo "$kind $selector" >> missing.txt
+            fi
+          done < expected.txt
+
+          total="$(wc -l < missing.txt | tr -d ' ')"
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+          echo "Present: $present.  Missing: $total."
+
+          # One JSON array per workflow, which is what its `only` input reads
+          # with fromJSON().
+          #
+          # DERIVED assets are the exception. Three of the 27 are not built by a
+          # matrix entry at all, but by a later job out of what the matrix
+          # produced: the two build-script zips (Deb.yml's attach job, from every
+          # architecture's artifacts), the combined Windows installer (from both
+          # .exe builds) and the universal macOS image (lipo, from both arch
+          # builds). No selector would rebuild them, so when one is missing its
+          # whole workflow runs unfiltered - an empty `only` means all of it.
+          # Without this a release missing ONLY its universal .dmg would filter
+          # down to nothing, build nothing, and report the same gap forever.
+          derived_deb='^scripts-'
+          derived_windows='^combined$'
+          derived_mac='^universal$'
+          for kind in deb appimage flatpak windows mac; do
+            sels="$(awk -v k="$kind" '$1 == k { print $2 }' missing.txt)"
+            eval "pattern=\${derived_${kind}:-}"
+            if [ -n "$pattern" ] && printf '%s\n' "$sels" | grep -q "$pattern"; then
+              echo "  $kind: (all - a derived asset is missing, so its inputs must be rebuilt)"
+              echo "$kind=" >> "$GITHUB_OUTPUT"
+              continue
+            fi
+            json="$(printf '%s\n' $sels | sed '/^$/d' | jq -R . | jq -sc .)"
+            [ -n "$json" ] || json='[]'
+            echo "$kind=$json" >> "$GITHUB_OUTPUT"
+            echo "  $kind: $json"
+          done
+
+          {
+            echo "### $tag"
+            echo ""
+            echo "$present of $((present + total)) assets already published."
+            echo ""
+            if [ "$total" -eq 0 ]; then
+              echo "Nothing is missing - the release is complete."
+            else
+              echo "Missing:"
+              echo ""
+              echo '```'
+              cat missing.txt
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Each workflow is called only when it has something to build, and told
+  # exactly which entries. `only: ''` on deb means "all of it" - see the
+  # build-script zip note above.
+  deb:
+    name: .deb packages
+    needs: plan
+    if: ${{ needs.plan.outputs.deb != '[]' }}
+    uses: ./.github/workflows/Deb.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      publish: true
+      only: ${{ needs.plan.outputs.deb }}
+
+  appimage:
+    name: AppImages
+    needs: plan
+    if: ${{ needs.plan.outputs.appimage != '[]' }}
+    uses: ./.github/workflows/AppImage.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      publish: true
+      only: ${{ needs.plan.outputs.appimage }}
+
+  flatpak:
+    name: Flatpaks
+    needs: plan
+    if: ${{ needs.plan.outputs.flatpak != '[]' }}
+    uses: ./.github/workflows/Flatpak.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      publish: true
+      only: ${{ needs.plan.outputs.flatpak }}
+
+  windows:
+    name: Windows installers
+    needs: plan
+    if: ${{ needs.plan.outputs.windows != '[]' }}
+    uses: ./.github/workflows/Windows.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      publish: true
+      only: ${{ needs.plan.outputs.windows }}
+
+  mac:
+    name: macOS disk image
+    needs: plan
+    if: ${{ needs.plan.outputs.mac != '[]' }}
+    uses: ./.github/workflows/Mac.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      publish: true
+      only: ${{ needs.plan.outputs.mac }}
+
+  # Last and alone, out of whatever is on the release once the builds above have
+  # finished - the same reason release-all.yml runs it last.
+  repos:
+    name: package repositories
+    needs: [plan, deb, appimage, flatpak, windows, mac]
+    if: ${{ always() && inputs.build_repos != false && needs.plan.outputs.total != '0' }}
+    uses: ./.github/workflows/Repos.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+
+  done:
+    name: what is still missing
+    needs: [plan, deb, appimage, flatpak, windows, mac, repos]
+    # always(), so a release that needed nothing still reports, and so one failed
+    # platform does not hide the ones that were filled in.
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          V: ${{ needs.plan.outputs.version }}
+          BEFORE: ${{ needs.plan.outputs.total }}
+        run: |
+          set -euo pipefail
+          if [ "$BEFORE" = "0" ]; then
+            echo "::notice::$TAG was already complete - nothing was built."
+            exit 0
+          fi
+
+          gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null | sort > now.txt || : > now.txt
+          bash .github/scripts/expected-assets.sh "$V" > expected.txt
+
+          still=""
+          while read -r kind selector asset sums; do
+            need="$asset"
+            if [ "$sums" = "sums" ]; then
+              base="${asset%.*}"
+              need="$need ${base}.md5sum ${base}.sha256sum"
+            fi
+            for n in $need; do
+              grep -qxF "$n" now.txt || { still="$still $kind/$selector"; break; }
+            done
+          done < expected.txt
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$still" ]; then
+            echo "$TAG is complete."
+            echo "**$TAG is complete.**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            # A warning, not a failure: win32 and the armhf AppImage cannot be
+            # built at all today, so a run that fills in everything it can and
+            # still reports those two has done its job.
+            echo "::warning::$TAG is still missing:${still}. Each platform's log says why."
+            echo "Still missing:\`${still# }\`" >> "$GITHUB_STEP_SUMMARY"
+          fi
