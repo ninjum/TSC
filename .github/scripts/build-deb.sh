@@ -54,6 +54,15 @@
 
 set -euo pipefail
 
+# Name the line that failed.
+#
+# The resolute armhf build ended with "exit code 1" and not one line of output:
+# build-tsc.sh printed "Staged TSC in /src/stage" and the job simply stopped. It
+# was the `du` below - see the comment there - and it was invisible because its
+# stderr goes to /dev/null while `set -e` still acted on its exit status. Any
+# future silent failure says where it was instead.
+trap 'rc=$?; echo "build-deb.sh: FAILED at line $LINENO: $BASH_COMMAND (exit $rc)" >&2; exit $rc' ERR
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 version="${TSC_VERSION:?TSC_VERSION is required}"
@@ -123,7 +132,14 @@ mkdir -p "$out"
 # number on the host filesystem, and it happened building armhf under emulation.
 # Installed-Size is informational - dpkg-deb builds a perfectly good package
 # without it - so a package that cannot be measured is still worth shipping.
-data_installed_size="$(du -ks --exclude=DEBIAN "$datadir" 2>/dev/null | cut -f1)"
+#
+# `|| var=""` is what makes that true, and it was missing. 2>/dev/null hid du's
+# MESSAGE but not its exit status: under `set -euo pipefail` the failing command
+# substitution ended the script, so the resolute armhf build died here with exit
+# 1 and no output at all, having just reported a successful staging. The forky
+# armhf build beside it, on a different base image, measured fine - which is why
+# it read as random rather than as this line.
+data_installed_size="$(du -ks --exclude=DEBIAN "$datadir" 2>/dev/null | cut -f1)" || data_installed_size=""
 {
     echo "Package: tsc-data"
     echo "Version: $version"
@@ -159,7 +175,7 @@ if [ "${TSC_DATA_ONLY:-0}" = "1" ]; then
 fi
 
 # ── The architecture package: the binary and what goes with it ───────────────
-installed_size="$(du -ks --exclude=DEBIAN "$pkgdir" 2>/dev/null | cut -f1)"
+installed_size="$(du -ks --exclude=DEBIAN "$pkgdir" 2>/dev/null | cut -f1)" || installed_size=""
 
 # dpkg-shlibdeps needs a control file to exist before it will run, and it
 # writes its answer into debian/substvars, so give it a minimal one first.

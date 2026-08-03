@@ -17,10 +17,21 @@ name: Windows
 # which is what TSC needs since the SFML 3 port (#729).
 #
 # 32-BIT is attempted and is expected to fail, which is why it is
-# continue-on-error rather than absent. MSYS2 ended 32-bit support in May 2024
-# and its mingw32 packages stopped being built then - months before SFML 3 was
-# released - so there is no 32-bit SFML 3 in MSYS2 to build against, and a
-# 32-bit build of current TSC cannot be produced there at all. The job is kept
+# continue-on-error rather than absent. MSYS2 ended 32-bit support in May 2024,
+# and what is left of the mingw32 repository is a TOOLCHAIN without libraries:
+# its database carries 247 packages against ucrt64's 3917, and while
+# mingw-w64-i686-gcc (16.1.0), -cmake, -ninja and -pkg-config are all still
+# there, sfml, boost, glew, glm, devil and libxml++ are all gone. That is what
+# pacman reports, six times over:
+#
+#   error: target not found: mingw-w64-i686-sfml
+#
+# Do not be misled by browsing https://mirror.msys2.org/mingw/mingw32/ - it
+# still LISTS mingw-w64-i686-sfml-3.0.2-1-any.pkg.tar.zst. That file is a
+# leftover that is no longer in mingw32.db, so pacman cannot see it and no
+# amount of retrying will install it.
+#
+# The job is kept
 # because that is a fact about MSYS2 today rather than about TSC, and it should
 # be a job whose log says so on every run rather than a platform that quietly
 # disappeared from the release. If 32-bit matters more than this, the way back
