@@ -1,56 +1,6 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
-	* Fix: The Windows build produced nothing. mruby was built by running
-		./minirake, which is a Ruby script with no extension: its shebang
-		makes that work on Linux and macOS, which is why it was never
-		noticed, but cmd has no shebangs and answered "'.\minirake' is not
-		recognized as an internal or external command". ninja stopped there,
-		so the release got no Windows installer at all. It is run through
-		the interpreter find_package(Ruby) already located. (by Lauri
-		Ojansivu)
-	* Fix: Every macOS build failed to link. Mac.yml configures TSC with
-		-DCMAKE_OSX_ARCHITECTURES, but an ExternalProject is a separate
-		cmake run and inherits only what CMAKE_ARGS names, so CEGUI never
-		saw it, defaulted to x86_64 and linked against the arm64 Homebrew
-		libraries beside it. The giveaway is that the error says x86_64 in
-		the two arm64 jobs as well. The architecture, deployment target and
-		sysroot are forwarded now, on Apple and only when set. (by Lauri
-		Ojansivu)
-	* Fix: Both Flatpak builds failed in glu, whose 9.0.0 source uses NULL
-		without including stddef.h and does not compile with the runtime's
-		GCC. glu is 9.0.3 now, taken from what flathub shared-modules uses
-		today, with its checksum verified against the downloaded tarball
-		rather than copied on trust. It is inlined in the manifest instead
-		of bumping the submodule, because upstream has since deleted both
-		glu-9.0.0.json and the whole udev directory this manifest also
-		references. (by Lauri Ojansivu)
-	* Fix: The .deb for resolute armhf ended with "exit code 1" and not
-		one line saying why. It was du, whose EOVERFLOW in a 32-bit
-		userland had been silenced with 2>/dev/null - which hid the message
-		but not the exit status, so under set -euo pipefail the failing
-		command substitution ended the script. Installed-Size is
-		informational, so a package that cannot be measured is still worth
-		shipping; that now actually holds. An ERR trap naming the line and
-		the command is added, so the next silent failure is not silent. (by
-		Lauri Ojansivu)
-	* Misc: Added GitHub workflow release-all-missing.yml, which builds
-		only the packages a release does not already carry. release-all.yml
-		runs five build workflows over 27 assets and the emulated ones take
-		hours; when a run ends with some missing, as every run so far has,
-		the only way to fill the gap was to build all 27 again. What a
-		complete release looks like lives in one place,
-		.github/scripts/expected-assets.sh, and each build workflow gained
-		an "only" input so the same workflows build the subset. An asset
-		counts as present only when its checksums are there too. (by Lauri
-		Ojansivu)
-	* Fix: That "only" filter was written as a job-level if:, which
-		GitHub refuses to load - matrix is not available to a job's own
-		condition, only to its runs-on, env, name, steps and a few others.
-		A workflow that will not load takes every workflow that calls it
-		with it, so release-all-missing.yml failed at startup and built
-		nothing. The decision is made in the job's env, which can see
-		matrix, and every step asks for it. (by Lauri Ojansivu)
 
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
@@ -187,6 +137,46 @@
 		checkout, and gh works out the repository from the git remote,
 		so it failed with "not a git repository". It names the
 		repository explicitly. (by Lauri Ojansivu)
+	* Fix: The Windows build produced nothing. mruby was built by running
+		./minirake, which is a Ruby script with no extension: its shebang
+		makes that work on Linux and macOS, which is why it was never
+		noticed, but cmd has no shebangs and answered "'.\minirake' is not
+		recognized as an internal or external command". ninja stopped there,
+		so the release got no Windows installer at all. It is run through
+		the interpreter find_package(Ruby) already located. (by Lauri
+		Ojansivu)
+	* Fix: Every macOS build failed to link. Mac.yml configures TSC with
+		-DCMAKE_OSX_ARCHITECTURES, but an ExternalProject is a separate
+		cmake run and inherits only what CMAKE_ARGS names, so CEGUI never
+		saw it, defaulted to x86_64 and linked against the arm64 Homebrew
+		libraries beside it. The giveaway is that the error says x86_64 in
+		the two arm64 jobs as well. The architecture, deployment target and
+		sysroot are forwarded now, on Apple and only when set. (by Lauri
+		Ojansivu)
+	* Fix: Both Flatpak builds failed in glu, whose 9.0.0 source uses NULL
+		without including stddef.h and does not compile with the runtime's
+		GCC. glu is 9.0.3 now, taken from what flathub shared-modules uses
+		today, with its checksum verified against the downloaded tarball
+		rather than copied on trust. It is inlined in the manifest instead
+		of bumping the submodule, because upstream has since deleted both
+		glu-9.0.0.json and the whole udev directory this manifest also
+		references. (by Lauri Ojansivu)
+	* Fix: The .deb for resolute armhf ended with "exit code 1" and not
+		one line saying why. It was du, whose EOVERFLOW in a 32-bit
+		userland had been silenced with 2>/dev/null - which hid the message
+		but not the exit status, so under set -euo pipefail the failing
+		command substitution ended the script. Installed-Size is
+		informational, so a package that cannot be measured is still worth
+		shipping; that now actually holds. An ERR trap naming the line and
+		the command is added, so the next silent failure is not silent. (by
+		Lauri Ojansivu)
+	* Fix: That "only" filter was written as a job-level if:, which
+		GitHub refuses to load - matrix is not available to a job's own
+		condition, only to its runs-on, env, name, steps and a few others.
+		A workflow that will not load takes every workflow that calls it
+		with it, so release-all-missing.yml failed at startup and built
+		nothing. The decision is made in the job's env, which can see
+		matrix, and every step asks for it. (by Lauri Ojansivu)
 	* Misc: Every package type is built for each CPU separately, and
 		additionally as one multi-CPU package wherever the format allows
 		it. macOS ships a disk image per CPU AND the universal one -
@@ -234,6 +224,16 @@
 		entry that carries a number is the version the workflows tag
 		and name their files after, so a release cannot be built for a
 		version the changelog does not describe. (by Lauri Ojansivu)
+	* Misc: Added GitHub workflow release-all-missing.yml, which builds
+		only the packages a release does not already carry. release-all.yml
+		runs five build workflows over 27 assets and the emulated ones take
+		hours; when a run ends with some missing, as every run so far has,
+		the only way to fill the gap was to build all 27 again. What a
+		complete release looks like lives in one place,
+		.github/scripts/expected-assets.sh, and each build workflow gained
+		an "only" input so the same workflows build the subset. An asset
+		counts as present only when its checksums are there too. (by Lauri
+		Ojansivu)
 	* Dependencies: Patch CEGUI so it compiles with CMake 4.2.3 (#732
 		by Jhonny Oliveira).
 	* Dependencies: Drop dependency on libpcre3. This currently allows
