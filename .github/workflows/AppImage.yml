@@ -1,0 +1,206 @@
+name: AppImage
+
+# Build an AppImage of TSC for every CPU architecture it can be built for, and
+# attach them to the release of the version CHANGELOG names.
+#
+# An AppImage is one executable file that runs on any Linux distribution with no
+# installation and no package manager, which is the thing the .deb packages from
+# Deb.yml cannot be. A .deb is built against one distribution's libraries and
+# only installs on that distribution; since the SFML 3 port (#729) TSC needs
+# SFML 3, which only Ubuntu 26.04 and Debian 14 ship, so on anything older there
+# can be no TSC package at all. The AppImage carries its own SFML and runs there
+# anyway.
+#
+# THE VERSION COMES FROM CHANGELOG. `* Version 2.2.0-beta2.` in the topmost
+# entry that has a number is what names the tag (v2.2.0-beta2) and every file
+# uploaded - see .github/scripts/changelog-version.sh. CHANGELOG is already the
+# file the .deb carries as DEBIAN/CHANGELOG, so this adds no second place where
+# a version is written down and could disagree.
+#
+# WHY IT IS BUILT ON BOOKWORM. glibc is backward compatible but not forward
+# compatible: a binary built against glibc 2.41 will not start on a system with
+# 2.36, but one built against 2.36 runs on both. So an AppImage is built on the
+# OLDEST distribution it should run on, and Debian bookworm is that choice here.
+# Bookworm ships SFML 2, so SFML 3 is compiled from source into the container
+# and bundled - which is what an AppImage is for.
+#
+# WHICH ARCHITECTURES. AppImage needs a runtime binary for the CPU it runs on,
+# and those exist for x86_64, aarch64 and armhf only. There is no AppImage for
+# s390x, ppc64el or riscv64 to build - those architectures get a .deb from
+# Deb.yml instead. armhf has no runner of its own and is emulated, so it is
+# marked continue-on-error: a slow emulated build must not hold up the two that
+# run on real hardware.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Attach the AppImages to the release'
+        required: false
+        default: true
+        type: boolean
+      draft:
+        description: 'Create the release as a draft if it does not exist yet'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tsc-appimage-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: read the version
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+      tag: ${{ steps.read.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the version from CHANGELOG
+        id: read
+        run: |
+          set -euo pipefail
+          version="$(bash .github/scripts/changelog-version.sh)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG says TSC is at $version, so the release is v$version"
+
+  build:
+    name: AppImage ${{ matrix.arch }}
+    needs: version
+    runs-on: ${{ matrix.runs_on }}
+    continue-on-error: ${{ matrix.emulated || false }}
+    timeout-minutes: ${{ matrix.emulated && 360 || 120 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            docker_platform: linux/amd64
+            runs_on: ubuntu-24.04
+          - arch: aarch64
+            docker_platform: linux/arm64
+            runs_on: ubuntu-24.04-arm
+          - arch: armhf
+            docker_platform: linux/arm/v7
+            runs_on: ubuntu-24.04
+            emulated: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Register the emulator
+        if: matrix.emulated
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build TSC and pack the AppImage
+        run: |
+          set -euo pipefail
+          # TSC_SFML=source: bookworm ships SFML 2, and an AppImage bundles its
+          # libraries, so SFML 3 is compiled into the container.
+          docker run --rm --platform ${{ matrix.docker_platform }} \
+            -v "$PWD":/src -w /src \
+            -e TSC_VERSION='${{ needs.version.outputs.version }}' \
+            -e TSC_APPIMAGE_ARCH='${{ matrix.arch }}' \
+            -e TSC_SFML=source \
+            -e DEBIAN_FRONTEND=noninteractive \
+            debian:bookworm \
+            bash -c '
+              set -euo pipefail
+              bash .github/scripts/install-build-dependencies.sh \
+                file wget xz-utils zsync desktop-file-utils
+              bash .github/scripts/build-tsc.sh
+              bash .github/scripts/build-appimage.sh
+            '
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.arch }}
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: attach to the release
+    needs: [version, build]
+    if: ${{ always() && inputs.publish != false }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: appimage-*
+          path: assets
+          merge-multiple: true
+
+      - name: Say what was built, and what was not
+        run: |
+          set -euo pipefail
+          built=""
+          for f in assets/*.AppImage; do
+            [ -e "$f" ] || continue
+            built="$built $(basename "$f")"
+          done
+          if [ -z "$built" ]; then
+            echo "::error::No architecture produced an AppImage - every build" \
+                 "job failed. Their logs say why; nothing is uploaded."
+            exit 1
+          fi
+          echo "AppImages built:"
+          for b in $built; do echo "  $b"; done
+          for want in x86_64 aarch64 armhf; do
+            case "$built" in
+              *"-$want.AppImage"*) ;;
+              *) echo "::warning::no AppImage for $want - see that build job's log" ;;
+            esac
+          done
+
+      # The release named by CHANGELOG. If it is not there yet this creates it,
+      # pinned to the commit that was built rather than to whatever the branch
+      # points at by the time anyone looks.
+      - name: Create the release if it does not exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='${{ needs.version.outputs.tag }}'
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "$tag exists already"
+            exit 0
+          fi
+          notes="$(mktemp)"
+          {
+            echo "TSC ${{ needs.version.outputs.version }}"
+            echo
+            echo "The changes in this release are the topmost entry of"
+            echo "[CHANGELOG](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG)."
+            echo
+            echo "AppImages run on any Linux distribution without being installed:"
+            echo "download the one for your CPU, \`chmod +x\` it and run it."
+            echo "The \`.deb\` packages are built separately by the Deb workflow."
+          } > "$notes"
+          gh release create "$tag" \
+            --title "$tag" \
+            --notes-file "$notes" \
+            --target '${{ github.sha }}' \
+            ${{ inputs.draft && '--draft' || '' }}
+          echo "Created $tag"
+
+      - name: Upload them
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload '${{ needs.version.outputs.tag }}' \
+            assets/* --clobber
+          echo "Uploaded to $(gh release view '${{ needs.version.outputs.tag }}' --json url --jq .url)"

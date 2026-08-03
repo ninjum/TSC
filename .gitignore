@@ -81,6 +81,16 @@ CMakeLists.txt.user*
 /.flatpak-builder
 /tsc/.flatpak-builder/
 
+# Release packaging (.github/workflows/AppImage.yml and Deb.yml, and the
+# scripts they call). The staged install tree, the .deb package tree, the
+# AppImage AppDir, the downloaded AppImage tooling, and the finished files.
+/stage
+/deb
+/build-deb
+/AppDir
+/.appimage-tools
+/dist
+
 # Installer
 /tsc/extras/Setup/*.exe
 /tsc/icon.rc

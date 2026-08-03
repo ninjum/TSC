@@ -1,6 +1,32 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+
+2026-08-03  Lauri Ojansivu  <x@xet7.org>
+
+	* Version 2.2.0-beta2.
+	* Misc: Added GitHub workflow AppImage.yml, which builds an
+		AppImage for each CPU architecture AppImage has a runtime for
+		(x86_64, aarch64, armhf) and attaches them to the release this
+		file names. An AppImage runs on any Linux distribution without
+		being installed, which matters more than usual now that TSC
+		needs SFML 3: only Ubuntu 26.04 and Debian 14 ship it, so on
+		anything older there can be no TSC package at all, while the
+		AppImage carries its own SFML and runs from Debian 12 onwards.
+		(by Lauri Ojansivu)
+	* Misc: Added GitHub workflow Deb.yml, which builds a .deb for
+		each CPU architecture it can be built for - amd64, arm64,
+		armhf, ppc64el, s390x and riscv64 - on Ubuntu 26.04 and
+		Debian 14, and attaches them to the newest release. The
+		v2.2.0-beta1 packages were built by hand, one machine per
+		distribution and architecture, with the Depends line of each
+		typed out; these are built from one commit in one run, with
+		the dependency list read off the compiled binary by
+		dpkg-shlibdeps. (by Lauri Ojansivu)
+	* Misc: The release version is read from this file. The topmost
+		entry that carries a number is the version the workflows tag
+		and name their files after, so a release cannot be built for a
+		version the changelog does not describe. (by Lauri Ojansivu)
 	* Dependencies: Patch CEGUI so it compiles with CMake 4.2.3 (#732
 		by Jhonny Oliveira).
 	* Dependencies: Drop dependency on libpcre3. This currently allows

@@ -1,0 +1,302 @@
+name: Deb
+
+# Build a .deb of TSC for every CPU architecture it can be built for, and
+# attach them to the newest TSC release.
+#
+# The v2.2.0-beta1 packages were built by hand, one machine per distribution and
+# architecture, and the release shows it: bookworm arm64 and armhf were uploaded
+# two days after noble amd64, and the `Depends` line of each was typed out. This
+# builds all of them from one commit, in one run, with the dependency list read
+# off the compiled binary - see .github/scripts/build-deb.sh.
+#
+# WHICH DISTRIBUTIONS. TSC needs SFML 3.0.0 or newer since the SFML 3 port
+# (#729), and a .deb can only depend on a package that exists in the archive it
+# is installed from, so a distribution that ships SFML 2 cannot have a TSC
+# package at all - not even a working one, because there is nothing for
+# `Depends: libsfml-graphics3.0` to point at. That rules out the three beta1 was
+# built for (bookworm 2.5, noble 2.6, oracular 2.6) and leaves:
+#
+#   resolute  Ubuntu 26.04 LTS   SFML 3.0.2
+#   forky     Debian 14          SFML 3.1.0
+#
+# Anyone on an older distribution is not left out: the AppImage from
+# AppImage.yml carries its own SFML and runs on bookworm and newer.
+#
+# WHICH ARCHITECTURES. amd64 and arm64 build on runners of their own CPU. The
+# rest have no runner, so they build in an emulated container, which is far
+# slower - hours, not minutes - and is why they are marked continue-on-error:
+# an emulated build that runs out of clock must not stop the release of the ones
+# that finished. The publish job attaches whatever was built and says which
+# platforms those were, so a missing architecture is visible rather than silent.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach to (empty = newest release)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the packages to the release'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+# Two runs would upload over each other's assets on the same release.
+concurrency:
+  group: tsc-deb-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: read the version
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The package's Version field is the version, not the tag: the tag is
+      # v2.2.0-beta2 and the package is 2.2.0-beta2, exactly as in beta1.
+      - name: Read the version from CHANGELOG
+        id: read
+        run: |
+          set -euo pipefail
+          version="$(bash .github/scripts/changelog-version.sh)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG says TSC is at $version"
+
+  build:
+    name: ${{ matrix.distro }} ${{ matrix.arch }}
+    needs: version
+    runs-on: ${{ matrix.runs_on }}
+    # An emulated architecture is best effort. A native one is not.
+    continue-on-error: ${{ matrix.emulated || false }}
+    timeout-minutes: ${{ matrix.emulated && 360 || 120 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ---- Ubuntu 26.04 LTS ------------------------------------------
+          - distro: resolute
+            image: ubuntu:26.04
+            arch: amd64
+            docker_platform: linux/amd64
+            runs_on: ubuntu-24.04
+          - distro: resolute
+            image: ubuntu:26.04
+            arch: arm64
+            docker_platform: linux/arm64
+            runs_on: ubuntu-24.04-arm
+          - distro: resolute
+            image: ubuntu:26.04
+            arch: armhf
+            docker_platform: linux/arm/v7
+            runs_on: ubuntu-24.04
+            emulated: true
+          - distro: resolute
+            image: ubuntu:26.04
+            arch: ppc64el
+            docker_platform: linux/ppc64le
+            runs_on: ubuntu-24.04
+            emulated: true
+          - distro: resolute
+            image: ubuntu:26.04
+            arch: s390x
+            docker_platform: linux/s390x
+            runs_on: ubuntu-24.04
+            emulated: true
+          - distro: resolute
+            image: ubuntu:26.04
+            arch: riscv64
+            docker_platform: linux/riscv64
+            runs_on: ubuntu-24.04
+            emulated: true
+          # ---- Debian 14 -------------------------------------------------
+          - distro: forky
+            image: debian:forky
+            arch: amd64
+            docker_platform: linux/amd64
+            runs_on: ubuntu-24.04
+          - distro: forky
+            image: debian:forky
+            arch: arm64
+            docker_platform: linux/arm64
+            runs_on: ubuntu-24.04-arm
+          - distro: forky
+            image: debian:forky
+            arch: armhf
+            docker_platform: linux/arm/v7
+            runs_on: ubuntu-24.04
+            emulated: true
+          - distro: forky
+            image: debian:forky
+            arch: ppc64el
+            docker_platform: linux/ppc64le
+            runs_on: ubuntu-24.04
+            emulated: true
+          - distro: forky
+            image: debian:forky
+            arch: s390x
+            docker_platform: linux/s390x
+            runs_on: ubuntu-24.04
+            emulated: true
+          - distro: forky
+            image: debian:forky
+            arch: riscv64
+            docker_platform: linux/riscv64
+            runs_on: ubuntu-24.04
+            emulated: true
+    steps:
+      # CEGUI, mruby and pod-parser are submodules TSC compiles itself, and
+      # CEGUI has submodules of its own.
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # Only for the emulated architectures. amd64 on an amd64 runner and arm64
+      # on an arm64 runner need no binfmt handler and are not slowed by one.
+      - name: Register the emulator
+        if: matrix.emulated
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build TSC and package it
+        run: |
+          set -euo pipefail
+          docker run --rm --platform ${{ matrix.docker_platform }} \
+            -v "$PWD":/src -w /src \
+            -e TSC_VERSION='${{ needs.version.outputs.version }}' \
+            -e TSC_DISTRO='${{ matrix.distro }}' \
+            -e TSC_ARCH='${{ matrix.arch }}' \
+            -e DEBIAN_FRONTEND=noninteractive \
+            ${{ matrix.image }} \
+            bash -c '
+              set -euo pipefail
+              bash .github/scripts/install-build-dependencies.sh \
+                dpkg-dev fakeroot file xz-utils
+              bash .github/scripts/build-tsc.sh
+              bash .github/scripts/build-deb.sh
+            '
+
+      # The same shape beta1 published its build scripts in -
+      # <distro>-build-deb.zip holding <distro>/<arch>/, with the scripts that
+      # built the package and the DEBIAN metadata that went into it. It is the
+      # record of how the .deb on the release was made.
+      - name: Collect the build scripts, as <distro>-build-deb.zip does
+        run: |
+          set -euo pipefail
+          d='${{ matrix.distro }}/${{ matrix.arch }}'
+          mkdir -p "build-deb/$d"
+          cp .github/scripts/build-tsc.sh \
+             .github/scripts/build-deb.sh \
+             .github/scripts/install-build-dependencies.sh "build-deb/$d/"
+          if [ -d "deb/tsc_${{ needs.version.outputs.version }}/DEBIAN" ]; then
+            mkdir -p "build-deb/$d/tsc_${{ needs.version.outputs.version }}"
+            cp -a "deb/tsc_${{ needs.version.outputs.version }}/DEBIAN" \
+                  "build-deb/$d/tsc_${{ needs.version.outputs.version }}/"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.distro }}-${{ matrix.arch }}
+          path: dist/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-deb-${{ matrix.distro }}-${{ matrix.arch }}
+          path: build-deb/
+          if-no-files-found: warn
+
+  publish:
+    name: attach to the release
+    needs: [version, build]
+    # Whatever finished gets published, so this runs even when an emulated
+    # build did not.
+    if: ${{ always() && inputs.publish != false }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: deb-*
+          path: assets
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: build-deb-*
+          path: build-deb
+          merge-multiple: true
+
+      # One zip per distribution, holding every architecture built for it -
+      # bookworm-raspi-build-deb.zip on beta1 held bookworm/amd64, /arm64 and
+      # /s390x together.
+      - name: Zip the build scripts, one per distribution
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          for distro in build-deb/*/; do
+            [ -d "$distro" ] || continue
+            name="$(basename "$distro")"
+            (cd build-deb && zip -qr "../assets/${name}-build-deb.zip" "$name")
+            echo "Packed ${name}-build-deb.zip"
+          done
+
+      - name: Work out which release to attach to
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='${{ inputs.tag }}'
+          if [ -z "$tag" ]; then
+            # "the newest TSC release" - what the Releases page shows at the top.
+            tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
+          fi
+          if [ -z "$tag" ]; then
+            echo "::error::No release to attach to, and no tag was given."
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Attaching to $tag"
+
+      - name: Say what was built, and what was not
+        run: |
+          set -euo pipefail
+          built=""
+          for f in assets/*.deb; do
+            [ -e "$f" ] || continue
+            built="$built $(basename "$f")"
+          done
+          if [ -z "$built" ]; then
+            echo "::error::No architecture produced a package - every build job" \
+                 "failed. Their logs say why; nothing is uploaded."
+            exit 1
+          fi
+          echo "Packages built:"
+          for b in $built; do echo "  $b"; done
+          for want in resolute-amd64 resolute-arm64 resolute-armhf resolute-ppc64el \
+                      resolute-s390x resolute-riscv64 forky-amd64 forky-arm64 \
+                      forky-armhf forky-ppc64el forky-s390x forky-riscv64; do
+            case "$built" in
+              *"-$want.deb"*) ;;
+              *) echo "::warning::no package for $want - see that build job's log" ;;
+            esac
+          done
+
+      - name: Upload them
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # --clobber so a re-run replaces the asset it rebuilt instead of
+          # failing on "already exists", and leaves the others alone.
+          gh release upload '${{ steps.release.outputs.tag }}' \
+            assets/* --clobber
+          echo "Uploaded to $(gh release view '${{ steps.release.outputs.tag }}' --json url --jq .url)"
