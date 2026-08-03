@@ -23,6 +23,35 @@
 		typed out; these are built from one commit in one run, with
 		the dependency list read off the compiled binary by
 		dpkg-shlibdeps. (by Lauri Ojansivu)
+	* Misc: Added GitHub workflow Windows.yml, which builds the 64-bit
+		Windows installer with MSYS2 UCRT64 and CPack's NSIS generator.
+		This also answers #709 ("cegui dependency not available for
+		building Windows version") by what it does NOT install: TSC has
+		compiled CEGUI itself from its submodule since 2024-10-04, so
+		the MSYS2 cegui package INSTALL.md still asks for is not needed
+		and no longer exists. The 32-bit job is kept and expected to
+		fail: MSYS2 ended 32-bit support in May 2024, months before SFML
+		3 was released, so there is no 32-bit SFML 3 to build against.
+		(#709, #719 by Lauri Ojansivu)
+	* Misc: Added GitHub workflow Mac.yml, which builds macOS 13, 14
+		and 15 disk images on Intel and Apple silicon and welds the two
+		CPUs into one universal disk image with lipo, so there is a
+		single file that runs on both. It replaces the hand-made zip on
+		a file-sharing site that #691 offered with a build anyone can
+		re-run from a commit. (#691, #719 by Lauri Ojansivu)
+	* Misc: Added GitHub workflow Flatpak.yml, which builds Flatpaks
+		for x86_64 and aarch64, attaches the single-file bundles to the
+		release, and publishes a multi-architecture Flatpak REPOSITORY
+		of static files that the website can serve, so `flatpak update`
+		works rather than every update being a download by hand.
+		(#733, #719 by Lauri Ojansivu)
+	* Dependencies: Brought the Flatpak manifest back to life. It was
+		written in 2018 against runtime 18.08 and had rotted: boost came
+		from bintray, shut down in 2021, and SFML was 2.5.1, which the
+		SFML 3 port no longer builds against. It is on freedesktop 24.08
+		with a live boost URL and SFML 3.0.2 now, and its cegui and
+		mruby modules are gone - TSC compiles both itself, so building
+		them into /app built something nothing used. (by Lauri Ojansivu)
 	* Misc: The release version is read from this file. The topmost
 		entry that carries a number is the version the workflows tag
 		and name their files after, so a release cannot be built for a

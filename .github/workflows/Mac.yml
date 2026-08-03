@@ -1,0 +1,278 @@
+name: Mac
+
+# Build TSC for macOS and attach the disk images to the newest TSC release.
+#
+# ISSUE #691 asked for a Macintosh version. It was ported by hand in 2020 and
+# the result was a zip on a file-sharing site, which is the thing this replaces:
+# a build anyone can re-run from a commit, signed for nothing but at least
+# reproducible, attached to the release beside the Linux and Windows packages.
+# The experimental macOS support that came out of that issue is in the tree
+# already (CMakeLists.txt handles APPLE), so this is packaging, not porting.
+#
+# WHICH macOS VERSIONS. GitHub's runners are the constraint and they are also
+# the only macOS this can be built on:
+#
+#   macos-15  arm64   Apple silicon
+#   macos-14  arm64   Apple silicon
+#   macos-13  x86_64  Intel
+#
+# CMAKE_OSX_DEPLOYMENT_TARGET is set two versions below the runner, which is
+# what makes the result run on older macOS than it was built on - the same
+# reason the AppImage is built on Debian bookworm. Homebrew's own bottles are
+# built for the runner's OS, so going further back than that would mean
+# building every dependency from source.
+#
+# THE UNIVERSAL BUILD. A single file holding both CPUs is the macOS convention,
+# and it cannot be produced by one job: CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+# needs every dependency to be universal too, and Homebrew's are not - each is
+# built for the machine it was installed on. So the two per-CPU builds are made
+# first and `lipo` welds them together afterwards, which is what lipo is for.
+# That job runs only when BOTH architectures built; if one failed there is
+# nothing to weld and the per-CPU disk images are still published.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach to (empty = newest release)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the disk images to the release'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tsc-mac-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: read the version
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          set -euo pipefail
+          version="$(bash .github/scripts/changelog-version.sh)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG says TSC is at $version"
+
+  build:
+    name: macOS ${{ matrix.macos }} ${{ matrix.arch }}
+    needs: version
+    runs-on: ${{ matrix.runs_on }}
+    continue-on-error: true
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs_on: macos-15
+            macos: '15'
+            arch: arm64
+            deployment_target: '13.0'
+          - runs_on: macos-14
+            macos: '14'
+            arch: arm64
+            deployment_target: '12.0'
+          - runs_on: macos-13
+            macos: '13'
+            arch: x86_64
+            deployment_target: '11.0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # No cegui and no mruby: TSC compiles both itself from its submodules.
+      - name: Install the dependencies
+        run: |
+          set -euo pipefail
+          brew update
+          brew install cmake ninja pkg-config bison gperf \
+            sfml libxml++ boost glew glm devil freetype expat libpng gettext
+          echo "$(brew --prefix bison)/bin" >> "$GITHUB_PATH"
+
+      - name: Build TSC
+        env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+        run: |
+          set -euo pipefail
+          cd tsc
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES='${{ matrix.arch }}' \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET='${{ matrix.deployment_target }}' \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+          cmake --build build -j "$(sysctl -n hw.ncpu)"
+          cmake --install build --prefix "$PWD/stage/usr"
+
+      # A .app is a directory with a fixed shape; TSC installs a Unix tree, so
+      # the tree goes into Resources and the binary into MacOS, with a wrapper
+      # that points TSC at its data.
+      - name: Make TSC.app and a disk image
+        run: |
+          set -euo pipefail
+          version='${{ needs.version.outputs.version }}'
+          arch='${{ matrix.arch }}'
+          app="TSC.app"
+          rm -rf "$app"
+          mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+          cp -a tsc/stage/usr/. "$app/Contents/Resources/"
+          cp "$app/Contents/Resources/bin/tsc" "$app/Contents/MacOS/tsc-bin"
+
+          cat > "$app/Contents/MacOS/tsc" <<'SH'
+          #!/bin/bash
+          here="$(cd "$(dirname "$0")" && pwd)"
+          res="$here/../Resources"
+          export TSC_DATA_DIR="$res/share/tsc"
+          exec "$here/tsc-bin" "$@"
+          SH
+          chmod +x "$app/Contents/MacOS/tsc"
+
+          cat > "$app/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key><string>TSC</string>
+            <key>CFBundleDisplayName</key><string>The Secret Chronicles of Dr. M.</string>
+            <key>CFBundleIdentifier</key><string>org.secretchronicles.TSC</string>
+            <key>CFBundleVersion</key><string>${version}</string>
+            <key>CFBundleShortVersionString</key><string>${version}</string>
+            <key>CFBundleExecutable</key><string>tsc</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>LSMinimumSystemVersion</key><string>${{ matrix.deployment_target }}</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          PLIST
+
+          mkdir -p dist
+          name="TSC-${version}-macos${{ matrix.macos }}-${arch}"
+          hdiutil create -volname "TSC ${version}" -srcfolder "$app" \
+            -ov -format UDZO "dist/${name}.dmg"
+          ( cd dist && md5sum "${name}.dmg" > "${name}.md5sum" \
+                    && shasum -a 256 "${name}.dmg" > "${name}.sha256sum" )
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-${{ matrix.macos }}-${{ matrix.arch }}
+          path: |
+            dist/
+            TSC.app
+          if-no-files-found: error
+
+  # One file that runs on both CPUs, welded from the two per-CPU builds.
+  universal:
+    name: universal (arm64 + x86_64)
+    needs: [version, build]
+    if: ${{ always() }}
+    runs-on: macos-14
+    continue-on-error: true
+    timeout-minutes: 60
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mac-*
+          path: parts
+
+      - name: lipo the two builds together
+        run: |
+          set -euo pipefail
+          version='${{ needs.version.outputs.version }}'
+          arm="$(ls -d parts/mac-*-arm64/TSC.app 2>/dev/null | head -n1 || true)"
+          intel="$(ls -d parts/mac-*-x86_64/TSC.app 2>/dev/null | head -n1 || true)"
+          if [ -z "$arm" ] || [ -z "$intel" ]; then
+            echo "::warning::a universal build needs both an arm64 and an x86_64" \
+                 "build; one of them is missing, so only the per-CPU disk images" \
+                 "are published."
+            exit 0
+          fi
+
+          app="TSC.app"
+          rm -rf "$app"
+          cp -a "$arm" "$app"
+          # Every Mach-O in the bundle has to be fat, not just the main binary.
+          ( cd "$intel" && find . -type f -print ) | while read -r rel; do
+            a="$arm/$rel"; i="$intel/$rel"; o="$app/$rel"
+            if file "$a" 2>/dev/null | grep -q 'Mach-O' && \
+               file "$i" 2>/dev/null | grep -q 'Mach-O'; then
+              lipo -create "$a" "$i" -output "$o" 2>/dev/null || cp "$a" "$o"
+            fi
+          done
+
+          mkdir -p dist
+          name="TSC-${version}-macos-universal"
+          hdiutil create -volname "TSC ${version}" -srcfolder "$app" \
+            -ov -format UDZO "dist/${name}.dmg"
+          ( cd dist && md5sum "${name}.dmg" > "${name}.md5sum" \
+                    && shasum -a 256 "${name}.dmg" > "${name}.sha256sum" )
+          lipo -info "$app/Contents/MacOS/tsc-bin" || true
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-universal
+          path: dist/
+          if-no-files-found: warn
+
+  publish:
+    name: attach to the release
+    needs: [version, build, universal]
+    if: ${{ always() && inputs.publish != false }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mac-*
+          path: parts
+
+      - name: Collect the disk images
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          find parts -name '*.dmg' -o -name '*.md5sum' -o -name '*.sha256sum' \
+            | while read -r f; do cp "$f" assets/; done
+          ls -l assets 2>/dev/null || true
+          if ! ls assets/*.dmg >/dev/null 2>&1; then
+            echo "::error::No macOS disk image was produced; nothing is uploaded."
+            exit 1
+          fi
+          ls assets/*universal* >/dev/null 2>&1 || \
+            echo "::warning::no universal disk image - it needs both an arm64 and an x86_64 build"
+
+      - name: Work out which release to attach to
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='${{ inputs.tag }}'
+          [ -n "$tag" ] || tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
+          if [ -z "$tag" ]; then
+            echo "::error::No release to attach to, and no tag was given."
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Upload them
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload '${{ steps.release.outputs.tag }}' assets/* --clobber
+          echo "Uploaded to $(gh release view '${{ steps.release.outputs.tag }}' --json url --jq .url)"

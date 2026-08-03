@@ -1,0 +1,254 @@
+name: Flatpak
+
+# Build TSC as a Flatpak for every CPU Flathub's runtime exists for, attach the
+# single-file bundles to the newest TSC release, and publish a Flatpak
+# REPOSITORY that can be added with `flatpak remote-add` - answering issue #733.
+#
+# A .flatpak bundle is one file you install by hand and update by downloading
+# the next one. A repository is what makes `flatpak update` work, and it is one
+# repository for every architecture at once, which is the multi-CPU package a
+# .deb or an AppImage cannot be. Both come out of the same build here: the
+# bundles go on the GitHub release, and the repository is published as static
+# files, so it can sit on the website with no server to run.
+#
+# WHICH CPUs. org.freedesktop.Platform//24.08 is built for x86_64 and aarch64,
+# and those are the two Flathub itself ships, so those are the two here.
+# aarch64 builds on an ARM runner rather than under emulation.
+#
+# THE MANIFEST was written in 2018 against runtime 18.08 and had rotted: its
+# boost came from bintray, which was shut down in 2021, and its SFML was 2.5.1,
+# which the SFML 3 port (#729) no longer builds against. It is on 24.08 now with
+# a live boost URL and SFML 3.0.2, and its cegui and mruby modules are gone -
+# TSC compiles both itself from its submodules, so building them a second time
+# into /app was building something nothing used.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach to (empty = newest release)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the bundles to the release'
+        required: false
+        default: true
+        type: boolean
+      publish_repo:
+        description: 'Publish the Flatpak repository as a workflow artifact for the website'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tsc-flatpak-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: read the version
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: |
+          set -euo pipefail
+          version="$(bash .github/scripts/changelog-version.sh)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG says TSC is at $version"
+
+  build:
+    name: flatpak ${{ matrix.arch }}
+    needs: version
+    runs-on: ${{ matrix.runs_on }}
+    timeout-minutes: 240
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runs_on: ubuntu-24.04
+          - arch: aarch64
+            runs_on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install flatpak and flatpak-builder
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            flatpak flatpak-builder ostree zip
+          flatpak remote-add --if-not-exists --user flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y --noninteractive flathub \
+            org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+
+      # --repo writes an OSTree repository as well as building, so the bundle
+      # and the repository come from one build rather than two.
+      - name: Build
+        run: |
+          set -euo pipefail
+          flatpak-builder --user --force-clean --disable-rofiles-fuse \
+            --repo=repo --arch='${{ matrix.arch }}' \
+            build org.secretchronicles.TSC.json
+
+      - name: Make the single-file bundle
+        run: |
+          set -euo pipefail
+          version='${{ needs.version.outputs.version }}'
+          name="TSC-${version}-${{ matrix.arch }}"
+          mkdir -p dist
+          flatpak build-bundle repo "dist/${name}.flatpak" \
+            --arch='${{ matrix.arch }}' org.secretchronicles.TSC
+          ( cd dist && md5sum "${name}.flatpak" > "${name}.md5sum" \
+                    && sha256sum "${name}.flatpak" > "${name}.sha256sum" )
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-${{ matrix.arch }}
+          path: dist/
+          if-no-files-found: error
+
+      # The per-architecture half of the repository. The publish job merges the
+      # two into the one multi-architecture repository users add.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-repo-${{ matrix.arch }}
+          path: repo/
+          if-no-files-found: warn
+
+  publish:
+    name: attach to the release, and build the repository
+    needs: [version, build]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: flatpak-[0-9a-z]*
+          path: assets
+          merge-multiple: true
+
+      - name: Say what was built
+        run: |
+          set -euo pipefail
+          ls -l assets 2>/dev/null || true
+          if ! ls assets/*.flatpak >/dev/null 2>&1; then
+            echo "::error::No architecture produced a Flatpak bundle; nothing is uploaded."
+            exit 1
+          fi
+          for want in x86_64 aarch64; do
+            ls assets/*"-$want.flatpak" >/dev/null 2>&1 || \
+              echo "::warning::no Flatpak for $want - see that build job's log"
+          done
+
+      - name: Work out which release to attach to
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='${{ inputs.tag }}'
+          [ -n "$tag" ] || tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
+          if [ -z "$tag" ]; then
+            echo "::error::No release to attach to, and no tag was given."
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the bundles
+        if: ${{ inputs.publish != false }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload '${{ steps.release.outputs.tag }}' assets/* --clobber
+          echo "Uploaded to $(gh release view '${{ steps.release.outputs.tag }}' --json url --jq .url)"
+
+      # ---- the repository -------------------------------------------------
+      #
+      # One repository holding both architectures, plus the .flatpakrepo file
+      # that names it. Copy this directory to the website and TSC installs with
+      #
+      #   flatpak remote-add --if-not-exists tsc https://secretchronicles.org/flatpak/tsc.flatpakrepo
+      #   flatpak install tsc org.secretchronicles.TSC
+      #
+      # It is static files only - no server, no daemon - which is why it can be
+      # served by GitHub Pages.
+      - name: Merge the per-architecture repositories into one
+        if: ${{ inputs.publish_repo != false }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak ostree
+
+      - uses: actions/download-artifact@v4
+        if: ${{ inputs.publish_repo != false }}
+        with:
+          pattern: flatpak-repo-*
+          path: repos
+
+      - name: Build the multi-architecture repository
+        if: ${{ inputs.publish_repo != false }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          parts=(repos/flatpak-repo-*)
+          if [ ${#parts[@]} -eq 0 ]; then
+            echo "::warning::no repository halves were produced; skipping"
+            exit 0
+          fi
+          ostree init --repo=flatpak-repo --mode=archive-z2
+          for part in "${parts[@]}"; do
+            echo "Pulling $(basename "$part")"
+            ostree --repo=flatpak-repo remote add --no-gpg-verify \
+              --if-not-exists "$(basename "$part")" "file://$PWD/$part"
+            ostree --repo=flatpak-repo pull --mirror "$(basename "$part")" || true
+          done
+          flatpak build-update-repo --prune flatpak-repo
+
+          cat > flatpak-repo/tsc.flatpakrepo <<'REPO'
+          [Flatpak Repo]
+          Title=The Secret Chronicles of Dr. M.
+          Url=https://secretchronicles.org/flatpak/
+          Homepage=https://secretchronicles.org
+          Comment=TSC releases, built by the Flatpak workflow in Secretchronicles/TSC
+          Description=Flatpak repository for The Secret Chronicles of Dr. M. (TSC)
+          REPO
+
+          cat > flatpak-repo/README.txt <<'TXT'
+          Flatpak repository for The Secret Chronicles of Dr. M. (TSC).
+
+          Copy this whole directory to the website under /flatpak/, then:
+
+            flatpak remote-add --if-not-exists tsc \
+              https://secretchronicles.org/flatpak/tsc.flatpakrepo
+            flatpak install tsc org.secretchronicles.TSC
+            flatpak run org.secretchronicles.TSC
+
+          It is unsigned: there is no GPG key in this repository to sign it
+          with. Add one by setting a GPG_PRIVATE_KEY secret and passing
+          --gpg-sign to flatpak build-update-repo, and put the public key
+          beside this file.
+          TXT
+          du -sh flatpak-repo
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.publish_repo != false }}
+        with:
+          name: flatpak-repository
+          path: flatpak-repo/
+          if-no-files-found: warn
