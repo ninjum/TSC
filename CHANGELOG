@@ -83,6 +83,26 @@
 		with a live boost URL and SFML 3.0.2 now, and its cegui and
 		mruby modules are gone - TSC compiles both itself, so building
 		them into /app built something nothing used. (by Lauri Ojansivu)
+	* Misc: Every package type is built for each CPU separately, and
+		additionally as one multi-CPU package wherever the format allows
+		it. macOS ships a disk image per CPU AND the universal one -
+		the universal is the download for somebody who does not know
+		which Mac they have, the per-CPU ones are half the size for
+		somebody who does. Windows gains a combined 32/64-bit installer,
+		built when both halves exist, which is skipped with a note until
+		MSYS2 has a 32-bit SFML 3 again. Flatpak already had both: a
+		bundle per architecture and a repository serving all of them.
+		AppImage is per-CPU only and now says why - an AppImage starts
+		with a runtime binary for one architecture, so the format cannot
+		express several. (by Lauri Ojansivu)
+	* Misc: The .deb is split into tsc and tsc-data, which is what the
+		project itself did at 2.1.0. tsc/data is 289 MB of levels,
+		worlds, music and graphics and is byte-identical on every CPU;
+		tsc/src is 3.7 MB. One all-in-one package per architecture meant
+		shipping that 289 MB twelve times over, and an apt repository
+		carrying it twelve times. tsc-data is Architecture: all, built
+		once, and every tsc package depends on it at the same version.
+		(by Lauri Ojansivu)
 	* Misc: Added GitHub workflow release-all.yml, which asks which
 		release to build for and runs all five package workflows plus
 		Repos against that one release, so a release is the product of

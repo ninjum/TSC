@@ -26,12 +26,31 @@
 #   TSC_ARCH      Debian architecture, e.g. amd64      (default: dpkg's own)
 #   TSC_OUT       where the .deb is written            (default: ./dist)
 #
-# Produces, in $TSC_OUT, named exactly as the v2.2.0-beta1 release named them -
-# the checksum files drop the .deb from their own name but still refer to the
-# .deb inside, which is what makes `md5sum -c` work next to the package:
-#   TSC-<version>-<distro>-<arch>.deb
+# TWO PACKAGES, because 99% of TSC is the same on every CPU. tsc/data is 289 MB
+# of levels, worlds, music, graphics and scripting docs; tsc/src is 3.7 MB. Six
+# architectures of one all-in-one package means shipping that 289 MB six times,
+# and a repository carrying it six times over.
+#
+#   tsc       Architecture: <arch>   the binary and what is genuinely per-CPU
+#   tsc-data  Architecture: all      the game's data, one package for every CPU
+#
+# This is what the project itself did at 2.1.0 - the alpha packages on the
+# download page are tsc_<ver>_amd64.deb beside tsc-data_<ver>_all.deb - and it is
+# what Debian expects of a game this shape. `tsc` depends on `tsc-data` of the
+# same version, so installing the one you want pulls the other in.
+#
+# TSC_DATA_ONLY=1 builds only the data package. The workflow uses it to build
+# that package ONCE rather than six identical times.
+#
+# Produces, in $TSC_OUT, named as the v2.2.0-beta1 release named things - the
+# checksum files drop the .deb from their own name but still refer to the .deb
+# inside, which is what makes `md5sum -c` work next to the package:
+#   TSC-<version>-<distro>-<arch>.deb        (tsc, per CPU)
 #   TSC-<version>-<distro>-<arch>.md5sum
 #   TSC-<version>-<distro>-<arch>.sha256sum
+#   TSC-<version>-data-all.deb               (tsc-data, every CPU)
+#   TSC-<version>-data-all.md5sum
+#   TSC-<version>-data-all.sha256sum
 
 set -euo pipefail
 
@@ -42,6 +61,9 @@ distro="${TSC_DISTRO:?TSC_DISTRO is required}"
 stage="${TSC_STAGE:-$repo_root/stage}"
 arch="${TSC_ARCH:-$(dpkg --print-architecture)}"
 out="${TSC_OUT:-$repo_root/dist}"
+# The prefix TSC was staged under - the same default build-tsc.sh uses. The data
+# lives at <prefix>/share/tsc, which is what the split below is drawn on.
+prefix="${TSC_PREFIX:-/usr}"
 
 if [ ! -d "$stage" ]; then
     echo "build-deb.sh: no staged build at $stage - run build-tsc.sh first" >&2
@@ -49,19 +71,79 @@ if [ ! -d "$stage" ]; then
 fi
 
 # dpkg-deb wants the package tree named after the package, and the DEBIAN
-# directory beside the files it installs. Build it next to the stage rather
-# than in it, so the stage stays exactly what `make install` produced and can
-# be packaged a second way (the AppImage) from the same bytes.
-pkgdir="$repo_root/deb/tsc_${version}"
+# directory beside the files it installs. Build them next to the stage rather
+# than in it, so the stage stays exactly what `make install` produced and can be
+# packaged a second way (the AppImage) from the same bytes.
+#
+# The split is by path: everything under <prefix>/share/tsc is the game's data
+# and is the same on every CPU; everything else - the binary, the man page, the
+# desktop file, the icons - goes with the architecture. The icons and desktop
+# file are arch-independent too, but they are kilobytes and they are what makes
+# the package show up in a menu, so they stay with the part you install.
 rm -rf "$repo_root/deb"
-mkdir -p "$pkgdir"
-cp -a "$stage"/. "$pkgdir"/
-mkdir -p "$pkgdir/DEBIAN"
 
-# The changelog IS the repository's CHANGELOG - the same file the version was
-# read from, and the same thing beta1's packages carried.
-cp "$repo_root/CHANGELOG" "$pkgdir/DEBIAN/CHANGELOG"
+datadir_rel="${prefix#/}/share/tsc"
+pkgdir="$repo_root/deb/tsc_${version}"
+datadir="$repo_root/deb/tsc-data_${version}"
 
+mkdir -p "$pkgdir" "$datadir"
+
+if [ "${TSC_DATA_ONLY:-0}" != "1" ]; then
+    cp -a "$stage"/. "$pkgdir"/
+    rm -rf "${pkgdir:?}/${datadir_rel}"
+    mkdir -p "$pkgdir/DEBIAN"
+    cp "$repo_root/CHANGELOG" "$pkgdir/DEBIAN/CHANGELOG"
+fi
+
+mkdir -p "$datadir/$(dirname "$datadir_rel")" "$datadir/DEBIAN"
+if [ -d "$stage/$datadir_rel" ]; then
+    cp -a "$stage/$datadir_rel" "$datadir/$datadir_rel"
+else
+    echo "build-deb.sh: no $datadir_rel in the staged tree - the data package" >&2
+    echo "  would be empty. Did build-tsc.sh install with this prefix?" >&2
+    exit 1
+fi
+cp "$repo_root/CHANGELOG" "$datadir/DEBIAN/CHANGELOG"
+
+mkdir -p "$out"
+
+# ── The data package: Architecture: all, the same file on every CPU ──────────
+data_installed_size="$(du -ks --exclude=DEBIAN "$datadir" | cut -f1)"
+{
+    echo "Package: tsc-data"
+    echo "Version: $version"
+    echo "Architecture: all"
+    echo "Maintainer: Lauri Ojansivu <x@xet7.org>"
+    echo "Installed-Size: $data_installed_size"
+    echo "Section: games"
+    echo "Priority: optional"
+    echo "Homepage: https://secretchronicles.org"
+    echo "Description: Data files for TSC - Jump and Run game like Super Mario World"
+    echo " The levels, worlds, music, sounds, graphics and scripting documentation"
+    echo " for The Secret Chronicles of Dr. M. (TSC)."
+    echo " ."
+    echo " None of it depends on the CPU, so it is one package for every"
+    echo " architecture rather than the same 280 MB repeated in each of them."
+    echo " ."
+    echo " Install the tsc package; this comes with it."
+} > "$datadir/DEBIAN/control"
+
+data_name="TSC-${version}-data-all"
+dpkg-deb -Zxz --build "$datadir" "$out/${data_name}.deb"
+(
+    cd "$out"
+    md5sum    "${data_name}.deb" > "${data_name}.md5sum"
+    sha256sum "${data_name}.deb" > "${data_name}.sha256sum"
+)
+echo "Built $out/${data_name}.deb"
+ls -l "$out/${data_name}.deb"
+
+if [ "${TSC_DATA_ONLY:-0}" = "1" ]; then
+    echo "TSC_DATA_ONLY=1: the architecture package was not built."
+    exit 0
+fi
+
+# ── The architecture package: the binary and what goes with it ───────────────
 installed_size="$(du -ks --exclude=DEBIAN "$pkgdir" | cut -f1)"
 
 # dpkg-shlibdeps needs a control file to exist before it will run, and it
@@ -84,7 +166,7 @@ if command -v dpkg-shlibdeps >/dev/null 2>&1; then
         cd "$repo_root/deb"
         # -O prints the field instead of writing substvars; the binary is the
         # only ELF object in the package.
-        dpkg-shlibdeps -O --ignore-missing-info "tsc_${version}/usr/bin/tsc" \
+        dpkg-shlibdeps -O --ignore-missing-info "tsc_${version}/${prefix#/}/bin/tsc" \
             2>/dev/null || true
     ) > "$repo_root/deb/shlibdeps.txt" || true
     depends="$(sed -n 's/^shlibs:Depends=//p' "$repo_root/deb/shlibdeps.txt" | head -n1)"
@@ -92,8 +174,16 @@ fi
 
 if [ -z "$depends" ]; then
     echo "build-deb.sh: dpkg-shlibdeps produced nothing; the package will have" >&2
-    echo "  no Depends line. It will still install, but apt will not pull the" >&2
+    echo "  no library Depends. It will still install, but apt will not pull the" >&2
     echo "  libraries in for you." >&2
+fi
+
+# The data package is a hard dependency, pinned to this exact version: a tsc
+# binary with another version's levels is not a working game.
+if [ -n "$depends" ]; then
+    depends="tsc-data (= ${version}), ${depends}"
+else
+    depends="tsc-data (= ${version})"
 fi
 
 {
@@ -103,7 +193,7 @@ fi
     echo "Maintainer: Lauri Ojansivu <x@xet7.org>"
     echo "Original-Maintainer: Muammar El Khatib <muammar@debian.org>"
     echo "Installed-Size: $installed_size"
-    [ -n "$depends" ] && echo "Depends: $depends"
+    echo "Depends: $depends"
     echo "Section: games"
     echo "Priority: optional"
     echo "Homepage: https://secretchronicles.org"
@@ -121,10 +211,11 @@ fi
     echo " notably we are working towards our own type of game rather than being solely"
     echo " inspired by one specific existing game."
     echo " ."
+    echo " The game's data is in the tsc-data package, which this one depends on."
+    echo " ."
     echo " Built for $distro on $arch from commit $(git -C "$repo_root" rev-parse --short HEAD)."
 } > "$pkgdir/DEBIAN/control"
 
-mkdir -p "$out"
 name="TSC-${version}-${distro}-${arch}"
 
 # -Zxz because the default compressor changed between the distributions this

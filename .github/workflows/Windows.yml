@@ -30,6 +30,15 @@ name: Windows
 # The installers are made by CPack's NSIS generator, which tsc/CMakeLists.txt
 # already configures - installer icon, desktop shortcut, the lot - so this runs
 # it rather than describing the packaging a second time.
+#
+# EACH CPU SEPARATELY, AND A COMBINED INSTALLER WHEN BOTH EXIST. NSIS can carry
+# both builds in one .exe and pick at install time, which is the Windows
+# equivalent of a macOS universal binary - one download for somebody who does not
+# know which Windows they have. It needs both halves, so it is built by a job
+# after them and is skipped, with a line saying so, when 32-bit did not build -
+# which today is every time, for the MSYS2 reason above. It is written now so
+# that the day a 32-bit SFML 3 exists, the combined installer appears without
+# anybody having to remember this.
 
 on:
   workflow_call:
@@ -172,9 +181,79 @@ jobs:
           path: dist/
           if-no-files-found: error
 
+  # One installer carrying both CPUs. Only possible when both built.
+  combined:
+    name: combined 32/64-bit installer
+    needs: [version, build]
+    if: ${{ always() }}
+    runs-on: windows-2022
+    continue-on-error: true
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: windows-*
+          path: parts
+
+      - name: Weld them into one installer, if both are there
+        shell: bash
+        run: |
+          set -euo pipefail
+          version='${{ needs.version.outputs.version }}'
+          win64="$(ls parts/windows-win64/TSC-${version}-win64.exe 2>/dev/null | head -n1 || true)"
+          win32="$(ls parts/windows-win32/TSC-${version}-win32.exe 2>/dev/null | head -n1 || true)"
+
+          if [ -z "$win64" ] || [ -z "$win32" ]; then
+            echo "::warning::A combined installer needs both a 32-bit and a 64-bit build, and $( [ -z "$win32" ] && echo 32 || echo 64 )-bit is missing. MSYS2 has had no 32-bit SFML 3 since it ended 32-bit support in May 2024, so this is expected until that changes; the per-CPU installers are published on their own."
+            exit 0
+          fi
+
+          # An NSIS script that carries both and picks by RunningX64. The two
+          # CPack installers are run silently into the chosen directory, which
+          # keeps every shortcut, icon and uninstaller CPack already sets up
+          # rather than describing all of it a second time here.
+          mkdir -p combined dist
+          cp "$win64" combined/tsc-win64.exe
+          cp "$win32" combined/tsc-win32.exe
+          cat > combined/tsc.nsi <<NSI
+          !include "x64.nsh"
+          Name "The Secret Chronicles of Dr. M. ${version}"
+          OutFile "..\\dist\\TSC-${version}-windows.exe"
+          RequestExecutionLevel admin
+          SilentInstall normal
+          Page instfiles
+          Section
+            SetOutPath "\$TEMP\\tsc-install"
+            \${If} \${RunningX64}
+              File "tsc-win64.exe"
+              ExecWait '"\$TEMP\\tsc-install\\tsc-win64.exe" /S'
+            \${Else}
+              File "tsc-win32.exe"
+              ExecWait '"\$TEMP\\tsc-install\\tsc-win32.exe" /S'
+            \${EndIf}
+            RMDir /r "\$TEMP\\tsc-install"
+          SectionEnd
+          NSI
+
+          "/c/Program Files (x86)/NSIS/makensis.exe" combined/tsc.nsi
+
+          name="TSC-${version}-windows"
+          ( cd dist
+            md5sum    "${name}.exe" > "${name}.md5sum"
+            sha256sum "${name}.exe" > "${name}.sha256sum" )
+          ls -l dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-combined
+          path: dist/
+          if-no-files-found: warn
+
   publish:
     name: attach to the release
-    needs: [version, build]
+    needs: [version, build, combined]
     if: ${{ always() && inputs.publish != false }}
     runs-on: ubuntu-24.04
     steps:

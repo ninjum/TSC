@@ -22,17 +22,20 @@ name: Mac
 # built for the runner's OS, so going further back than that would mean
 # building every dependency from source.
 #
-# ONLY THE UNIVERSAL DISK IMAGE IS PUBLISHED. A single file holding both CPUs
-# is the macOS convention, so shipping an Intel image and an Apple silicon image
-# beside it would be three downloads where one will do, and three chances for
-# somebody to take the wrong one. The per-CPU builds still happen - they have to,
-# because a universal build cannot be made in one job: CMAKE_OSX_ARCHITECTURES=
+# EVERY CPU SEPARATELY, AND THE UNIVERSAL IMAGE AS WELL. Each macOS version and
+# CPU gets its own disk image, and the two CPUs are also welded into one
+# universal image that runs on both. Both are worth having and they answer
+# different questions: the universal one is the download for somebody who does
+# not know or care which Mac they have, and the per-CPU ones are half the size
+# and are what you want when you do know - and are the only thing left if one
+# architecture fails to build.
+#
+# The universal image cannot be made in one job: CMAKE_OSX_ARCHITECTURES=
 # "x86_64;arm64" needs every dependency to be universal too, and Homebrew's are
-# not, each being built for the machine it was installed on. So the two are built
-# and `lipo` welds them together, which is what lipo is for, and only the weld is
-# uploaded. If one architecture fails there is nothing to weld and the release
-# gets no macOS image, which is the honest outcome: a disk image called universal
-# that only runs on half the Macs would be worse than none.
+# not - each is built for the machine it was installed on. So the per-CPU builds
+# come first and `lipo` welds them together afterwards, which is what lipo is
+# for. If one architecture fails there is nothing to weld, and the per-CPU images
+# that did build are published on their own.
 
 on:
   workflow_call:
@@ -135,7 +138,7 @@ jobs:
       # A .app is a directory with a fixed shape; TSC installs a Unix tree, so
       # the tree goes into Resources and the binary into MacOS, with a wrapper
       # that points TSC at its data.
-      - name: Make TSC.app
+      - name: Make TSC.app and its disk image
         run: |
           set -euo pipefail
           version='${{ needs.version.outputs.version }}'
@@ -174,16 +177,28 @@ jobs:
 
           ls -l "$app/Contents/MacOS"
 
-          # Tar it, do not hand the directory to upload-artifact: an artifact
-          # is a zip, and a zip does not carry the executable bit. The .app
-          # would arrive with its wrapper script not executable and the bundle
-          # would not start.
+          # This CPU's own disk image, published beside the universal one.
+          mkdir -p dist
+          name="TSC-${version}-macos${{ matrix.macos }}-${{ matrix.arch }}"
+          hdiutil create -volname "TSC ${version}" -srcfolder "$app" \
+            -ov -format UDZO "dist/${name}.dmg"
+          ( cd dist
+            md5sum "${name}.dmg" > "${name}.md5sum"
+            shasum -a 256 "${name}.dmg" > "${name}.sha256sum" )
+          ls -l dist
+
+          # Tar the bundle for the universal job. NOT the directory straight to
+          # upload-artifact: an artifact is a zip, and a zip does not carry the
+          # executable bit - the .app would arrive with its wrapper script not
+          # executable and would not start.
           tar czf "TSC-app-${{ matrix.arch }}.tar.gz" "$app"
 
       - uses: actions/upload-artifact@v4
         with:
           name: mac-${{ matrix.macos }}-${{ matrix.arch }}
-          path: TSC-app-${{ matrix.arch }}.tar.gz
+          path: |
+            dist/
+            TSC-app-${{ matrix.arch }}.tar.gz
           if-no-files-found: error
 
   # One file that runs on both CPUs, welded from the two per-CPU builds.
@@ -192,6 +207,9 @@ jobs:
     needs: [version, build]
     if: ${{ always() }}
     runs-on: macos-14
+    # Best effort: it needs BOTH CPUs, and the per-CPU images are published
+    # whether or not the weld happens.
+    continue-on-error: true
     timeout-minutes: 60
     steps:
       - uses: actions/download-artifact@v4
@@ -213,11 +231,10 @@ jobs:
           arm="$(ls -d unpacked/arm64/TSC.app 2>/dev/null || true)"
           intel="$(ls -d unpacked/x86_64/TSC.app 2>/dev/null || true)"
           if [ -z "$arm" ] || [ -z "$intel" ]; then
-            echo "::error::a universal disk image needs both an arm64 and an" \
-                 "x86_64 build, and one of them is missing. See the build jobs'" \
-                 "logs. Nothing is published rather than a disk image called" \
-                 "universal that runs on half the Macs."
-            exit 1
+            echo "::warning::a universal disk image needs both an arm64 and an" \
+                 "x86_64 build, and one of them is missing - see the build jobs'" \
+                 "logs. The per-CPU disk images are published on their own."
+            exit 0
           fi
 
           app="TSC.app"
@@ -245,7 +262,7 @@ jobs:
         with:
           name: mac-universal
           path: dist/
-          if-no-files-found: error
+          if-no-files-found: warn
 
   publish:
     name: attach to the release
@@ -257,10 +274,10 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: mac-universal
+          pattern: mac-*
           path: parts
 
-      - name: Collect the disk image
+      - name: Collect the disk images
         run: |
           set -euo pipefail
           mkdir -p assets
@@ -268,9 +285,11 @@ jobs:
             | while read -r f; do cp "$f" assets/; done
           ls -l assets 2>/dev/null || true
           if ! ls assets/*.dmg >/dev/null 2>&1; then
-            echo "::error::No universal macOS disk image was produced; nothing is uploaded."
+            echo "::error::No macOS disk image was produced at all; nothing is uploaded."
             exit 1
           fi
+          ls assets/*universal* >/dev/null 2>&1 || \
+            echo "::warning::no universal disk image - it needs both an arm64 and an x86_64 build; the per-CPU ones are published
 
       - name: Work out which release to attach to
         id: release

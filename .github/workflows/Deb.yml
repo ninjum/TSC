@@ -22,6 +22,17 @@ name: Deb
 # Anyone on an older distribution is not left out: the AppImage from
 # AppImage.yml carries its own SFML and runs on bookworm and newer.
 #
+# TWO PACKAGES PER RELEASE, not one per architecture. tsc/data is 289 MB of
+# levels, worlds, music and graphics and is identical on every CPU; tsc/src is
+# 3.7 MB. So the .deb is split the way the project itself split it at 2.1.0:
+#
+#   tsc       Architecture: <arch>   the binary, one per CPU and distribution
+#   tsc-data  Architecture: all      the data, ONE package for all of them
+#
+# The data package is built once, in its own job, rather than six identical
+# times. `tsc` depends on `tsc-data (= <version>)`, so installing either pulls
+# the other.
+#
 # WHICH ARCHITECTURES. amd64 and arm64 build on runners of their own CPU. The
 # rest have no runner, so they build in an emulated container, which is far
 # slower - hours, not minutes - and is why they are marked continue-on-error:
@@ -223,9 +234,49 @@ jobs:
           path: build-deb/
           if-no-files-found: warn
 
+  # The Architecture: all data package - built ONCE, on the fastest runner,
+  # because it is the same file whatever CPU it is installed on. It needs a full
+  # build to exist: the data is what `make install` stages, and the scripting
+  # documentation in it is generated during that build.
+  data:
+    name: tsc-data (all architectures)
+    needs: version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build TSC and package only its data
+        run: |
+          set -euo pipefail
+          docker run --rm --platform linux/amd64 \
+            -v "$PWD":/src -w /src \
+            -e TSC_VERSION='${{ needs.version.outputs.version }}' \
+            -e TSC_DISTRO=all \
+            -e TSC_ARCH=all \
+            -e TSC_DATA_ONLY=1 \
+            -e DEBIAN_FRONTEND=noninteractive \
+            debian:forky \
+            bash -c '
+              set -euo pipefail
+              bash .github/scripts/install-build-dependencies.sh \
+                dpkg-dev fakeroot file xz-utils
+              bash .github/scripts/build-tsc.sh
+              bash .github/scripts/build-deb.sh
+            '
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb-data-all
+          path: dist/
+          if-no-files-found: error
+
   publish:
     name: attach to the release
-    needs: [version, build]
+    needs: [version, build, data]
     # Whatever finished gets published, so this runs even when an emulated
     # build did not.
     if: ${{ always() && inputs.publish != false }}
@@ -291,6 +342,8 @@ jobs:
           fi
           echo "Packages built:"
           for b in $built; do echo "  $b"; done
+          ls assets/*-data-all.deb >/dev/null 2>&1 || \
+            echo "::warning::no tsc-data package - the per-architecture packages depend on it, so they will not install without it. See the data job's log."
           for want in resolute-amd64 resolute-arm64 resolute-armhf resolute-ppc64el \
                       resolute-s390x resolute-riscv64 forky-amd64 forky-arm64 \
                       forky-armhf forky-ppc64el forky-s390x forky-riscv64; do

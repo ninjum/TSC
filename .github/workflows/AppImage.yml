@@ -30,6 +30,14 @@ name: AppImage
 # Deb.yml instead. armhf has no runner of its own and is emulated, so it is
 # marked continue-on-error: a slow emulated build must not hold up the two that
 # run on real hardware.
+#
+# ONE PER CPU, AND THERE IS NO MULTI-CPU ONE. An AppImage begins with a runtime
+# binary for one architecture - that is what the kernel executes when the file is
+# run - so a single AppImage holding several CPUs is not a thing the format can
+# express, the way a macOS universal binary or a Flatpak repository can. The
+# multi-CPU answers TSC does have are the Flatpak repository from Flatpak.yml,
+# which serves every architecture from one remote, and the apt repository from
+# Repos.yml, which does the same for the .deb packages.
 
 on:
   workflow_call:
