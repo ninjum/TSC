@@ -65,6 +65,16 @@ out="${TSC_OUT:-$repo_root/dist}"
 # lives at <prefix>/share/tsc, which is what the split below is drawn on.
 prefix="${TSC_PREFIX:-/usr}"
 
+# git refuses to touch a repository owned by somebody else - "detected dubious
+# ownership in repository at '/src'" - and inside the build container that is
+# every command, because the container runs as root while the checkout on the
+# host belongs to the runner user. The check is for a shared machine where
+# another user's repo might run hooks against you; here the "other user" is the
+# same person one UID away, and the repository is the one this script was
+# handed. Mark it safe.
+git config --global --add safe.directory "$repo_root" 2>/dev/null || true
+git config --global --add safe.directory '*' 2>/dev/null || true
+
 if [ ! -d "$stage" ]; then
     echo "build-deb.sh: no staged build at $stage - run build-tsc.sh first" >&2
     exit 1

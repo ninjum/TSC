@@ -15,7 +15,16 @@
 ########################################
 # Configuring CMake
 
-cmake_minimum_required(VERSION 3.0)
+# 3.5, not 3.0: CMake 4 REMOVED compatibility with anything below 3.5, so a
+# cmake_minimum_required of 3.0 is a hard error there - "Compatibility with
+# CMake < 3.5 has been removed from CMake" - and every Windows, macOS and Ubuntu
+# 26.04 build stopped on this line before compiling anything.
+#
+# 3.5 and not higher on purpose. The number decides which policies default to
+# NEW, so raising it further changes behaviour rather than only satisfying the
+# parser, and this is exactly the value the project already forces on CEGUI
+# through -DCMAKE_POLICY_VERSION_MINIMUM=3.5 in ProvideCEGUI.cmake.
+cmake_minimum_required(VERSION 3.5)
 project(TSC C CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")

@@ -166,7 +166,13 @@ jobs:
           echo "### $TAG" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          assets="$(gh release view "$TAG" --json assets --jq '.assets[].name' | sort)"
+          # --repo, because this job has no checkout: gh works out which
+          # repository to talk to from the git remote, and without one it fails
+          # with "failed to run git: fatal: not a git repository". Naming the
+          # repository is lighter than checking the whole thing out to run one
+          # query.
+          assets="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --json assets --jq '.assets[].name' | sort)"
           if [ -z "$assets" ]; then
             echo "::error::$TAG has no assets at all - every build failed. Each job's log says why."
             echo "No assets. Every build failed." >> "$GITHUB_STEP_SUMMARY"

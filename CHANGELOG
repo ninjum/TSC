@@ -83,6 +83,40 @@
 		with a live boost URL and SFML 3.0.2 now, and its cegui and
 		mruby modules are gone - TSC compiles both itself, so building
 		them into /app built something nothing used. (by Lauri Ojansivu)
+	* Fix: The first release-all run failed on every platform, on five
+		separate causes, none of which had reached a compiler. cmake
+		stopped at the first line of tsc/CMakeLists.txt on Windows,
+		macOS and Ubuntu 26.04: CMake 4 removed compatibility with
+		cmake_minimum_required below 3.5, and it asked for 3.0. It asks
+		for 3.5 now, the same value ProvideCEGUI.cmake already forces on
+		CEGUI. (by Lauri Ojansivu)
+	* Fix: The container builds - every .deb and every AppImage - died
+		on "detected dubious ownership in repository at '/src'". The
+		container runs as root and the checkout belongs to the runner
+		user, so git refused every command, including the submodule
+		update that fetches CEGUI and mruby. The mounted repository is
+		marked safe. (by Lauri Ojansivu)
+	* Fix: flatpak-builder rejected the manifest outright: "No slashes
+		allowed in dest-filename, use dest property". The COPYING source
+		had dest-filename "tsc/COPYING", which is a path and not a file
+		name; it is dest "tsc" plus dest-filename "COPYING" now.
+		(by Lauri Ojansivu)
+	* Fix: The macOS runner labels had moved. macos-13, which this
+		used for the Intel build, has been retired outright, and
+		macos-14 is deprecated. Intel is macos-15-intel now, and
+		macos-15 on its own is Apple silicon, so the matrix is macos-15
+		and macos-26 for arm64 and macos-15-intel for x86_64 - which
+		keeps the universal disk image possible. (by Lauri Ojansivu)
+	* Fix: The repositories job stopped with a bare exit code 2 on a
+		release with no packages yet. Counting them with `ls *.deb |
+		wc -l` under set -e and pipefail makes the glob matching nothing
+		a fatal error, and an empty release is exactly the case that
+		loop exists to report. It counts with nullglob and an array, and
+		says which package type is missing. (by Lauri Ojansivu)
+	* Fix: The run summary could not read the release: it has no
+		checkout, and gh works out the repository from the git remote,
+		so it failed with "not a git repository". It names the
+		repository explicitly. (by Lauri Ojansivu)
 	* Misc: Every package type is built for each CPU separately, and
 		additionally as one multi-CPU package wherever the format allows
 		it. macOS ships a disk image per CPU AND the universal one -

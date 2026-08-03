@@ -28,6 +28,16 @@ stage="${TSC_STAGE:-$repo_root/stage}"
 prefix="${TSC_PREFIX:-/usr}"
 jobs="${TSC_JOBS:-$(nproc)}"
 
+# git refuses to touch a repository owned by somebody else - "detected dubious
+# ownership in repository at '/src'" - and inside the build container that is
+# every command, because the container runs as root while the checkout on the
+# host belongs to the runner user. The check is for a shared machine where
+# another user's repo might run hooks against you; here the "other user" is the
+# same person one UID away, and the repository is the one this script was
+# handed. Mark it safe.
+git config --global --add safe.directory "$repo_root" 2>/dev/null || true
+git config --global --add safe.directory '*' 2>/dev/null || true
+
 cd "$repo_root"
 
 # CEGUI, mruby and pod-parser are submodules and TSC compiles all three itself.

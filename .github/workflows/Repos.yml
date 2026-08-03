@@ -88,11 +88,19 @@ jobs:
           gh release download "$tag" --pattern '*.AppImage' --clobber || true
           gh release download "$tag" --pattern '*.flatpak'  --clobber || true
           ls -lh
+          # nullglob and a shell array, not `ls | wc -l`. Under `set -e` with
+          # pipefail, `ls *.deb` on a release that has no .deb exits 2, the
+          # pipeline inherits it, the command substitution fails and the whole
+          # step dies - which is what happened: "no assets to download", then
+          # exit code 2, with nothing said about which package type was missing.
+          # An empty release is exactly the case this loop exists to report.
+          shopt -s nullglob
           for kind in deb AppImage flatpak; do
-            n=$(ls -1 *."$kind" 2>/dev/null | wc -l)
-            echo "$kind: $n"
-            [ "$n" -gt 0 ] || echo "::warning::$tag has no .$kind - that repository will be empty"
+            files=( *."$kind" )
+            echo "$kind: ${#files[@]}"
+            [ "${#files[@]}" -gt 0 ] || echo "::warning::$tag has no .$kind - that repository will be empty"
           done
+          shopt -u nullglob
 
       - name: Install the tools
         run: |

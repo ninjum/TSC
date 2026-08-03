@@ -10,11 +10,23 @@ name: Mac
 # already (CMakeLists.txt handles APPLE), so this is packaging, not porting.
 #
 # WHICH macOS VERSIONS. GitHub's runners are the constraint and they are also
-# the only macOS this can be built on:
+# the only macOS this can be built on. The labels moved under this workflow:
 #
-#   macos-15  arm64   Apple silicon
-#   macos-14  arm64   Apple silicon
-#   macos-13  x86_64  Intel
+#   macos-15        arm64   Apple silicon
+#   macos-26        arm64   Apple silicon
+#   macos-15-intel  x86_64  Intel
+#
+# macos-13 is GONE - actions/runner-images no longer lists it at all, and it was
+# the label this used for Intel. macos-14 is listed as DEPRECATED. Intel did not
+# disappear with them: `macos-15-intel` is the label now (`macos-15-large` is
+# the same machine under its older name), and `macos-15` on its own is arm64 -
+# the run that led to this shows it, "Image: macos-15-arm64" with Homebrew at
+# /opt/homebrew.
+#
+# So the Intel build, and with it the universal image, is still possible; it
+# just needed the new label. It is continue-on-error like the rest, so if that
+# label turns out to be unavailable here the arm64 images still publish and the
+# universal job says why it made nothing.
 #
 # CMAKE_OSX_DEPLOYMENT_TARGET is set two versions below the runner, which is
 # what makes the result run on older macOS than it was built on - the same
@@ -97,14 +109,14 @@ jobs:
             macos: '15'
             arch: arm64
             deployment_target: '13.0'
-          - runs_on: macos-14
-            macos: '14'
+          - runs_on: macos-26
+            macos: '26'
             arch: arm64
-            deployment_target: '12.0'
-          - runs_on: macos-13
-            macos: '13'
+            deployment_target: '14.0'
+          - runs_on: macos-15-intel
+            macos: '15'
             arch: x86_64
-            deployment_target: '11.0'
+            deployment_target: '13.0'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -231,9 +243,12 @@ jobs:
           arm="$(ls -d unpacked/arm64/TSC.app 2>/dev/null || true)"
           intel="$(ls -d unpacked/x86_64/TSC.app 2>/dev/null || true)"
           if [ -z "$arm" ] || [ -z "$intel" ]; then
-            echo "::warning::a universal disk image needs both an arm64 and an" \
+            echo "::warning::A universal disk image needs both an arm64 and an" \
                  "x86_64 build, and one of them is missing - see the build jobs'" \
-                 "logs. The per-CPU disk images are published on their own."
+                 "logs. If the x86_64 one is the one missing, check that the" \
+                 "macos-15-intel label is available here: macos-13, the label" \
+                 "this used to use for Intel, has been retired. The arm64 disk" \
+                 "images are published on their own."
             exit 0
           fi
 
