@@ -1,0 +1,203 @@
+name: Release all
+
+# One run that builds every package TSC ships and puts them all on one release.
+#
+# The six build workflows can each be run on their own - that is how you rebuild
+# a single platform after fixing it - and this runs all of them against the SAME
+# release, so a release is the product of one run rather than of six that were
+# started on different days and may not have been the same commit.
+#
+# THE RELEASE IS ASKED FOR, and made if it is not there. `release` is the tag,
+# e.g. v2.2.0-beta2; leave it empty and it is the version CHANGELOG names, which
+# is where the version lives anyway. Every one of these workflows creates the
+# release if it does not exist, so this can be pointed at a version that has
+# never been released - that used to be a chicken-and-egg problem, because the
+# .deb, Windows, Mac and Flatpak workflows attached to "the newest release" and
+# failed outright when there was none.
+#
+# THE NOTES COME FROM CHANGELOG. If there is an entry for that version - a
+# `* Version 2.2.0-beta2.` line and the items under it - it becomes the release
+# notes, so a release is described by the file the project already keeps rather
+# than by something typed into a form and lost. A version with no entry still
+# gets a release, with a line saying where the description should have come from.
+#
+# THE ORDER. The five package builds run in parallel; there is nothing between
+# them and they take very different lengths of time - Windows about half an hour,
+# the emulated .deb architectures several. Repos runs LAST and alone, because it
+# builds the apt, AppImage and Flatpak repositories out of the files the others
+# attached: run it alongside them and it would package whatever happened to have
+# finished.
+#
+# needs + always(): a platform that fails must not stop the rest from being
+# published, or one emulated build running out of clock would cost the release
+# everything else. Each workflow already warns by name about what it did not
+# produce.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release to build for, e.g. v2.2.0-beta2 (empty = the version CHANGELOG names)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the binaries to the release'
+        required: false
+        default: true
+        type: boolean
+      build_repos:
+        description: 'Also build the apt/AppImage/Flatpak repositories afterwards'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+# One run per release. A second would upload over the first's assets half way
+# through, and the two would be indistinguishable on the release page.
+concurrency:
+  group: tsc-release-all-${{ inputs.release || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # What the release is called, and that it exists, decided ONCE here rather
+  # than six times in parallel - six jobs racing to create the same release is
+  # six chances for one to lose the race and fail on "already exists".
+  release:
+    name: the release
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.ensure.outputs.tag }}
+      version: ${{ steps.ensure.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: ensure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='${{ inputs.release }}'
+          if [ -z "$tag" ]; then
+            tag="v$(bash .github/scripts/changelog-version.sh)"
+            echo "No release given; CHANGELOG says $tag."
+          fi
+          bash .github/scripts/ensure-release.sh "$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          echo "Building everything for $tag."
+
+  deb:
+    name: .deb packages
+    needs: release
+    uses: ./.github/workflows/Deb.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+      publish: ${{ inputs.publish != false }}
+
+  appimage:
+    name: AppImages
+    needs: release
+    uses: ./.github/workflows/AppImage.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+      publish: ${{ inputs.publish != false }}
+
+  flatpak:
+    name: Flatpaks
+    needs: release
+    uses: ./.github/workflows/Flatpak.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+      publish: ${{ inputs.publish != false }}
+
+  windows:
+    name: Windows installers
+    needs: release
+    uses: ./.github/workflows/Windows.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+      publish: ${{ inputs.publish != false }}
+
+  mac:
+    name: macOS disk image
+    needs: release
+    uses: ./.github/workflows/Mac.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+      publish: ${{ inputs.publish != false }}
+
+  # Last, and only after the packages are on the release: this builds the
+  # repositories OUT OF them.
+  repos:
+    name: package repositories
+    needs: [release, deb, appimage, flatpak, windows, mac]
+    if: ${{ always() && inputs.build_repos != false }}
+    uses: ./.github/workflows/Repos.yml
+    permissions:
+      contents: write
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+
+  summary:
+    name: what ended up on the release
+    needs: [release, deb, appimage, flatpak, windows, mac, repos]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: List the release, and say what is missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+          V: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          echo "### $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          assets="$(gh release view "$TAG" --json assets --jq '.assets[].name' | sort)"
+          if [ -z "$assets" ]; then
+            echo "::error::$TAG has no assets at all - every build failed. Each job's log says why."
+            echo "No assets. Every build failed." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' "$assets" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Which KINDS of package are there. A release missing every .deb is a
+          # different thing from one missing a single architecture, and the
+          # summary should say which happened without anyone opening six logs.
+          missing=""
+          for kind in ".deb:Debian and Ubuntu packages" \
+                      ".AppImage:AppImages" \
+                      ".flatpak:Flatpaks" \
+                      ".exe:Windows installers" \
+                      ".dmg:macOS disk image"; do
+            ext="${kind%%:*}"; what="${kind#*:}"
+            if printf '%s\n' "$assets" | grep -q -- "${ext}$"; then
+              n="$(printf '%s\n' "$assets" | grep -c -- "${ext}$")"
+              echo "- $what: $n" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- $what: NONE" >> "$GITHUB_STEP_SUMMARY"
+              missing="${missing} ${what}"
+            fi
+          done
+
+          if [ -n "$missing" ]; then
+            echo "::warning::$TAG has no:${missing}. The job for each says why in its log."
+          fi
+          echo "$TAG: $(printf '%s\n' "$assets" | wc -l) assets."

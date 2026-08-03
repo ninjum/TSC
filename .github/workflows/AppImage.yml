@@ -32,6 +32,17 @@ name: AppImage
 # run on real hardware.
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Release to add the binaries to (empty = the version CHANGELOG names)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the binaries to the release'
+        required: false
+        default: true
+        type: boolean
   workflow_dispatch:
     inputs:
       publish:
@@ -66,10 +77,16 @@ jobs:
         id: read
         run: |
           set -euo pipefail
+          # The version names the FILES; the tag names the RELEASE. They are the
+          # same thing unless a caller asked for a particular release - which
+          # release-all.yml does, so every workflow in one run publishes to the
+          # same place even if CHANGELOG has moved on since.
           version="$(bash .github/scripts/changelog-version.sh)"
+          tag='${{ inputs.tag }}'
+          [ -n "$tag" ] || tag="v$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=v$version" >> "$GITHUB_OUTPUT"
-          echo "CHANGELOG says TSC is at $version, so the release is v$version"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "CHANGELOG says TSC is at $version; publishing to $tag"
 
   build:
     name: AppImage ${{ matrix.arch }}
@@ -168,33 +185,16 @@ jobs:
       # The release named by CHANGELOG. If it is not there yet this creates it,
       # pinned to the commit that was built rather than to whatever the branch
       # points at by the time anyone looks.
-      - name: Create the release if it does not exist
+      # The release these AppImages go to. Created if it is not there yet, with
+      # the CHANGELOG entry for its version as the notes - see
+      # .github/scripts/ensure-release.sh, which every workflow here shares.
+      - name: Make sure the release exists
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag='${{ needs.version.outputs.tag }}'
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "$tag exists already"
-            exit 0
-          fi
-          notes="$(mktemp)"
-          {
-            echo "TSC ${{ needs.version.outputs.version }}"
-            echo
-            echo "The changes in this release are the topmost entry of"
-            echo "[CHANGELOG](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG)."
-            echo
-            echo "AppImages run on any Linux distribution without being installed:"
-            echo "download the one for your CPU, \`chmod +x\` it and run it."
-            echo "The \`.deb\` packages are built separately by the Deb workflow."
-          } > "$notes"
-          gh release create "$tag" \
-            --title "$tag" \
-            --notes-file "$notes" \
-            --target '${{ github.sha }}' \
+          bash .github/scripts/ensure-release.sh '${{ needs.version.outputs.tag }}' \
             ${{ inputs.draft && '--draft' || '' }}
-          echo "Created $tag"
 
       - name: Upload them
         env:

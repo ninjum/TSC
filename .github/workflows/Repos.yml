@@ -25,6 +25,17 @@ name: Repos
 # change once a key exists; the download page says the same thing to readers.
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Release to add the binaries to (empty = the version CHANGELOG names)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the binaries to the release'
+        required: false
+        default: true
+        type: boolean
   workflow_dispatch:
     inputs:
       tag:
@@ -59,11 +70,13 @@ jobs:
         run: |
           set -euo pipefail
           tag='${{ inputs.tag }}'
-          [ -n "$tag" ] || tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
-          if [ -z "$tag" ]; then
-            echo "::error::No release to build the repositories from."
-            exit 1
-          fi
+          # No tag given: the version CHANGELOG names, which is what the
+          # release is called.
+          [ -n "$tag" ] || tag="v$(bash .github/scripts/changelog-version.sh)"
+          # It has to exist to have assets to build repositories FROM, but a run
+          # pointed at a version that does not exist yet should say so by making
+          # it - empty repositories and a warning, not a hard stop.
+          bash .github/scripts/ensure-release.sh "$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
 

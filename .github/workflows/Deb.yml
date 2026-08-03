@@ -30,6 +30,17 @@ name: Deb
 # platforms those were, so a missing architecture is visible rather than silent.
 
 on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Release to add the binaries to (empty = the version CHANGELOG names)'
+        required: false
+        type: string
+      publish:
+        description: 'Attach the binaries to the release'
+        required: false
+        default: true
+        type: boolean
   workflow_dispatch:
     inputs:
       tag:
@@ -255,14 +266,13 @@ jobs:
         run: |
           set -euo pipefail
           tag='${{ inputs.tag }}'
-          if [ -z "$tag" ]; then
-            # "the newest TSC release" - what the Releases page shows at the top.
-            tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName')"
-          fi
-          if [ -z "$tag" ]; then
-            echo "::error::No release to attach to, and no tag was given."
-            exit 1
-          fi
+          # No tag given: the version CHANGELOG names, which is what the
+          # release is called.
+          [ -n "$tag" ] || tag="v$(bash .github/scripts/changelog-version.sh)"
+          # Create it if it is not there. A workflow pointed at a version that
+          # does not exist yet should make it, not fail - that was a
+          # chicken-and-egg problem on the first build of every version.
+          bash .github/scripts/ensure-release.sh "$tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "Attaching to $tag"
 

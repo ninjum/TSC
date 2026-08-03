@@ -83,6 +83,18 @@
 		with a live boost URL and SFML 3.0.2 now, and its cegui and
 		mruby modules are gone - TSC compiles both itself, so building
 		them into /app built something nothing used. (by Lauri Ojansivu)
+	* Misc: Added GitHub workflow release-all.yml, which asks which
+		release to build for and runs all five package workflows plus
+		Repos against that one release, so a release is the product of
+		one run rather than of six started on different days. The
+		release is created if it does not exist, and the CHANGELOG entry
+		for its version becomes its release notes - so a release is
+		described by the file the project already keeps rather than by
+		something typed into a form and lost. Every workflow also takes
+		the release as an input and creates it the same way on its own,
+		which removes a chicken-and-egg problem: the .deb, Windows, Mac
+		and Flatpak workflows used to attach to "the newest release" and
+		fail outright when a version had none yet. (by Lauri Ojansivu)
 	* Misc: Added GitHub workflow Repos.yml, which builds the apt,
 		AppImage and Flatpak repositories the website serves out of the
 		files already attached to a release. The other workflows produce
