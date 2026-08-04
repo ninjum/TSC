@@ -5,6 +5,16 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: The CEGUI DevIL image codec still failed to link on macOS
+		and Windows after the earlier DevIL hint - _ilInit / __imp_ilInit
+		undefined. The hint set IL_LIB, but CEGUI is built with its STATIC
+		configuration, whose DevIL finder wants the STATIC library
+		variables and reported "Could NOT find IL (missing: IL_LIB_STATIC
+		IL_LIB_STATIC_DBG)" - so the codec never linked libIL. Those
+		variants, and the ILU ones, are passed now too, pointing at the
+		same shared libIL the finder resolved (DevIL has no static archive
+		on these platforms); CEGUI only needs them set, exactly as its
+		GLEW finder needed GLEW_LIB_STATIC. (by Lauri Ojansivu)
 	* Fix: The release notes on GitHub no longer freeze at what
 		CHANGELOG said when the release was first created. They are read
 		from this file, but were written only when the release did not
