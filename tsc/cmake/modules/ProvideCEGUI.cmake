@@ -97,6 +97,43 @@ if (APPLE)
   message(STATUS "CEGUI sub-build inherits: ${TSC_CEGUI_PLATFORM_ARGS}")
 endif()
 
+# CEGUI's SEPARATE cmake run finds GLEW with its own bundled dependency finder,
+# which searches for a library named GLEW/glew. MSYS2 (ucrt64) ships it as
+# glew32, so on Windows that finder reports
+#   Could NOT find GLEW (missing: GLEW_LIB_STATIC GLEW_LIB_STATIC_DBG GLEW_LIB
+#   GLEW_LIB_DBG)
+# and stops the whole configure with
+#   Building the old OpenGL renderer module is only supported using GLEW
+# - even though the OUTER build's find_package(GLEW REQUIRED) above DID find it
+# (GLEW_INCLUDE_DIRS/GLEW_LIBRARIES are set, or GLEW::GLEW handled higher up).
+# Resolve GLEW's files by their mingw names here and pass them to CEGUI's own
+# GLEW_* cache variables so its finder is satisfied. Windows-only, so the working
+# Linux and macOS builds - where CEGUI's finder already succeeds - are untouched.
+if (WIN32)
+  find_path(TSC_CEGUI_GLEW_INC NAMES GL/glew.h HINTS ${GLEW_INCLUDE_DIRS})
+  # The import/shared lib (libglew32.dll.a) and, for CEGUI's static config
+  # (CEGUI_BUILD_STATIC_CONFIGURATION=ON), the static archive (libglew32.a).
+  find_library(TSC_CEGUI_GLEW_LIB NAMES glew32 GLEW glew HINTS "${GLEW_INCLUDE_DIRS}/../lib")
+  set(_saved_suffixes "${CMAKE_FIND_LIBRARY_SUFFIXES}")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+  find_library(TSC_CEGUI_GLEW_LIB_STATIC NAMES glew32 glew32s GLEW glew HINTS "${GLEW_INCLUDE_DIRS}/../lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES "${_saved_suffixes}")
+  if (NOT TSC_CEGUI_GLEW_LIB_STATIC)
+    set(TSC_CEGUI_GLEW_LIB_STATIC "${TSC_CEGUI_GLEW_LIB}")
+  endif()
+  if (TSC_CEGUI_GLEW_INC AND TSC_CEGUI_GLEW_LIB)
+    message(STATUS "CEGUI GLEW hint: lib=${TSC_CEGUI_GLEW_LIB} static=${TSC_CEGUI_GLEW_LIB_STATIC} inc=${TSC_CEGUI_GLEW_INC}")
+    list(APPEND TSC_CEGUI_PLATFORM_ARGS
+      "-DGLEW_H_PATH=${TSC_CEGUI_GLEW_INC}"
+      "-DGLEW_LIB=${TSC_CEGUI_GLEW_LIB}"
+      "-DGLEW_LIB_DBG=${TSC_CEGUI_GLEW_LIB}"
+      "-DGLEW_LIB_STATIC=${TSC_CEGUI_GLEW_LIB_STATIC}"
+      "-DGLEW_LIB_STATIC_DBG=${TSC_CEGUI_GLEW_LIB_STATIC}")
+  else()
+    message(WARNING "GLEW not resolved for the CEGUI sub-build; its finder may still fail")
+  endif()
+endif()
+
 ExternalProject_Add(
   cegui
   DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory "${TSC_SOURCE_DIR}/../cegui" "${TSC_BINARY_DIR}/cegui-source"
