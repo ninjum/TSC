@@ -78,24 +78,62 @@ for f in "$desktop" "$icon"; do
 done
 
 tools="$repo_root/.appimage-tools"
-mkdir -p "$tools"
-if [ ! -x "$tools/linuxdeploy" ]; then
-    wget -q -O "$tools/linuxdeploy" \
+mkdir -p "$tools/bin"
+
+# linuxdeploy and appimagetool are themselves AppImages, and a type-2 AppImage's
+# runtime is a STATIC-PIE binary. On armhf this job runs under qemu-user (the
+# x86_64 runner emulates the armhf container), and qemu-user CANNOT load a
+# static-PIE executable: running `linuxdeploy-armhf.AppImage` dies with "cannot
+# execute binary file: Exec format error" BEFORE it starts - so
+# APPIMAGE_EXTRACT_AND_RUN, which the runtime reads only once it is running, can
+# never take effect. The fix is to never execute the runtime: unpack the
+# appended squashfs (whose inner linuxdeploy/appimagetool is a DYNAMIC binary
+# qemu-user can run) and call that directly. It also drops the FUSE dependency
+# the old APPIMAGE_EXTRACT_AND_RUN worked around, so it is done for every arch.
+#
+# extract_appimage IMAGE DEST - unpack a type-2 AppImage without running it, by
+# finding the appended squashfs (its little-endian 'hsqs' magic) and unsquashing
+# from that byte offset. Needs squashfs-tools (unsquashfs).
+extract_appimage() {
+    local img="$1" dest="$2" off
+    off="$(LC_ALL=C grep -a -b -o -m1 'hsqs' "$img" | head -n1 | cut -d: -f1)"
+    [ -n "$off" ] || { echo "extract_appimage: no squashfs magic in $img" >&2; return 1; }
+    rm -rf "$dest"
+    unsquashfs -q -f -d "$dest" -o "$off" "$img"
+    [ -x "$dest/AppRun" ] || { echo "extract_appimage: no AppRun in $img" >&2; return 1; }
+}
+
+if [ ! -x "$tools/linuxdeploy/AppRun" ]; then
+    wget -q -O "$tools/linuxdeploy.AppImage" \
         "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${arch}.AppImage"
-    chmod +x "$tools/linuxdeploy"
+    extract_appimage "$tools/linuxdeploy.AppImage" "$tools/linuxdeploy"
+fi
+if [ ! -x "$tools/appimagetool/AppRun" ]; then
+    wget -q -O "$tools/appimagetool.AppImage" \
+        "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${arch}.AppImage"
+    extract_appimage "$tools/appimagetool.AppImage" "$tools/appimagetool"
 fi
 
-# A container has no FUSE, so the tools cannot mount themselves; this makes
-# them unpack into a temporary directory and run from there instead.
-export APPIMAGE_EXTRACT_AND_RUN=1
+# linuxdeploy's `--output appimage` plugin runs `appimagetool` from PATH; point
+# it at the EXTRACTED one so appimagetool is never exec'd as a static-PIE
+# AppImage either.
+cat > "$tools/bin/appimagetool" <<EOF
+#!/bin/sh
+exec "$tools/appimagetool/AppRun" "\$@"
+EOF
+chmod +x "$tools/bin/appimagetool"
+export PATH="$tools/bin:$PATH"
+
 export ARCH="$arch"
 # Written into the AppImage's own metadata, and into the file name below.
 export VERSION="$version"
+# Belt and braces for any nested tool that still tries to self-mount.
+export APPIMAGE_EXTRACT_AND_RUN=1
 
 mkdir -p "$out"
 name="TSC-${version}-${arch}"
 
-"$tools/linuxdeploy" \
+"$tools/linuxdeploy/AppRun" \
     --appdir "$appdir" \
     --executable "$appdir/usr/bin/tsc" \
     --desktop-file "$desktop" \

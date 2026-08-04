@@ -31,13 +31,15 @@ name: AppImage
 # marked continue-on-error: a slow emulated build must not hold up the two that
 # run on real hardware.
 #
-# armhf FAILS UNDER EMULATION, and not for a reason this workflow can fix.
-# linuxdeploy ships its armhf build as a static-PIE executable, and qemu-user -
-# which is what runs an armhf binary on an x86_64 runner - cannot load those:
-# the job gets "cannot execute binary file: Exec format error" AFTER building
-# TSC successfully. It is continue-on-error, so it reports that and the two
-# native architectures still publish. Building it for real needs an armhf
-# runner, not a change here.
+# armhf USED TO FAIL under emulation, for a reason that turned out to be fixable
+# after all. linuxdeploy and appimagetool ship their armhf builds as static-PIE
+# executables, and qemu-user - which runs the armhf binaries on this x86_64
+# runner - cannot LOAD a static-PIE binary, so exec'ing the tool died with
+# "cannot execute binary file: Exec format error" after TSC itself built fine.
+# build-appimage.sh no longer executes those AppImage runtimes: it unpacks each
+# tool's squashfs and runs the DYNAMIC binary inside, which qemu-user can run
+# (needs squashfs-tools, added to the deps above). continue-on-error stays as a
+# backstop while that path is proven on a real armhf-emulated run.
 #
 # ONE PER CPU, AND THERE IS NO MULTI-CPU ONE. An AppImage begins with a runtime
 # binary for one architecture - that is what the kernel executes when the file is
@@ -172,7 +174,7 @@ jobs:
             bash -c '
               set -euo pipefail
               bash .github/scripts/install-build-dependencies.sh \
-                file wget xz-utils zsync desktop-file-utils
+                file wget xz-utils zsync desktop-file-utils squashfs-tools
               bash .github/scripts/build-tsc.sh
               bash .github/scripts/build-appimage.sh
             '
