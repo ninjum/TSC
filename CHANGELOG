@@ -1,6 +1,24 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Change: The 32-bit Windows (win32) build is built against a
+		WeKan-maintained MSYS2 mirror instead of failing on MSYS2's
+		dropped packages. MSYS2 ended 32-bit support in May 2024 and
+		delisted every i686 library (sfml, boost, glew, freetype,
+		libxml++, ...) from mingw32.db, so `pacman -S mingw-w64-i686-sfml`
+		reported "target not found" and win32 could not build - only the
+		toolchain (gcc, cmake, ninja, pkgconf) is still listed. The files
+		are still served, just delisted, so they are mirrored with a
+		regenerated database; libxml++ 2.6, which MSYS2 no longer builds
+		at all (its libxmlpp is now 5.x), is rebuilt for i686 from its
+		PKGBUILD; and the win32 job installs the toolchain from the live
+		mingw32 db and every library from the mirror, whose pacman Server
+		URL is the repository/organization variable MINGW32_MIRROR. The
+		mirror and package tooling live in the wekan repo's log/ directory
+		(mirror-mingw.sh, build-mingw32-package.sh, regenerate-mirror-db.sh,
+		upload-msys2-mirror-to-github.sh, generate-msys2-mirror-site.sh).
+		win32 stays expected_to_fail until MINGW32_MIRROR is configured.
+		(by Lauri Ojansivu)
 	* Fix: The Windows (win64) build failed at link with "undefined
 		reference to `__imp__ZN5CEGUI...'" for String, System,
 		OpenGLRendererBase, Exception and friends. CEGUI is built as
