@@ -167,11 +167,27 @@ if (NOT TSC_CEGUI_ILU_LIB)
 endif()
 if (TSC_CEGUI_IL_INC AND TSC_CEGUI_IL_LIB)
   message(STATUS "CEGUI DevIL hint: il=${TSC_CEGUI_IL_LIB} ilu=${TSC_CEGUI_ILU_LIB} inc=${TSC_CEGUI_IL_INC}")
+  # CEGUI's STATIC configuration wants the STATIC (and *_DBG) variants of the IL
+  # library, not just IL_LIB. With only IL_LIB set, its finder still reported
+  #   Could NOT find IL (missing: IL_LIB_STATIC IL_LIB_STATIC_DBG)
+  # and the DevIL image codec then did not link libIL - _ilInit / __imp_ilInit
+  # undefined at link on macOS and Windows. DevIL ships no static archive on
+  # these platforms, so point every variant at the shared library we resolved,
+  # exactly as the GLEW hint above does for GLEW_LIB_STATIC (CEGUI only needs the
+  # variable set to satisfy its finder; TSC's own final link carries
+  # ${IL_LIBRARIES} too). Same for ILU.
   list(APPEND TSC_CEGUI_PLATFORM_ARGS
     "-DIL_H_PATH=${TSC_CEGUI_IL_INC}"
-    "-DIL_LIB=${TSC_CEGUI_IL_LIB}")
+    "-DIL_LIB=${TSC_CEGUI_IL_LIB}"
+    "-DIL_LIB_DBG=${TSC_CEGUI_IL_LIB}"
+    "-DIL_LIB_STATIC=${TSC_CEGUI_IL_LIB}"
+    "-DIL_LIB_STATIC_DBG=${TSC_CEGUI_IL_LIB}")
   if (TSC_CEGUI_ILU_LIB)
-    list(APPEND TSC_CEGUI_PLATFORM_ARGS "-DILU_LIB=${TSC_CEGUI_ILU_LIB}")
+    list(APPEND TSC_CEGUI_PLATFORM_ARGS
+      "-DILU_LIB=${TSC_CEGUI_ILU_LIB}"
+      "-DILU_LIB_DBG=${TSC_CEGUI_ILU_LIB}"
+      "-DILU_LIB_STATIC=${TSC_CEGUI_ILU_LIB}"
+      "-DILU_LIB_STATIC_DBG=${TSC_CEGUI_ILU_LIB}")
   endif()
 else()
   message(WARNING "DevIL not resolved for the CEGUI sub-build; its DevIL image codec may not link libIL")
