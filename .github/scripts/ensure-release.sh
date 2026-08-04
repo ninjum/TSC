@@ -32,16 +32,31 @@ version="${tag#v}"
 
 if gh release view "$tag" >/dev/null 2>&1; then
     echo "Release $tag exists."
-    # Its notes may still be missing - a release created by an earlier run of a
-    # workflow that had no CHANGELOG entry to use, or created by hand. Fill them
-    # in if CHANGELOG has something now and the release body is empty.
-    body="$(gh release view "$tag" --json body --jq '.body' 2>/dev/null || true)"
-    if [ -z "${body//[[:space:]]/}" ]; then
-        if notes="$(bash "$here/changelog-notes.sh" "$version" "$here/../../CHANGELOG")"; then
-            printf '%s\n' "$notes" > /tmp/release-notes.md
+    # Keep the notes in SYNC with CHANGELOG, every run. CHANGELOG is the source of
+    # truth for the description (that is the whole point of reading them from it),
+    # so re-copy its entry for this version whenever it has one - not only when the
+    # release body happens to be empty. Both "Release all" (re-run) and "Release
+    # all missing" complete an EXISTING release, so this is the path they take, and
+    # only re-copying here is what lets a CHANGELOG edit made AFTER the release was
+    # created reach the release page. Filling only an empty body left the notes
+    # frozen at whatever the CHANGELOG said the first time.
+    #
+    # If CHANGELOG has no entry for this version, the existing notes are left as
+    # they are rather than wiped - there is nothing to replace them with.
+    if notes="$(bash "$here/changelog-notes.sh" "$version" "$here/../../CHANGELOG")"; then
+        printf '%s\n' "$notes" > /tmp/release-notes.md
+        current="$(gh release view "$tag" --json body --jq '.body' 2>/dev/null || true)"
+        # Normalise CRLF the API may return before comparing, so an unchanged
+        # CHANGELOG does not rewrite the body on every one of the parallel build
+        # workflows that call this.
+        if [ "${current//$'\r'/}" != "$notes" ]; then
             gh release edit "$tag" --notes-file /tmp/release-notes.md
-            echo "Filled in the notes for $tag from CHANGELOG."
+            echo "Synced the notes for $tag from CHANGELOG."
+        else
+            echo "Notes for $tag already match CHANGELOG."
         fi
+    else
+        echo "CHANGELOG has no entry for $version; leaving the existing notes as they are."
     fi
     exit 0
 fi
