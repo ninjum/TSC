@@ -5,6 +5,15 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: The release notes on GitHub no longer freeze at what
+		CHANGELOG said when the release was first created. They are read
+		from this file, but were written only when the release did not
+		exist yet or had an empty body, so a later CHANGELOG edit never
+		reached the release page - and both "Release all" re-runs and
+		"Release all missing" complete an already-created release. Every
+		run re-copies the entry for the version now, comparing against the
+		current body first so the parallel build workflows do not each
+		rewrite an unchanged one. (by Lauri Ojansivu)
 	* Fix: CEGUI's own build could not find GLEW and stopped with
 		"Building the old OpenGL renderer module is only supported using
 		GLEW", on Windows first and then on the Flatpak runtime. CEGUI is
