@@ -5,6 +5,45 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: CEGUI's own build could not find GLEW and stopped with
+		"Building the old OpenGL renderer module is only supported using
+		GLEW", on Windows first and then on the Flatpak runtime. CEGUI is
+		a separate cmake run with its own bundled GLEW finder, which looks
+		for a library named GLEW or glew and so misses MSYS2's glew32, and
+		missed it on Flatpak too even though the outer find_package(GLEW)
+		had found it. GLEW is resolved once and handed to CEGUI's
+		GLEW_LIB/GLEW_H_PATH cache variables now, on every platform rather
+		than only on Windows. (by Lauri Ojansivu)
+	* Fix: Every macOS and 64-bit Windows build died linking CEGUI's
+		DevIL image codec, with undefined _ilInit / __imp_ilInit: the
+		codec compiled but no libIL was on the link line. Forwarding
+		CMAKE_PREFIX_PATH to the sub-build found DevIL's HEADERS but not
+		its library, which was not enough. DevIL is now resolved the same
+		way GLEW is and handed to CEGUI's IL_LIB/IL_H_PATH (and ILU_LIB)
+		cache variables, so the codec links the library it was compiled
+		against. (by Lauri Ojansivu)
+	* Fix: The Flatpak build failed compiling the shared-modules
+		udev-175 module - "implicit declaration of function
+		'major'/'minor'". udev 175 predates glibc moving major()/minor()
+		into <sys/sysmacros.h>, so it no longer compiles, and upstream
+		flathub shared-modules has deleted it. SFML needs libudev for
+		joystick input; the manifest defines an inline eudev 3.2.14 module
+		- the maintained standalone libudev - from a pinned release with
+		its checksum verified, in place of the udev-175 reference. (by
+		Lauri Ojansivu)
+	* Fix: The armhf AppImage failed after TSC had already built.
+		linuxdeploy and appimagetool ship their armhf builds as static-PIE
+		AppImages, and qemu-user - which runs the armhf binaries on the
+		x86_64 runner this job emulates on - cannot load a static-PIE
+		executable, so the tool never started. build-appimage.sh unpacks
+		each tool's appended squashfs and runs the dynamic binary inside
+		instead, which qemu-user can run. Finding that squashfs by the
+		first 'hsqs' magic in the file was not enough, because that
+		four-byte sequence also occurs in the ELF runtime ahead of the
+		real squashfs and unsquashfs then died with "Can't find a valid
+		SQUASHFS superblock"; it tries every candidate offset now and
+		keeps the one that unsquashes into a tree with an AppRun. (by
+		Lauri Ojansivu)
 	* Fix: The build failed to link on FreeBSD with "ld: error: unable
 		to find library -liconv". iconv and intl were named as bare
 		linker flags, which asks the linker to find them on its default
