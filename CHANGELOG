@@ -1,6 +1,38 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Fix: The Windows (win64) build failed at link with "undefined
+		reference to `__imp__ZN5CEGUI...'" for String, System,
+		OpenGLRendererBase, Exception and friends. CEGUI is built as
+		STATIC libraries, but the static ProvideCEGUI path never defined
+		CEGUI_STATIC, so on Windows the CEGUI headers declared every
+		symbol __declspec(dllimport) - an __imp_* import the static libs
+		do not provide - and MinGW's ld could not resolve them. It now
+		defines -DCEGUI_STATIC in the static-CEGUI branch (a no-op where
+		there is no dllimport, Linux and macOS). This surfaced only now
+		because CEGUI itself finally builds after the DevIL->STB switch.
+		(by Lauri Ojansivu)
+	* Fix: The macOS build failed compiling every unit that includes a
+		libxml++ header with "no template named 'auto_ptr' in namespace
+		'std'". TSC is -std=c++17 (for SFML 3), which removed
+		std::auto_ptr, and macOS's libc++ does not provide it under C++17
+		- from libc++ 18 not even behind the opt-in
+		_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR macro - yet libxml++ 2.6,
+		the only libxml++ Homebrew ships (2.42.x; there is no 3.0/5.0
+		formula), still declares std::auto_ptr members. A tiny libc++-only
+		std::auto_ptr shim (src/core/libxmlpp_autoptr_compat.hpp),
+		force-included on macOS, restores it; Linux's libstdc++ keeps
+		auto_ptr, so the shim is libc++-guarded and never redefines an
+		existing one. (by Lauri Ojansivu)
+	* Fix: The Flatpak "attach to the release" job failed at "Upload the
+		bundles" with "read assets/objects: is a directory". Its
+		download-artifact pattern (flatpak-[0-9a-z]*, merge-multiple) also
+		matched the flatpak-repo-<arch> artifacts, so assets/ held the
+		ostree repo layout (objects/, refs/, ...) as well as the .flatpak
+		bundles, and `gh release upload assets/*` then tried to upload the
+		objects directory. It now uploads only assets/*.flatpak and their
+		checksums; the repository is published separately, to GitHub
+		Pages, not to the release. (by Lauri Ojansivu)
 
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
