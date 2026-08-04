@@ -137,6 +137,15 @@ if (USE_SYSTEM_CEGUI)
 else()
   message(STATUS "Compiling CEGUI statically")
   include("ProvideCEGUI")
+  # CEGUI is built as STATIC libraries here, so its headers must not declare their
+  # symbols __declspec(dllimport). Without -DCEGUI_STATIC every CEGUI symbol
+  # becomes an __imp_* import the static libs do not provide, and the Windows
+  # (MinGW) link fails with "undefined reference to `__imp__ZN5CEGUI...'" for
+  # String, System, OpenGLRendererBase, Exception and friends. CEGUI's own
+  # FindCEGUI sets this from pkg-config, but the static ProvideCEGUI path did not,
+  # so it was missing. It is a no-op where there is no dllimport (Linux/macOS), so
+  # define it unconditionally in the static path.
+  add_definitions(-DCEGUI_STATIC)
 endif()
 
 if (USE_LIBXMLPP3)
