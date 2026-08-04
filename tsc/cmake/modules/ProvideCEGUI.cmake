@@ -134,6 +134,22 @@ if (WIN32)
   endif()
 endif()
 
+# The CEGUI sub-build is a separate cmake run, so it also does not inherit
+# CMAKE_PREFIX_PATH - the prefix the outer build was told to search (Homebrew on
+# macOS, from Mac.yml's -DCMAKE_PREFIX_PATH="$(brew --prefix)"). Without it CEGUI's
+# DevIL image codec COMPILED (it found the DevIL headers) but linked no libIL, so
+# every macOS job failed linking libCEGUIDevILImageCodec.dylib with
+#   Undefined symbols for architecture x86_64: "_ilInit", "_ilLoadL", ...
+# Forward the prefix so CEGUI's finders locate the same DevIL (and GLEW, freetype,
+# ...) the outer build used. A cmake LIST is semicolon-separated; encode it as |
+# and let ExternalProject's LIST_SEPARATOR put the semicolons back (see the arch
+# note above).
+if (CMAKE_PREFIX_PATH)
+  string(REPLACE ";" "|" _tsc_cegui_prefix "${CMAKE_PREFIX_PATH}")
+  list(APPEND TSC_CEGUI_PLATFORM_ARGS "-DCMAKE_PREFIX_PATH=${_tsc_cegui_prefix}")
+  message(STATUS "CEGUI sub-build CMAKE_PREFIX_PATH: ${_tsc_cegui_prefix}")
+endif()
+
 ExternalProject_Add(
   cegui
   DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory "${TSC_SOURCE_DIR}/../cegui" "${TSC_BINARY_DIR}/cegui-source"
