@@ -5,6 +5,15 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: The Flatpak build failed linking SFML's audio - undefined
+		reference to ov_pcm_seek (vorbisfile) and FLAC__stream_decoder_*
+		(FLAC). SFML's cmake found Vorbis and FLAC in the freedesktop SDK
+		but built a STATIC libsfml-audio-s.a, and a static library carries
+		none of its dependencies, so when TSC links it the FLAC/Vorbis/Ogg
+		symbols are unresolved. Every other platform links a shared SFML
+		(apt, Homebrew, MSYS2) whose .so pulls them in; only the Flatpak
+		builds SFML from source and it went static. -DBUILD_SHARED_LIBS=ON
+		makes the Flatpak's SFML shared like the rest. (by Lauri Ojansivu)
 	* Fix: The CEGUI DevIL image codec still failed to link on macOS
 		and Windows after the earlier DevIL hint - _ilInit / __imp_ilInit
 		undefined. The hint set IL_LIB, but CEGUI is built with its STATIC
