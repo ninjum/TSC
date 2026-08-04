@@ -83,6 +83,19 @@ if (CMAKE_BUILD_TYPE MATCHES "Debug")
   add_definitions(-D_DEBUG=1)
 endif()
 
+# macOS's libc++ removed std::auto_ptr in C++17, but libxml++ 2.6's headers
+# (saxparser.h, textreader.h, xsdvalidator.h, ...) declare `std::auto_ptr<Impl>
+# pimpl_;`, so compiling any translation unit that includes them fails under
+# -std=c++17 with "no template named 'auto_ptr' in namespace 'std'". Homebrew
+# ships only libxml++ 2.6 (no 3.0/5.0 formula), and from libc++ 18 not even the
+# opt-in _LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR macro brings it back, so the robust
+# fix is a tiny libc++-only std::auto_ptr shim, force-included before any header.
+# Linux's libstdc++ keeps std::auto_ptr, so the shim is libc++-guarded and never
+# redefines an existing one. See src/core/libxmlpp_autoptr_compat.hpp.
+if (APPLE)
+  add_compile_options(-include "${TSC_SOURCE_DIR}/src/core/libxmlpp_autoptr_compat.hpp")
+endif()
+
 if(WIN32 AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "$ENV{systemdrive}/Games/${CMAKE_PROJECT_NAME}" CACHE PATH "CMAKE PREFIX" FORCE)
 endif()
