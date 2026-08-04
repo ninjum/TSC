@@ -95,12 +95,28 @@ mkdir -p "$tools/bin"
 # finding the appended squashfs (its little-endian 'hsqs' magic) and unsquashing
 # from that byte offset. Needs squashfs-tools (unsquashfs).
 extract_appimage() {
-    local img="$1" dest="$2" off
-    off="$(LC_ALL=C grep -a -b -o -m1 'hsqs' "$img" | head -n1 | cut -d: -f1)"
-    [ -n "$off" ] || { echo "extract_appimage: no squashfs magic in $img" >&2; return 1; }
+    local img="$1" dest="$2" off offs
+    # The squashfs is APPENDED after the ELF runtime, so the offset we want is the
+    # 'hsqs' that BEGINS a valid superblock - which is not necessarily the FIRST
+    # 'hsqs' byte sequence in the file. That four-byte sequence can also occur
+    # inside the ELF runtime, and taking `-m1` (the first match) landed on such a
+    # spurious one, so unsquashfs died with
+    #   FATAL ERROR: Can't find a valid SQUASHFS superblock on linuxdeploy.AppImage
+    # (this is exactly how the armhf AppImage job failed, after TSC had already
+    # built). So collect EVERY candidate offset and keep the first that actually
+    # unsquashes into a tree with an AppRun - a spurious offset does not.
+    offs="$(LC_ALL=C grep -a -b -o 'hsqs' "$img" | cut -d: -f1)"
+    [ -n "$offs" ] || { echo "extract_appimage: no squashfs magic in $img" >&2; return 1; }
+    for off in $offs; do
+        rm -rf "$dest"
+        if unsquashfs -q -f -d "$dest" -o "$off" "$img" 2>/dev/null \
+            && [ -x "$dest/AppRun" ]; then
+            return 0
+        fi
+    done
     rm -rf "$dest"
-    unsquashfs -q -f -d "$dest" -o "$off" "$img"
-    [ -x "$dest/AppRun" ] || { echo "extract_appimage: no AppRun in $img" >&2; return 1; }
+    echo "extract_appimage: no 'hsqs' offset in $img held a valid squashfs with an AppRun" >&2
+    return 1
 }
 
 if [ ! -x "$tools/linuxdeploy/AppRun" ]; then
