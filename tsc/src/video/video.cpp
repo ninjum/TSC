@@ -108,7 +108,7 @@ void cVideo::Init_CEGUI(void)
 #else
     mp_cegui_xmlparser = new CEGUI::LibxmlParser();
 #endif
-    mp_cegui_imgcodec = new CEGUI::DevILImageCodec();
+    mp_cegui_imgcodec = new CEGUI::STBImageCodec();
     CEGUI::System::create(*mp_cegui_renderer, NULL, mp_cegui_xmlparser, mp_cegui_imgcodec, NULL, "", utf8_logpath);
 
     // Retrieve default resource provider for the OpenGLRenderer

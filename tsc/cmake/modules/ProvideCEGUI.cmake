@@ -7,8 +7,8 @@
 # This is required for TSC's config.hpp
 set(CEGUI_USE_EXPAT 1)
 
-# CEGUI dependencies
-find_package(DevIL REQUIRED)
+# CEGUI dependencies. No DevIL: TSC uses CEGUI's built-in STB image codec (see
+# the note by the CMAKE_ARGS below), which needs no external image library.
 find_package(Freetype REQUIRED)
 find_package(EXPAT REQUIRED)
 find_package(GLEW REQUIRED)
@@ -52,7 +52,7 @@ set(CEGUI_LIBRARIES "${TSC_BINARY_DIR}/cegui-install/lib/libCEGUIOpenGLRenderer-
   "${TSC_BINARY_DIR}/cegui-install/lib/libCEGUIBase-0_Static.a"
   "${TSC_BINARY_DIR}/cegui-install/lib/libCEGUICoreWindowRendererSet_Static.a"
   "${TSC_BINARY_DIR}/cegui-install/lib/libCEGUIExpatParser_Static.a"
-  "${TSC_BINARY_DIR}/cegui-install/lib/libCEGUIDevILImageCodec_Static.a")
+  "${TSC_BINARY_DIR}/cegui-install/lib/libCEGUISTBImageCodec_Static.a")
 
 # An ExternalProject is a SEPARATE cmake run: it inherits nothing from this one
 # except what CMAKE_ARGS names. On macOS that is the difference between a build
@@ -148,61 +148,26 @@ else()
   message(WARNING "GLEW not resolved for the CEGUI sub-build; its finder may still fail")
 endif()
 
-# DevIL (IL, and ILU). find_package(DevIL REQUIRED) above set IL_LIBRARIES /
-# IL_INCLUDE_DIR / ILU_LIBRARIES; hand them to CEGUI's IL_LIB / IL_H_PATH /
-# ILU_LIB so its DevIL image codec links libIL instead of leaving _il* undefined.
-find_path(TSC_CEGUI_IL_INC NAMES IL/il.h HINTS ${IL_INCLUDE_DIR})
-if (NOT TSC_CEGUI_IL_INC AND IL_INCLUDE_DIR)
-  set(TSC_CEGUI_IL_INC "${IL_INCLUDE_DIR}")
-endif()
-# Prefer the exact library the outer find_package(DevIL) resolved; fall back to a
-# find_library by name if it only exported an imported target.
-set(TSC_CEGUI_IL_LIB "${IL_LIBRARIES}")
-if (NOT TSC_CEGUI_IL_LIB)
-  find_library(TSC_CEGUI_IL_LIB NAMES IL DevIL libIL HINTS "${TSC_CEGUI_IL_INC}/../lib")
-endif()
-set(TSC_CEGUI_ILU_LIB "${ILU_LIBRARIES}")
-if (NOT TSC_CEGUI_ILU_LIB)
-  find_library(TSC_CEGUI_ILU_LIB NAMES ILU HINTS "${TSC_CEGUI_IL_INC}/../lib")
-endif()
-if (TSC_CEGUI_IL_INC AND TSC_CEGUI_IL_LIB)
-  message(STATUS "CEGUI DevIL hint: il=${TSC_CEGUI_IL_LIB} ilu=${TSC_CEGUI_ILU_LIB} inc=${TSC_CEGUI_IL_INC}")
-  # CEGUI's STATIC configuration wants the STATIC (and *_DBG) variants of the IL
-  # library, not just IL_LIB. With only IL_LIB set, its finder still reported
-  #   Could NOT find IL (missing: IL_LIB_STATIC IL_LIB_STATIC_DBG)
-  # and the DevIL image codec then did not link libIL - _ilInit / __imp_ilInit
-  # undefined at link on macOS and Windows. DevIL ships no static archive on
-  # these platforms, so point every variant at the shared library we resolved,
-  # exactly as the GLEW hint above does for GLEW_LIB_STATIC (CEGUI only needs the
-  # variable set to satisfy its finder; TSC's own final link carries
-  # ${IL_LIBRARIES} too). Same for ILU.
-  list(APPEND TSC_CEGUI_PLATFORM_ARGS
-    "-DIL_H_PATH=${TSC_CEGUI_IL_INC}"
-    "-DIL_LIB=${TSC_CEGUI_IL_LIB}"
-    "-DIL_LIB_DBG=${TSC_CEGUI_IL_LIB}"
-    "-DIL_LIB_STATIC=${TSC_CEGUI_IL_LIB}"
-    "-DIL_LIB_STATIC_DBG=${TSC_CEGUI_IL_LIB}")
-  if (TSC_CEGUI_ILU_LIB)
-    list(APPEND TSC_CEGUI_PLATFORM_ARGS
-      "-DILU_LIB=${TSC_CEGUI_ILU_LIB}"
-      "-DILU_LIB_DBG=${TSC_CEGUI_ILU_LIB}"
-      "-DILU_LIB_STATIC=${TSC_CEGUI_ILU_LIB}"
-      "-DILU_LIB_STATIC_DBG=${TSC_CEGUI_ILU_LIB}")
-  endif()
-else()
-  message(WARNING "DevIL not resolved for the CEGUI sub-build; its DevIL image codec may not link libIL")
-endif()
+# No DevIL. CEGUI's DevIL image codec needs an external libIL, and when CEGUI is
+# built in its STATIC configuration (below) its DevIL finder demands a STATIC
+# libIL archive - IL_LIB_STATIC. macOS (Homebrew) and Windows (MSYS2) ship only
+# a SHARED libIL, so that finder reported
+#   Could NOT find IL (missing: IL_LIB_STATIC IL_LIB_STATIC_DBG)
+# and the codec never built - through several rounds of trying to feed it the
+# shared library as the static one, which its finder rejects. TSC only needs to
+# decode PNG imagesets, so it uses CEGUI's built-in STB image codec instead
+# (stb_image, a vendored header - no external library to find, static or shared,
+# on any platform). See the -DCEGUI_BUILD_IMAGECODEC_STB=ON / _DEVIL=OFF switch in
+# CMAKE_ARGS below and CEGUI::STBImageCodec in tsc/src/video/video.cpp.
 
 # The CEGUI sub-build is a separate cmake run, so it also does not inherit
 # CMAKE_PREFIX_PATH - the prefix the outer build was told to search (Homebrew on
-# macOS, from Mac.yml's -DCMAKE_PREFIX_PATH="$(brew --prefix)"). Without it CEGUI's
-# DevIL image codec COMPILED (it found the DevIL headers) but linked no libIL, so
-# every macOS job failed linking libCEGUIDevILImageCodec.dylib with
-#   Undefined symbols for architecture x86_64: "_ilInit", "_ilLoadL", ...
-# Forward the prefix so CEGUI's finders locate the same DevIL (and GLEW, freetype,
-# ...) the outer build used. A cmake LIST is semicolon-separated; encode it as |
-# and let ExternalProject's LIST_SEPARATOR put the semicolons back (see the arch
-# note above).
+# macOS, from Mac.yml's -DCMAKE_PREFIX_PATH="$(brew --prefix)"). Forward it so
+# CEGUI's finders locate the same freetype, GLEW and expat the outer build used;
+# without it those sit outside CEGUI's default search and the sub-build fails to
+# configure. A cmake LIST is semicolon-separated; encode it as | and let
+# ExternalProject's LIST_SEPARATOR put the semicolons back (see the arch note
+# above).
 if (CMAKE_PREFIX_PATH)
   string(REPLACE ";" "|" _tsc_cegui_prefix "${CMAKE_PREFIX_PATH}")
   list(APPEND TSC_CEGUI_PLATFORM_ARGS "-DCMAKE_PREFIX_PATH=${_tsc_cegui_prefix}")
@@ -217,11 +182,10 @@ ExternalProject_Add(
   INSTALL_DIR "${TSC_BINARY_DIR}/cegui-install"
   PATCH_COMMAND patch -p1 < "${TSC_SOURCE_DIR}/../cegui-cpp11.patch" && patch -p1 < "${TSC_SOURCE_DIR}/../cegui-cmake-policy.patch"
   LIST_SEPARATOR |
-  CMAKE_ARGS ${TSC_CEGUI_PLATFORM_ARGS} -Wno-dev -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Release "-DCMAKE_INSTALL_PREFIX=${TSC_BINARY_DIR}/cegui-install" -DCEGUI_BUILD_STATIC_CONFIGURATION=ON -DCEGUI_BUILD_STATIC_FACTORY_MODULE=ON -DCEGUI_BUILD_IMAGECODEC_DEVIL=ON -DCEGUI_BUILD_IMAGECODEC_SDL2=OFF -DCEGUI_BUILD_IMAGECODEC_FREEIMAGE=OFF -DCEGUI_BUILD_IMAGECODEC_CORONA=OFF -DCEGUI_BUILD_IMAGECODEC_PVR=OFF -DCEGUI_BUILD_IMAGECODEC_SILLY=OFF -DCEGUI_BUILD_IMAGECODEC_STB=OFF -DCEGUI_BUILD_IMAGECODEC_TGA=OFF -DCEGUI_BUILD_PYTHON_MODULES=OFF -DCEGUI_BUILD_LUA_GENERATOR=OFF -DCEGUI_BUILD_LUA_MODULE=OFF -DCEGUI_BUILD_XMLPARSER_EXPAT=ON -DCEGUI_BUILD_XMLPARSER_LIBXML2=OFF -DCEGUI_BUILD_XMLPARSER_RAPIDXML=OFF -DCEGUI_BUILD_XMLPARSER_XERCES=OFF -DCEGUI_BUILD_XMLPARSER_TINYXML=OFF -DCEGUI_BUILD_RENDERER_OPENGL=ON -DCEGUI_BUILD_RENDERER_OPENGL3=OFF -DCEGUI_BUILD_RENDERER_OPENGLES=OFF -DCEGUI_BUILD_RENDERER_DIRECT3D10=OFF -DCEGUI_BUILD_RENDERER_DIRECT3D11=OFF -DCEGUI_BUILD_RENDERER_DIRECT3D9=OFF -DCEGUI_BUILD_RENDERER_DIRECTFB=OFF -DCEGUI_BUILD_RENDERER_IRRLICHT=OFF -DCEGUI_BUILD_RENDERER_NULL=ON -DCEGUI_BUILD_RENDERER_OGRE=OFF -DCEGUI_SAMPLES_ENABLED=OFF -DCEGUI_BUILD_APPLICATION_TEMPLATES=OFF -DCEGUI_BUILD_TESTS=OFF -DCEGUI_WARNINGS_AS_ERRORS=OFF
+  CMAKE_ARGS ${TSC_CEGUI_PLATFORM_ARGS} -Wno-dev -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Release "-DCMAKE_INSTALL_PREFIX=${TSC_BINARY_DIR}/cegui-install" -DCEGUI_BUILD_STATIC_CONFIGURATION=ON -DCEGUI_BUILD_STATIC_FACTORY_MODULE=ON -DCEGUI_BUILD_IMAGECODEC_DEVIL=OFF -DCEGUI_BUILD_IMAGECODEC_SDL2=OFF -DCEGUI_BUILD_IMAGECODEC_FREEIMAGE=OFF -DCEGUI_BUILD_IMAGECODEC_CORONA=OFF -DCEGUI_BUILD_IMAGECODEC_PVR=OFF -DCEGUI_BUILD_IMAGECODEC_SILLY=OFF -DCEGUI_BUILD_IMAGECODEC_STB=ON -DCEGUI_BUILD_IMAGECODEC_TGA=OFF -DCEGUI_BUILD_PYTHON_MODULES=OFF -DCEGUI_BUILD_LUA_GENERATOR=OFF -DCEGUI_BUILD_LUA_MODULE=OFF -DCEGUI_BUILD_XMLPARSER_EXPAT=ON -DCEGUI_BUILD_XMLPARSER_LIBXML2=OFF -DCEGUI_BUILD_XMLPARSER_RAPIDXML=OFF -DCEGUI_BUILD_XMLPARSER_XERCES=OFF -DCEGUI_BUILD_XMLPARSER_TINYXML=OFF -DCEGUI_BUILD_RENDERER_OPENGL=ON -DCEGUI_BUILD_RENDERER_OPENGL3=OFF -DCEGUI_BUILD_RENDERER_OPENGLES=OFF -DCEGUI_BUILD_RENDERER_DIRECT3D10=OFF -DCEGUI_BUILD_RENDERER_DIRECT3D11=OFF -DCEGUI_BUILD_RENDERER_DIRECT3D9=OFF -DCEGUI_BUILD_RENDERER_DIRECTFB=OFF -DCEGUI_BUILD_RENDERER_IRRLICHT=OFF -DCEGUI_BUILD_RENDERER_NULL=ON -DCEGUI_BUILD_RENDERER_OGRE=OFF -DCEGUI_SAMPLES_ENABLED=OFF -DCEGUI_BUILD_APPLICATION_TEMPLATES=OFF -DCEGUI_BUILD_TESTS=OFF -DCEGUI_WARNINGS_AS_ERRORS=OFF
   BUILD_BYPRODUCTS ${CEGUI_LIBRARIES})
 
 set(CEGUI_LIBRARIES ${CEGUI_LIBRARIES}
-  "${IL_LIBRARIES}"
   "${EXPAT_LIBRARIES}"
   "${FREETYPE_LIBRARIES}"
   ${TSC_GLEW_LIBRARIES})

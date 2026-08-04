@@ -72,7 +72,7 @@ endmacro()
 # CEGUI consists of a wealth of libraries.
 find_cegui_library(Base)
 find_cegui_library(CoreWindowRendererSet)
-find_cegui_library(DevILImageCodec)
+find_cegui_library(STBImageCodec)
 
 if (CEGUI_USE_EXPAT)
   message(STATUS "Configuring to link with CEGUI's expat parser instead of libxml2")
@@ -101,7 +101,7 @@ set(CEGUI_LIBRARIES
   ${CEGUI_RENDERER_LIBRARIES}
   ${CEGUI_Base_LIBRARY}
   ${CEGUI_CoreWindowRendererSet_LIBRARY}
-  ${CEGUI_DevILImageCodec_LIBRARY}
+  ${CEGUI_STBImageCodec_LIBRARY}
  )
 
 if(CEGUI_USE_EXPAT)

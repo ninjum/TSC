@@ -93,7 +93,7 @@
 // None, True, and False that screw CEGUI declarations.
 #include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/OpenGL/GLRenderer.h>
-#include <CEGUI/ImageCodecModules/DevIL/ImageCodec.h>
+#include <CEGUI/ImageCodecModules/STB/ImageCodec.h>
 
 #ifdef CEGUI_USE_EXPAT
 #include <CEGUI/XMLParserModules/Expat/XMLParserModule.h>
