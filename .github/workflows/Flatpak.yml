@@ -219,7 +219,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release upload '${{ steps.release.outputs.tag }}' assets/* --clobber
+          # Only the bundle files, by extension - NOT assets/* . The download
+          # pattern above (flatpak-[0-9a-z]*, merge-multiple) also matches the
+          # flatpak-repo-<arch> artifacts, so assets/ holds the ostree repo layout
+          # too (objects/, refs/, summaries/, ...). `gh release upload assets/*`
+          # then tried to upload the `objects` DIRECTORY and died with
+          # "read assets/objects: is a directory". The .flatpak bundles and their
+          # checksums are the release assets; the repo is published separately
+          # (the repository steps below), to GitHub Pages, not to the release.
+          gh release upload '${{ steps.release.outputs.tag }}' \
+            assets/*.flatpak assets/*.md5sum assets/*.sha256sum --clobber
           echo "Uploaded to $(gh release view '${{ steps.release.outputs.tag }}' --json url --jq .url)"
 
       # ---- the repository -------------------------------------------------
