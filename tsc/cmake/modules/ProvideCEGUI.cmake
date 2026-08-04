@@ -97,41 +97,84 @@ if (APPLE)
   message(STATUS "CEGUI sub-build inherits: ${TSC_CEGUI_PLATFORM_ARGS}")
 endif()
 
-# CEGUI's SEPARATE cmake run finds GLEW with its own bundled dependency finder,
-# which searches for a library named GLEW/glew. MSYS2 (ucrt64) ships it as
-# glew32, so on Windows that finder reports
-#   Could NOT find GLEW (missing: GLEW_LIB_STATIC GLEW_LIB_STATIC_DBG GLEW_LIB
-#   GLEW_LIB_DBG)
-# and stops the whole configure with
-#   Building the old OpenGL renderer module is only supported using GLEW
-# - even though the OUTER build's find_package(GLEW REQUIRED) above DID find it
-# (GLEW_INCLUDE_DIRS/GLEW_LIBRARIES are set, or GLEW::GLEW handled higher up).
-# Resolve GLEW's files by their mingw names here and pass them to CEGUI's own
-# GLEW_* cache variables so its finder is satisfied. Windows-only, so the working
-# Linux and macOS builds - where CEGUI's finder already succeeds - are untouched.
-if (WIN32)
-  find_path(TSC_CEGUI_GLEW_INC NAMES GL/glew.h HINTS ${GLEW_INCLUDE_DIRS})
-  # The import/shared lib (libglew32.dll.a) and, for CEGUI's static config
-  # (CEGUI_BUILD_STATIC_CONFIGURATION=ON), the static archive (libglew32.a).
-  find_library(TSC_CEGUI_GLEW_LIB NAMES glew32 GLEW glew HINTS "${GLEW_INCLUDE_DIRS}/../lib")
-  set(_saved_suffixes "${CMAKE_FIND_LIBRARY_SUFFIXES}")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  find_library(TSC_CEGUI_GLEW_LIB_STATIC NAMES glew32 glew32s GLEW glew HINTS "${GLEW_INCLUDE_DIRS}/../lib")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES "${_saved_suffixes}")
-  if (NOT TSC_CEGUI_GLEW_LIB_STATIC)
-    set(TSC_CEGUI_GLEW_LIB_STATIC "${TSC_CEGUI_GLEW_LIB}")
+# CEGUI's SEPARATE cmake run uses its OWN bundled dependency finders, with their
+# own cache variables (GLEW_LIB/GLEW_H_PATH, IL_LIB/IL_H_PATH), NOT the results of
+# the outer find_package(GLEW)/find_package(DevIL) above. Both of those finders
+# miss libraries the outer build found, and each miss is fatal in its own way:
+#
+#   * GLEW - the finder searches for a library named GLEW/glew. It misses it on
+#     more than Windows (MSYS2 names it glew32; and it also missed on the Flatpak
+#     runtime, where the outer build found it fine), and then reports
+#       Could NOT find GLEW (missing: GLEW_LIB GLEW_H_PATH)
+#     and stops the whole configure with
+#       Building the old OpenGL renderer module is only supported using GLEW.
+#
+#   * DevIL - its finder misses IL_LIB, so the DevIL image codec COMPILES (its
+#     headers are found, on macOS via the forwarded CMAKE_PREFIX_PATH below) but
+#     links no libIL, and every macOS and Windows job died linking it with
+#       Undefined symbols ... _ilInit    /    undefined reference to __imp_ilInit
+#     Forwarding CMAKE_PREFIX_PATH alone did NOT fix this: the header was found,
+#     the LIBRARY was still not on the link line, because IL_LIB was never set.
+#
+# So resolve BOTH by hand from what the OUTER build already found and hand them to
+# CEGUI's cache variables. This runs on EVERY platform, because the same two
+# finders miss on Flatpak (GLEW), on macOS and Windows (DevIL), and on armhf - a
+# hint that names the library the outer build is already using cannot make a
+# working finder worse, and it is the only thing that makes the failing ones pass.
+
+# GLEW. The static archive too, for CEGUI's static configuration
+# (CEGUI_BUILD_STATIC_CONFIGURATION=ON); where there is no separate static lib
+# (typical on Linux/macOS) the shared one stands in - CEGUI only needs GLEW_LIB
+# set to pass its configure check and compile the OpenGL renderer, the final TSC
+# link provides the actual GLEW (TSC_GLEW_LIBRARIES).
+find_path(TSC_CEGUI_GLEW_INC NAMES GL/glew.h HINTS ${GLEW_INCLUDE_DIRS})
+find_library(TSC_CEGUI_GLEW_LIB NAMES glew32 GLEW glew HINTS "${GLEW_INCLUDE_DIRS}/../lib")
+set(_saved_suffixes "${CMAKE_FIND_LIBRARY_SUFFIXES}")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+find_library(TSC_CEGUI_GLEW_LIB_STATIC NAMES glew32 glew32s GLEW glew HINTS "${GLEW_INCLUDE_DIRS}/../lib")
+set(CMAKE_FIND_LIBRARY_SUFFIXES "${_saved_suffixes}")
+if (NOT TSC_CEGUI_GLEW_LIB_STATIC)
+  set(TSC_CEGUI_GLEW_LIB_STATIC "${TSC_CEGUI_GLEW_LIB}")
+endif()
+if (TSC_CEGUI_GLEW_INC AND TSC_CEGUI_GLEW_LIB)
+  message(STATUS "CEGUI GLEW hint: lib=${TSC_CEGUI_GLEW_LIB} static=${TSC_CEGUI_GLEW_LIB_STATIC} inc=${TSC_CEGUI_GLEW_INC}")
+  list(APPEND TSC_CEGUI_PLATFORM_ARGS
+    "-DGLEW_H_PATH=${TSC_CEGUI_GLEW_INC}"
+    "-DGLEW_LIB=${TSC_CEGUI_GLEW_LIB}"
+    "-DGLEW_LIB_DBG=${TSC_CEGUI_GLEW_LIB}"
+    "-DGLEW_LIB_STATIC=${TSC_CEGUI_GLEW_LIB_STATIC}"
+    "-DGLEW_LIB_STATIC_DBG=${TSC_CEGUI_GLEW_LIB_STATIC}")
+else()
+  message(WARNING "GLEW not resolved for the CEGUI sub-build; its finder may still fail")
+endif()
+
+# DevIL (IL, and ILU). find_package(DevIL REQUIRED) above set IL_LIBRARIES /
+# IL_INCLUDE_DIR / ILU_LIBRARIES; hand them to CEGUI's IL_LIB / IL_H_PATH /
+# ILU_LIB so its DevIL image codec links libIL instead of leaving _il* undefined.
+find_path(TSC_CEGUI_IL_INC NAMES IL/il.h HINTS ${IL_INCLUDE_DIR})
+if (NOT TSC_CEGUI_IL_INC AND IL_INCLUDE_DIR)
+  set(TSC_CEGUI_IL_INC "${IL_INCLUDE_DIR}")
+endif()
+# Prefer the exact library the outer find_package(DevIL) resolved; fall back to a
+# find_library by name if it only exported an imported target.
+set(TSC_CEGUI_IL_LIB "${IL_LIBRARIES}")
+if (NOT TSC_CEGUI_IL_LIB)
+  find_library(TSC_CEGUI_IL_LIB NAMES IL DevIL libIL HINTS "${TSC_CEGUI_IL_INC}/../lib")
+endif()
+set(TSC_CEGUI_ILU_LIB "${ILU_LIBRARIES}")
+if (NOT TSC_CEGUI_ILU_LIB)
+  find_library(TSC_CEGUI_ILU_LIB NAMES ILU HINTS "${TSC_CEGUI_IL_INC}/../lib")
+endif()
+if (TSC_CEGUI_IL_INC AND TSC_CEGUI_IL_LIB)
+  message(STATUS "CEGUI DevIL hint: il=${TSC_CEGUI_IL_LIB} ilu=${TSC_CEGUI_ILU_LIB} inc=${TSC_CEGUI_IL_INC}")
+  list(APPEND TSC_CEGUI_PLATFORM_ARGS
+    "-DIL_H_PATH=${TSC_CEGUI_IL_INC}"
+    "-DIL_LIB=${TSC_CEGUI_IL_LIB}")
+  if (TSC_CEGUI_ILU_LIB)
+    list(APPEND TSC_CEGUI_PLATFORM_ARGS "-DILU_LIB=${TSC_CEGUI_ILU_LIB}")
   endif()
-  if (TSC_CEGUI_GLEW_INC AND TSC_CEGUI_GLEW_LIB)
-    message(STATUS "CEGUI GLEW hint: lib=${TSC_CEGUI_GLEW_LIB} static=${TSC_CEGUI_GLEW_LIB_STATIC} inc=${TSC_CEGUI_GLEW_INC}")
-    list(APPEND TSC_CEGUI_PLATFORM_ARGS
-      "-DGLEW_H_PATH=${TSC_CEGUI_GLEW_INC}"
-      "-DGLEW_LIB=${TSC_CEGUI_GLEW_LIB}"
-      "-DGLEW_LIB_DBG=${TSC_CEGUI_GLEW_LIB}"
-      "-DGLEW_LIB_STATIC=${TSC_CEGUI_GLEW_LIB_STATIC}"
-      "-DGLEW_LIB_STATIC_DBG=${TSC_CEGUI_GLEW_LIB_STATIC}")
-  else()
-    message(WARNING "GLEW not resolved for the CEGUI sub-build; its finder may still fail")
-  endif()
+else()
+  message(WARNING "DevIL not resolved for the CEGUI sub-build; its DevIL image codec may not link libIL")
 endif()
 
 # The CEGUI sub-build is a separate cmake run, so it also does not inherit
