@@ -16,27 +16,27 @@ name: Windows
 # 64-BIT is the build that works. MSYS2's UCRT64 environment has SFML 3.0.2,
 # which is what TSC needs since the SFML 3 port (#729).
 #
-# 32-BIT is attempted and is expected to fail, which is why it is
-# continue-on-error rather than absent. MSYS2 ended 32-bit support in May 2024,
-# and what is left of the mingw32 repository is a TOOLCHAIN without libraries:
-# its database carries 247 packages against ucrt64's 3917, and while
-# mingw-w64-i686-gcc (16.1.0), -cmake, -ninja and -pkg-config are all still
-# there, sfml, boost, glew, glm, devil and libxml++ are all gone. That is what
-# pacman reports, six times over:
-#
+# 32-BIT builds against a WeKan-maintained mirror. MSYS2 ended 32-bit support in
+# May 2024: the mingw32 database still carries the TOOLCHAIN (gcc 16.1.0, cmake,
+# ninja, pkgconf) but every i686 LIBRARY - sfml, boost, glew, glm, freetype,
+# libxml++, ... - was delisted, so `pacman -S mingw-w64-i686-sfml` says
 #   error: target not found: mingw-w64-i686-sfml
+# even though the .pkg.tar.zst is still physically served from
+# https://repo.msys2.org/mingw/mingw32/ (it is only gone from the db).
 #
-# Do not be misled by browsing https://mirror.msys2.org/mingw/mingw32/ - it
-# still LISTS mingw-w64-i686-sfml-3.0.2-1-any.pkg.tar.zst. That file is a
-# leftover that is no longer in mingw32.db, so pacman cannot see it and no
-# amount of retrying will install it.
+# So the delisted libraries are mirrored and re-served with a regenerated db, and
+# the one package MSYS2 no longer builds at all - libxml++ 2.6, its current
+# libxmlpp being 5.x - is rebuilt for i686. The win32 job installs the toolchain
+# from the live mingw32 db and everything else from that mirror, whose pacman
+# Server URL is the repo/org variable MINGW32_MIRROR. The mirror + package tooling
+# lives in the wekan repo's log/ directory: mirror-mingw.sh (mirror the leftovers),
+# build-mingw32-package.sh + pkgbuilds/mingw-w64-libxml++2.6 (rebuild libxml++),
+# regenerate-mirror-db.sh (make it a working repo), upload-msys2-mirror-to-github.sh
+# and generate-msys2-mirror-site.sh (host it on GitHub Releases + Pages).
 #
-# The job is kept because that is a fact about MSYS2 today rather than about
-# TSC, and it should
-# be a job whose log says so on every run rather than a platform that quietly
-# disappeared from the release. If 32-bit matters more than this, the way back
-# is to build the dependency chain from source for i686 (as the AppImage build
-# already does for SFML) rather than to take it from a package repository.
+# It stays continue-on-error (expected_to_fail) until MINGW32_MIRROR is set and
+# the mirror is populated; then the Install-win32-libraries step succeeds, win32
+# builds, and expected_to_fail can be removed.
 #
 # The installers are made by CPack's NSIS generator, which tsc/CMakeLists.txt
 # already configures - installer icon, desktop shortcut, the lot - so this runs
@@ -120,10 +120,38 @@ jobs:
           - name: win64
             msystem: UCRT64
             prefix: mingw-w64-ucrt-x86_64
+            # win64 gets everything from MSYS2's own ucrt64 repo, as before.
+            setup_install: >-
+              git patch bison gperf
+              mingw-w64-ucrt-x86_64-toolchain
+              mingw-w64-ucrt-x86_64-cmake
+              mingw-w64-ucrt-x86_64-ninja
+              mingw-w64-ucrt-x86_64-pkgconf
+              mingw-w64-ucrt-x86_64-ruby
+              mingw-w64-ucrt-x86_64-sfml
+              mingw-w64-ucrt-x86_64-libxml++2.6
+              mingw-w64-ucrt-x86_64-boost
+              mingw-w64-ucrt-x86_64-glew
+              mingw-w64-ucrt-x86_64-glm
+              mingw-w64-ucrt-x86_64-freetype
+              mingw-w64-ucrt-x86_64-expat
+              mingw-w64-ucrt-x86_64-libpng
+              mingw-w64-ucrt-x86_64-gettext
+              mingw-w64-ucrt-x86_64-nsis
           - name: win32
             msystem: MINGW32
             prefix: mingw-w64-i686
             expected_to_fail: true
+            # win32 installs ONLY the toolchain here - MSYS2 delisted every i686
+            # LIBRARY when it dropped 32-bit, so gcc/cmake/ninja/pkgconf are all
+            # that pacman can still see in mingw32. The libraries come from the
+            # WeKan mirror in the next step (see the MINGW32_MIRROR note below).
+            setup_install: >-
+              git patch bison gperf
+              mingw-w64-i686-toolchain
+              mingw-w64-i686-cmake
+              mingw-w64-i686-ninja
+              mingw-w64-i686-pkgconf
     defaults:
       run:
         shell: msys2 {0}
@@ -150,25 +178,47 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           update: true
-          # No cegui and no mruby: TSC compiles both itself (#709).
-          install: >-
-            git patch bison gperf
-            ${{ matrix.prefix }}-toolchain
-            ${{ matrix.prefix }}-cmake
-            ${{ matrix.prefix }}-ninja
-            ${{ matrix.prefix }}-pkgconf
-            ${{ matrix.prefix }}-ruby
-            ${{ matrix.prefix }}-sfml
-            ${{ matrix.prefix }}-libxml++2.6
-            ${{ matrix.prefix }}-boost
-            ${{ matrix.prefix }}-glew
-            ${{ matrix.prefix }}-glm
-            ${{ matrix.prefix }}-devil
-            ${{ matrix.prefix }}-freetype
-            ${{ matrix.prefix }}-expat
-            ${{ matrix.prefix }}-libpng
-            ${{ matrix.prefix }}-gettext
-            ${{ matrix.prefix }}-nsis
+          # No cegui and no mruby: TSC compiles both itself (#709). No devil: TSC
+          # switched CEGUI to its built-in STB image codec, so DevIL is gone. The
+          # per-arch package set is matrix.setup_install (win64: everything from
+          # ucrt64; win32: only the toolchain - its libraries come next).
+          install: ${{ matrix.setup_install }}
+
+      # win32 only: MSYS2 dropped 32-bit, so its i686 LIBRARY packages (sfml,
+      # boost, glew, freetype, ..., and libxml++2.6) are delisted from mingw32.db
+      # and `pacman -S` them says "target not found". They still exist, and are
+      # served - together with a rebuilt mingw-w64-i686-libxml++2.6 (MSYS2's
+      # current libxmlpp is 5.x; TSC needs the 2.6 API) - by the WeKan-maintained
+      # mirror, whose pacman Server URL is the repo/org variable MINGW32_MIRROR.
+      # See the mirror + package tooling in the wekan repo's log/ scripts:
+      # mirror-mingw.sh, build-mingw32-package.sh, regenerate-mirror-db.sh,
+      # upload-msys2-mirror-to-github.sh. Until MINGW32_MIRROR is set this step
+      # fails with that message - which is why win32 stays expected_to_fail.
+      - name: Install win32 libraries from the WeKan mirror
+        if: ${{ env.BUILD_THIS == 'true' && matrix.msystem == 'MINGW32' }}
+        run: |
+          set -euo pipefail
+          MIRROR='${{ vars.MINGW32_MIRROR }}'
+          if [ -z "$MIRROR" ]; then
+            echo "::error::win32 needs the MINGW32_MIRROR repository (or organization) variable set to your mirror's pacman Server URL, e.g. https://github.com/wekan/msys2-mirror/releases/download/mingw-mingw32 . MSYS2 dropped 32-bit; the i686 libraries and the rebuilt libxml++2.6 come from that mirror. See the log/ mirror scripts."
+            exit 1
+          fi
+          printf '\n[mingw32-mirror]\nSigLevel = Optional TrustAll\nServer = %s\n' "$MIRROR" >> /etc/pacman.conf
+          pacman -Sy --noconfirm
+          # The same libraries win64 got from ucrt64, taken from the mirror. The
+          # toolchain (installed above) stays from the live mingw32 db.
+          pacman -S --needed --noconfirm \
+            mingw-w64-i686-ruby \
+            mingw-w64-i686-sfml \
+            mingw-w64-i686-libxml++2.6 \
+            mingw-w64-i686-boost \
+            mingw-w64-i686-glew \
+            mingw-w64-i686-glm \
+            mingw-w64-i686-freetype \
+            mingw-w64-i686-expat \
+            mingw-w64-i686-libpng \
+            mingw-w64-i686-gettext \
+            mingw-w64-i686-nsis
 
       - name: Build TSC
         if: ${{ env.BUILD_THIS == 'true' }}
