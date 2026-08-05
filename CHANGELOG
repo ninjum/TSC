@@ -1,6 +1,21 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Fix: The macOS "attach to the release" job could never publish a
+		disk image, whether or not one had been built. Its "Collect the
+		disk images" step ends with a warning whose closing quote was
+		missing, and bash - which parses a script one command at a time -
+		ran everything before it and then hit EOF inside the unterminated
+		string: "unexpected EOF while looking for matching `\"'", exit 2,
+		after the images had been collected and with nothing else wrong.
+		The same step also ran `find parts` before checking that `parts`
+		exists; when every build job fails, download-artifact creates no
+		such directory, `find` exits non-zero and `set -e` ended the step
+		on a bare "find: 'parts': No such file or directory" - hiding the
+		"No macOS disk image was produced at all" message the step already
+		had ready for exactly that case. The quote is closed and the
+		directory is created empty first, so a good run publishes and a
+		failed one says why. (by Lauri Ojansivu)
 	* Change: The 32-bit Windows (win32) build is built against a
 		WeKan-maintained MSYS2 mirror instead of failing on MSYS2's
 		dropped packages. MSYS2 ended 32-bit support in May 2024 and

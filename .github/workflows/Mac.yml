@@ -321,7 +321,15 @@ jobs:
       - name: Collect the disk images
         run: |
           set -euo pipefail
-          mkdir -p assets
+          # `parts` does not exist when every build job failed: download-artifact
+          # then has nothing to download and creates no directory, and `find` on
+          # a directory that is not there exits non-zero - which under `set -e`
+          # ended this step with a bare
+          #     find: 'parts': No such file or directory
+          # BEFORE it could reach the message below that says what actually
+          # happened. Creating it empty costs nothing and lets the diagnostic
+          # this step already carries do its job.
+          mkdir -p assets parts
           find parts -name '*.dmg' -o -name '*.md5sum' -o -name '*.sha256sum' \
             | while read -r f; do cp "$f" assets/; done
           ls -l assets 2>/dev/null || true
@@ -329,8 +337,13 @@ jobs:
             echo "::error::No macOS disk image was produced at all; nothing is uploaded."
             exit 1
           fi
+          # The closing quote of this warning was missing, so bash - which parses
+          # a script one command at a time - ran everything above and then hit
+          # EOF inside an unterminated string: "unexpected EOF while looking for
+          # matching `\"'". That failed the publish job on a GOOD run, after the
+          # disk images had been collected and with nothing else wrong.
           ls assets/*universal* >/dev/null 2>&1 || \
-            echo "::warning::no universal disk image - it needs both an arm64 and an x86_64 build; the per-CPU ones are published
+            echo "::warning::no universal disk image - it needs both an arm64 and an x86_64 build; the per-CPU ones are published on their own."
 
       - name: Work out which release to attach to
         id: release
