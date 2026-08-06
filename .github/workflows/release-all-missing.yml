@@ -243,6 +243,14 @@ jobs:
     uses: ./.github/workflows/Repos.yml
     permissions:
       contents: write
+    # secrets: inherit passes WEBSITE_TOKEN through to Repos.yml. A reusable
+    # workflow inherits NONE of the caller's secrets unless this is here, so
+    # without it Repos.yml sees an empty WEBSITE_TOKEN, skips its website-commit
+    # step every time, and the download pages never get the checksums of the
+    # packages this run filled in - they reach the GitHub release but not the
+    # webpage that offers them. This is what makes "add the hashes to the
+    # download webpages too" actually happen.
+    secrets: inherit
     with:
       tag: ${{ needs.plan.outputs.tag }}
 
