@@ -1,6 +1,6 @@
-3000-01-01  Nobody  <nobody@example.com>
+2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
-	* Version unreleased.
+	* Version 2.2.0-beta2.
 	* Misc: "Release all" and "Release all missing" now update the
 		website's download pages for the release they build. A new
 		script, .github/scripts/update-download-pages.py, reads the
@@ -136,10 +136,6 @@
 		objects directory. It now uploads only assets/*.flatpak and their
 		checksums; the repository is published separately, to GitHub
 		Pages, not to the release. (by Lauri Ojansivu)
-
-2026-08-03  Lauri Ojansivu  <x@xet7.org>
-
-	* Version 2.2.0-beta2.
 	* Fix: CEGUI now uses its built-in STB image codec instead of
 		DevIL, which never linked on macOS or Windows. CEGUI is built
 		statically, and its DevIL finder then demands a STATIC libIL
