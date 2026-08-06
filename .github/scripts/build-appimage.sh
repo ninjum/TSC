@@ -23,10 +23,13 @@
 #   TSC_OUT       where the AppImage is written           (default: ./dist)
 #
 # Produces, in $TSC_OUT, named the way the .deb assets are named - the game,
-# the version, what it runs on - and with the same two checksum files beside it:
+# the version, what it runs on - and with the same two checksum files beside it.
+# The checksum files KEEP the full asset name and append .md5sum/.sha256sum, so
+# the AppImage and the Flatpak of the same architecture (both TSC-<version>-<arch>)
+# do not write to the same checksum file and overwrite each other:
 #   TSC-<version>-<arch>.AppImage
-#   TSC-<version>-<arch>.md5sum
-#   TSC-<version>-<arch>.sha256sum
+#   TSC-<version>-<arch>.AppImage.md5sum
+#   TSC-<version>-<arch>.AppImage.sha256sum
 
 set -euo pipefail
 
@@ -171,8 +174,8 @@ chmod +x "$out/${name}.AppImage"
 
 (
     cd "$out"
-    md5sum    "${name}.AppImage" > "${name}.md5sum"
-    sha256sum "${name}.AppImage" > "${name}.sha256sum"
+    md5sum    "${name}.AppImage" > "${name}.AppImage.md5sum"
+    sha256sum "${name}.AppImage" > "${name}.AppImage.sha256sum"
 )
 
 echo "Built $out/${name}.AppImage"

@@ -20,11 +20,14 @@ name: Release all missing
 # prints `<kind> <selector> <asset> <sums|nosums>`, and the selector is exactly
 # what each workflow's `only` input filters its matrix on.
 #
-# An asset counts as present only when its CHECKSUMS are there too (.md5sum and
-# .sha256sum, named with the extension dropped). A package whose checksum upload
-# failed is a half-published release, and calling it present would leave it that
-# way. The build-script zips are the exception - they are published without
-# checksums, so expected-assets.sh marks them `nosums`.
+# An asset counts as present only when its CHECKSUMS are there too: <asset>.md5sum
+# and <asset>.sha256sum, keeping the asset's full name (extension included) so
+# that two assets sharing a stem - an AppImage and a Flatpak of one CPU, an .exe
+# and a .7z of one build - each get their own pair instead of one overwriting the
+# other's checksum. A package whose checksum upload failed is a half-published
+# release, and calling it present would leave it that way. The build-script zips
+# are the exception - they are published without checksums, so expected-assets.sh
+# marks them `nosums`.
 #
 # WHAT THIS CANNOT FIX: a package that is missing because it CANNOT be built
 # will be attempted again on every run. Today that is win32 (MSYS2's mingw32 has
@@ -106,8 +109,7 @@ jobs:
           while read -r kind selector asset sums; do
             need="$asset"
             if [ "$sums" = "sums" ]; then
-              base="${asset%.*}"
-              need="$need ${base}.md5sum ${base}.sha256sum"
+              need="$need ${asset}.md5sum ${asset}.sha256sum"
             fi
             have=yes
             for n in $need; do
@@ -273,8 +275,7 @@ jobs:
           while read -r kind selector asset sums; do
             need="$asset"
             if [ "$sums" = "sums" ]; then
-              base="${asset%.*}"
-              need="$need ${base}.md5sum ${base}.sha256sum"
+              need="$need ${asset}.md5sum ${asset}.sha256sum"
             fi
             for n in $need; do
               grep -qxF "$n" now.txt || { still="$still $kind/$selector"; break; }

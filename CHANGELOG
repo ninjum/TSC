@@ -1,6 +1,22 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Fix: "Release all" and "Release all missing" now add the
+		checksums that some assets had none of. Each build
+		workflow named its checksum files with the extension
+		dropped - TSC-<version>-x86_64.AppImage was checksummed
+		as TSC-<version>-x86_64.md5sum - so two assets that share
+		a stem wrote to one name and whichever ran second
+		overwrote the first: the x86_64 and aarch64 AppImages
+		lost theirs to the same-arch Flatpak, and the win64 .exe
+		to the win64 .7z, which is why those three had no md5 or
+		sha256 on the v2.2.0-beta2 release. The checksum files
+		keep the full asset name now
+		(TSC-<version>-x86_64.AppImage.md5sum), so every asset
+		gets its own pair; expected-assets.sh and
+		release-all-missing.yml look for the new names, so a
+		re-run over that release fills in the missing checksums.
+		(by Lauri Ojansivu)
 	* Fix: Every macOS build still failed with "no template named
 		'auto_ptr' in namespace 'std'", although the std::auto_ptr shim
 		added for exactly that was force-included in the very command

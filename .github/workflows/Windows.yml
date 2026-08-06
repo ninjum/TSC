@@ -252,8 +252,11 @@ jobs:
             ext="${f##*.}"
             name="TSC-${version}-${{ matrix.name }}.${ext}"
             cp "$f" "dist/$name"
-            ( cd dist && md5sum "$name" > "${name%.$ext}.md5sum" \
-                      && sha256sum "$name" > "${name%.$ext}.sha256sum" )
+            # The checksum files keep the full name including .exe/.7z, so the
+            # installer and the archive of one build get a pair each instead of
+            # both writing TSC-<version>-<name>.md5sum and one clobbering the other.
+            ( cd dist && md5sum "$name" > "${name}.md5sum" \
+                      && sha256sum "$name" > "${name}.sha256sum" )
             n=$((n + 1))
           done
           if [ "$n" -eq 0 ]; then
@@ -329,8 +332,8 @@ jobs:
 
           name="TSC-${version}-windows"
           ( cd dist
-            md5sum    "${name}.exe" > "${name}.md5sum"
-            sha256sum "${name}.exe" > "${name}.sha256sum" )
+            md5sum    "${name}.exe" > "${name}.exe.md5sum"
+            sha256sum "${name}.exe" > "${name}.exe.sha256sum" )
           ls -l dist
 
       - uses: actions/upload-artifact@v4

@@ -11,9 +11,13 @@
 # release-all-missing.yml can say "build these three and nothing else".
 #
 # The CHECKSUMS are not listed, they are DERIVED. Every one of these workflows
-# writes `<name>.md5sum` and `<name>.sha256sum` beside the file with the
-# extension DROPPED - TSC-2.2.0-beta2-x86_64.AppImage is checksummed as
-# TSC-2.2.0-beta2-x86_64.md5sum - so `sums` means "and those two as well". Such
+# writes `<asset>.md5sum` and `<asset>.sha256sum` beside the file, KEEPING the
+# asset's full name - TSC-2.2.0-beta2-x86_64.AppImage is checksummed as
+# TSC-2.2.0-beta2-x86_64.AppImage.md5sum - so `sums` means "and those two as
+# well". Keeping the extension is what stops two assets that share a stem (the
+# x86_64 AppImage and the x86_64 Flatpak, the win64 .exe and the win64 .7z) from
+# writing to the same checksum file and clobbering each other - which is exactly
+# why the earlier extension-dropped naming left some assets with no checksum. Such
 # an asset counts as present only when all three are there: a package whose
 # checksum upload failed is a half-published release, and treating the package
 # alone as present would leave it that way.
@@ -26,10 +30,12 @@
 # notice it is missing - which is the one way this script can be wrong without
 # anything failing.
 #
-# Verified against the real v2.2.0-beta2 release: the 44 assets it carries are
-# exactly the ones this prints, minus the .deb for resolute armhf, the armhf
-# AppImage, both Flatpaks, both Windows installers and every macOS image - which
-# are precisely the jobs that failed in that run.
+# NOTE on v2.2.0-beta2: its assets were checksummed under the OLD extension-
+# dropped naming, so the x86_64 and aarch64 AppImages and the win64 .exe went
+# without a checksum of their own - the same-stem Flatpak and .7z overwrote the
+# shared checksum file. Re-running "Release all" or "Release all missing" over
+# that release with this workflow rebuilds them and writes the per-asset checksum
+# files (<asset>.md5sum / <asset>.sha256sum), filling those gaps in.
 
 set -euo pipefail
 

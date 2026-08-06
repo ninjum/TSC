@@ -42,15 +42,17 @@
 # TSC_DATA_ONLY=1 builds only the data package. The workflow uses it to build
 # that package ONCE rather than six identical times.
 #
-# Produces, in $TSC_OUT, named as the v2.2.0-beta1 release named things - the
-# checksum files drop the .deb from their own name but still refer to the .deb
-# inside, which is what makes `md5sum -c` work next to the package:
+# Produces, in $TSC_OUT. The checksum files KEEP the full asset name and append
+# .md5sum/.sha256sum - so every asset has its own pair, and two assets that share
+# a stem (an AppImage and a Flatpak of one CPU, an .exe and a .7z) can never
+# write to the same checksum file. The line inside still refers to the .deb, so
+# `md5sum -c` works next to the package:
 #   TSC-<version>-<distro>-<arch>.deb        (tsc, per CPU)
-#   TSC-<version>-<distro>-<arch>.md5sum
-#   TSC-<version>-<distro>-<arch>.sha256sum
+#   TSC-<version>-<distro>-<arch>.deb.md5sum
+#   TSC-<version>-<distro>-<arch>.deb.sha256sum
 #   TSC-<version>-data-all.deb               (tsc-data, every CPU)
-#   TSC-<version>-data-all.md5sum
-#   TSC-<version>-data-all.sha256sum
+#   TSC-<version>-data-all.deb.md5sum
+#   TSC-<version>-data-all.deb.sha256sum
 
 set -euo pipefail
 
@@ -163,8 +165,8 @@ data_name="TSC-${version}-data-all"
 dpkg-deb -Zxz --build "$datadir" "$out/${data_name}.deb"
 (
     cd "$out"
-    md5sum    "${data_name}.deb" > "${data_name}.md5sum"
-    sha256sum "${data_name}.deb" > "${data_name}.sha256sum"
+    md5sum    "${data_name}.deb" > "${data_name}.deb.md5sum"
+    sha256sum "${data_name}.deb" > "${data_name}.deb.sha256sum"
 )
 echo "Built $out/${data_name}.deb"
 ls -l "$out/${data_name}.deb"
@@ -255,8 +257,8 @@ dpkg-deb -Zxz --build "$pkgdir" "$out/${name}.deb"
 
 (
     cd "$out"
-    md5sum    "${name}.deb" > "${name}.md5sum"
-    sha256sum "${name}.deb" > "${name}.sha256sum"
+    md5sum    "${name}.deb" > "${name}.deb.md5sum"
+    sha256sum "${name}.deb" > "${name}.deb.sha256sum"
 )
 
 echo "Built $out/${name}.deb"
