@@ -1,6 +1,21 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Misc: "Release all" and "Release all missing" now update the
+		website's download pages for the release they build. A new
+		script, .github/scripts/update-download-pages.py, reads the
+		release's assets and its .md5sum/.sha256sum files and
+		rewrites the Beta Version tables on the en/es/fi download
+		pages of Secretchronicles/secretchronicles.github.io -
+		every package's download link and its md5 and sha256 - so
+		the page stops advertising an old beta the moment a new one
+		is built. Repos.yml does it in the same commit that
+		publishes the apt/AppImage/Flatpak repositories, from the
+		same release, so the page that offers a download and the
+		repository that serves it cannot drift apart; the section
+		lives between HTML markers so each run is a clean
+		replacement. Needs the WEBSITE_TOKEN secret, as the repo
+		push already did. (by Lauri Ojansivu)
 	* Fix: "Release all" and "Release all missing" now add the
 		checksums that some assets had none of. Each build
 		workflow named its checksum files with the extension

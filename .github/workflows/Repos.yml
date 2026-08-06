@@ -15,9 +15,12 @@ name: Repos
 # WHERE IT GOES. The website is a separate repository
 # (Secretchronicles/secretchronicles.github.io), so this uploads the three trees
 # as one artifact and, if a WEBSITE_TOKEN secret exists, commits them there
-# directly. Without the secret it stops at the artifact and says so - a workflow
-# should not need a credential to be useful, and copying three directories by
-# hand is a small price for not having to hold a token.
+# directly. In the same commit it rewrites the en/es/fi download pages for this
+# release - links and md5/sha256 for every asset - with
+# .github/scripts/update-download-pages.py, so the page that offers a download
+# and the repository that serves it always describe the same release. Without the
+# secret it stops at the artifact and says so, printing the one command to update
+# the pages by hand - a workflow should not need a credential to be useful.
 #
 # THEY ARE UNSIGNED. Signing needs a GPG key, which is a secret rather than
 # something a build can invent, so the apt list line uses [trusted=yes] and the
@@ -36,6 +39,11 @@ on:
         required: false
         default: true
         type: boolean
+      push_to_website:
+        description: 'Update the download pages and commit the repositories to the website (needs WEBSITE_TOKEN)'
+        required: false
+        default: true
+        type: boolean
   workflow_dispatch:
     inputs:
       tag:
@@ -43,7 +51,7 @@ on:
         required: false
         type: string
       push_to_website:
-        description: 'Commit them to the website repository (needs WEBSITE_TOKEN)'
+        description: 'Update the download pages and commit the repositories to the website (needs WEBSITE_TOKEN)'
         required: false
         default: false
         type: boolean
@@ -249,26 +257,42 @@ jobs:
           if-no-files-found: error
 
       # Optional, and only when a token exists: a workflow that needs a
-      # credential to do anything useful is a workflow nobody can run.
-      - name: Commit them to the website
+      # credential to do anything useful is a workflow nobody can run. This does
+      # two things to the website in one commit: it rewrites the en/es/fi
+      # download pages so they list THIS release's packages, links and checksums
+      # (update-download-pages.py), and it drops in the three package
+      # repositories built above. Both come from the same release, so the page
+      # that offers a download and the repository that serves it cannot drift
+      # apart or lag a release behind - which is how the page came to still show
+      # v2.2.0-beta1.
+      - name: Update the download pages and commit them to the website
         if: ${{ inputs.push_to_website && env.WEBSITE_TOKEN != '' }}
         env:
           WEBSITE_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.assets.outputs.tag }}
         run: |
           set -euo pipefail
           git clone --depth 1 \
             "https://x-access-token:${WEBSITE_TOKEN}@github.com/Secretchronicles/secretchronicles.github.io.git" website
+
+          # The download pages: links and checksums for this release's assets.
+          python3 .github/scripts/update-download-pages.py "$TAG" website
+
+          # The package repositories the pages point people at.
           rm -rf website/apt website/appimage website/flatpak
           cp -a site/apt site/appimage site/flatpak website/ 2>/dev/null || true
+
           cd website
           git config user.name "Lauri Ojansivu"
           git config user.email "x@xet7.org"
           git add -A
           if git diff --cached --quiet; then
-            echo "The repositories are unchanged."
+            echo "The website is already up to date for $TAG."
             exit 0
           fi
-          git commit -m "Package repositories from ${{ steps.assets.outputs.tag }}"
+          git commit -m "Download pages and package repositories from $TAG"
           git push
           echo "Pushed to the website."
 
@@ -279,8 +303,10 @@ jobs:
         run: |
           echo "The repositories are in the website-repos artifact of this run."
           echo "Download it and copy apt/, appimage/ and flatpak/ into the root"
-          echo "of Secretchronicles/secretchronicles.github.io."
+          echo "of Secretchronicles/secretchronicles.github.io, then update the"
+          echo "download pages for this release with:"
+          echo "  python3 .github/scripts/update-download-pages.py ${{ steps.assets.outputs.tag }} <website-checkout>"
           if [ -z "${WEBSITE_TOKEN:-}" ]; then
             echo "Set a WEBSITE_TOKEN secret and re-run with push_to_website to"
-            echo "have this workflow commit them instead."
+            echo "have this workflow update the pages and commit everything itself."
           fi
