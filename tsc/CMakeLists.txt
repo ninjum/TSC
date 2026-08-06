@@ -297,12 +297,38 @@ install(TARGETS tsc
   COMPONENT base)
 
 if(WIN32)
+  # CEGUI's CoreWindowRendererSet is loaded at RUNTIME, so GetPrerequisites does
+  # not see it in tsc.exe and it used to be appended to the list by name. That
+  # name came from CEGUI_CoreWindowRendererSet_LIBRARY, which only FindCEGUI.cmake
+  # sets - i.e. only when CEGUI is FOUND on the system. Windows builds CEGUI here
+  # instead (ProvideCEGUI.cmake, USE_SYSTEM_CEGUI defaults to OFF), so the
+  # variable was empty and, expanded at configure time into the install script,
+  # generated
+  #
+  #     get_filename_component(CEGUI_CoreWindowRendererSet  NAME)
+  #
+  # - two arguments where three are required. Every win64 package died there:
+  # "CMake Error at .../cmake_install.cmake:57 (get_filename_component): called
+  # with incorrect number of arguments", then "CPack Error: Error when generating
+  # package: TSC", after a build that had otherwise succeeded.
+  #
+  # So the name is resolved HERE, where it can be tested, and the append is
+  # skipped when there is nothing to append. That is also the truth of the
+  # Windows build: CEGUI is linked STATICALLY into tsc.exe (CEGUI_STATIC), so the
+  # window-renderer set is already inside the executable and there is no separate
+  # module to install beside it.
+  set(TSC_EXTRA_RUNTIME_LIB "")
+  if(CEGUI_CoreWindowRendererSet_LIBRARY)
+    get_filename_component(TSC_EXTRA_RUNTIME_LIB
+      "${CEGUI_CoreWindowRendererSet_LIBRARY}" NAME)
+    string(REPLACE ".a" "" TSC_EXTRA_RUNTIME_LIB "${TSC_EXTRA_RUNTIME_LIB}")
+  endif()
   install(CODE
     "include(GetPrerequisites)
     get_prerequisites(\"${CMAKE_CURRENT_BINARY_DIR}/tsc.exe\" LIBLIST 1 1 \"\" \"\" )
-    get_filename_component(CEGUI_CoreWindowRendererSet ${CEGUI_CoreWindowRendererSet_LIBRARY} NAME)
-    string(REPLACE \".a\" \"\" CEGUI_CoreWindowRendererSet \${CEGUI_CoreWindowRendererSet})
-    list(APPEND LIBLIST \${CEGUI_CoreWindowRendererSet}) # Not detected, but still required
+    if(NOT \"${TSC_EXTRA_RUNTIME_LIB}\" STREQUAL \"\")
+      list(APPEND LIBLIST \"${TSC_EXTRA_RUNTIME_LIB}\") # not detected, but still required
+    endif()
     foreach(LIB \${LIBLIST})
       gp_resolve_item(\"${CMAKE_CURRENT_BINARY_DIR}/tsc.exe\" \"\${LIB}\" \"\" \"\" resolved_item)
       list(APPEND LIBS \${resolved_item})

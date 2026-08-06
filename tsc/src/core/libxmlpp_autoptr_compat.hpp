@@ -32,10 +32,24 @@
 #ifndef TSC_LIBXMLPP_AUTOPTR_COMPAT_HPP
 #define TSC_LIBXMLPP_AUTOPTR_COMPAT_HPP
 
-#if defined(_LIBCPP_VERSION) && !defined(TSC_HAVE_STD_AUTO_PTR)
-#define TSC_HAVE_STD_AUTO_PTR
-
+/* FIRST, unconditionally: _LIBCPP_VERSION is defined by libc++'s <__config>, and
+ * nothing has included a standard header yet when a force-included file is
+ * processed. Testing it before this include is testing an undefined macro, which
+ * is always false - so the shim below compiled to NOTHING and every macOS build
+ * still failed on "no template named 'auto_ptr' in namespace 'std'", with the
+ * -include flag present in the very command that failed. <cstddef> is the
+ * cheapest header that pulls in the configuration. */
 #include <cstddef>
+
+/* libc++ removed std::auto_ptr in C++17. Up to libc++ 17 it could be brought
+ * back with _LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR; from libc++ 18 that escape
+ * hatch is gone. So: define one only under libc++, only in C++17 or later, and
+ * only when that restore macro is NOT set - in every other case the standard
+ * library's own auto_ptr exists and this header must not touch it. */
+#if defined(_LIBCPP_VERSION) && (__cplusplus >= 201703L) \
+    && !defined(_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR) \
+    && !defined(TSC_HAVE_STD_AUTO_PTR)
+#define TSC_HAVE_STD_AUTO_PTR
 
 namespace std {
 
@@ -82,6 +96,21 @@ public:
 
 } // namespace std
 
-#endif // _LIBCPP_VERSION && !TSC_HAVE_STD_AUTO_PTR
+#endif // libc++ && C++17 && no restore macro
+
+/* If this header is force-included on macOS and still did NOT provide an
+ * auto_ptr, and the standard library was not asked to restore its own, then
+ * every translation unit that includes a libxml++ header is about to fail with
+ * "no template named 'auto_ptr' in namespace 'std'" - a message that says
+ * nothing about this file. Say it here instead, once, where the reason is.
+ * That is not hypothetical: the first version of this header tested
+ * _LIBCPP_VERSION before including any standard header, so the macro was always
+ * undefined, the shim compiled to nothing, and the build failed exactly that way
+ * with -include right there in the failing command line. */
+#if defined(__APPLE__) && (__cplusplus >= 201703L) \
+    && !defined(TSC_HAVE_STD_AUTO_PTR) \
+    && !defined(_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR)
+#warning "libxmlpp_autoptr_compat.hpp did nothing: no std::auto_ptr will exist, and libxml++ 2.6 headers need one. Is this really libc++ (is _LIBCPP_VERSION defined after <cstddef>)?"
+#endif
 
 #endif // TSC_LIBXMLPP_AUTOPTR_COMPAT_HPP

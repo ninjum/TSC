@@ -1,6 +1,45 @@
 3000-01-01  Nobody  <nobody@example.com>
 
 	* Version unreleased.
+	* Fix: Every macOS build still failed with "no template named
+		'auto_ptr' in namespace 'std'", although the std::auto_ptr shim
+		added for exactly that was force-included in the very command
+		that failed. The shim's guard was
+		`#if defined(_LIBCPP_VERSION)`, tested BEFORE it included any
+		standard header - and _LIBCPP_VERSION is defined by libc++'s
+		<__config>, which nothing had pulled in yet, because a
+		force-included file is the first thing the compiler sees. The
+		macro was therefore always undefined, the shim compiled to
+		nothing, and libxml++ 2.6's `std::auto_ptr<Impl> pimpl_;`
+		members broke every translation unit that includes a libxml++
+		header - and with xmlpp::SaxParser ill-formed, the classes
+		deriving from it (cCampaignLoader, cLevelLoader, the overworld
+		loaders) failed after it. The header now includes <cstddef>
+		first and then tests libc++ + C++17 + the absence of
+		_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR, so it defines auto_ptr
+		exactly when the standard library has none; and if it ever ends
+		up inert on macOS again it says so itself with a #warning
+		naming the reason, instead of leaving a wall of errors that
+		mention neither the shim nor libxml++. (by Lauri Ojansivu)
+	* Fix: The 64-bit Windows installer could never be packaged: the
+		build succeeded and CPack then died with "CMake Error at
+		cmake_install.cmake:57 (get_filename_component): called with
+		incorrect number of arguments", so neither the NSIS installer
+		nor the 7z archive was produced and the release job had nothing
+		to attach. The Windows install(CODE) block appends CEGUI's
+		CoreWindowRendererSet to the prerequisite list by name, because
+		it is loaded at runtime and GetPrerequisites cannot see it, and
+		it took that name from CEGUI_CoreWindowRendererSet_LIBRARY -
+		which only FindCEGUI.cmake sets, i.e. only when CEGUI is found
+		on the system. Windows builds CEGUI here instead
+		(ProvideCEGUI.cmake, USE_SYSTEM_CEGUI defaults to OFF), so the
+		variable was empty and, expanded at configure time into the
+		generated install script, left `get_filename_component(VAR
+		NAME)` - two arguments where three are required. The name is
+		resolved at configure time now, where it can be tested, and
+		nothing is appended when there is nothing to append: with the
+		static CEGUI the Windows build uses, the window-renderer set is
+		already linked into tsc.exe. (by Lauri Ojansivu)
 	* Fix: The macOS "attach to the release" job could never publish a
 		disk image, whether or not one had been built. Its "Collect the
 		disk images" step ends with a warning whose closing quote was
