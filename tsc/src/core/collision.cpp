@@ -46,62 +46,51 @@ void cObjectCollisionType::Add(cObjectCollision* obj)
     cObject_Manager<cObjectCollision>::Add(obj);
 }
 
+// std::binary_function and std::bind2nd were deprecated in C++11 and REMOVED
+// in C++17, which TSC uses for SFML 3. libstdc++ still provided them, so Linux
+// built; macOS's libc++ does not, so every Is_Included/Find_First below failed
+// to compile with "no template named 'binary_function'" and "no member named
+// 'bind2nd'". Each predicate is now a lambda that captures what bind2nd used to
+// bind as the functor's second argument - the same comparison, no removed API.
+
 // check if sprite
-struct check_if_sprite : public std::binary_function<cObjectCollision*, const cSprite*, bool> {
-    bool operator()(const cObjectCollision* col, const cSprite* sprite) const
-    {
-        return col->m_obj == sprite;
-    }
-};
 bool cObjectCollisionType::Is_Included(const cSprite* obj)
 {
-    return std::find_if(objects.begin(), objects.end(), std::bind2nd(check_if_sprite(), obj)) != objects.end();
+    return std::find_if(objects.begin(), objects.end(),
+                        [obj](const cObjectCollision* col) { return col->m_obj == obj; }) != objects.end();
 }
 
 // check if array type
-struct check_if_sprite_array : public std::binary_function<cObjectCollision*, ArrayType, bool> {
-    bool operator()(const cObjectCollision* col, ArrayType type) const
-    {
-        return col->m_obj->m_sprite_array == type;
-    }
-};
 bool cObjectCollisionType::Is_Included(const ArrayType type)
 {
-    return std::find_if(objects.begin(), objects.end(), std::bind2nd(check_if_sprite_array(), type)) != objects.end();
+    return std::find_if(objects.begin(), objects.end(),
+                        [type](const cObjectCollision* col) { return col->m_obj->m_sprite_array == type; }) != objects.end();
 }
 
 // check if sprite type
-struct check_if_sprite_type : public std::binary_function<cObjectCollision*, SpriteType, bool> {
-    bool operator()(const cObjectCollision* col, SpriteType type) const
-    {
-        return col->m_obj->m_type == type;
-    }
-};
 bool cObjectCollisionType::Is_Included(const SpriteType type)
 {
-    return std::find_if(objects.begin(), objects.end(), std::bind2nd(check_if_sprite_type(), type)) != objects.end();
+    return std::find_if(objects.begin(), objects.end(),
+                        [type](const cObjectCollision* col) { return col->m_obj->m_type == type; }) != objects.end();
 }
 
 // check if validation type
-struct check_if_valid_type : public std::binary_function<cObjectCollision*, Col_Valid_Type, bool> {
-    bool operator()(const cObjectCollision* col, Col_Valid_Type type) const
-    {
-        return col->m_valid_type == type;
-    }
-};
 bool cObjectCollisionType::Is_Included(const Col_Valid_Type type)
 {
-    return std::find_if(objects.begin(), objects.end(), std::bind2nd(check_if_valid_type(), type)) != objects.end();
+    return std::find_if(objects.begin(), objects.end(),
+                        [type](const cObjectCollision* col) { return col->m_valid_type == type; }) != objects.end();
 }
 
 cObjectCollision* cObjectCollisionType::Find_First(const ArrayType type)
 {
-    return *std::find_if(objects.begin(), objects.end(), std::bind2nd(check_if_sprite_array(), type));
+    return *std::find_if(objects.begin(), objects.end(),
+                         [type](const cObjectCollision* col) { return col->m_obj->m_sprite_array == type; });
 }
 
 cObjectCollision* cObjectCollisionType::Find_First(const SpriteType type)
 {
-    return *std::find_if(objects.begin(), objects.end(), std::bind2nd(check_if_sprite_type(), type));
+    return *std::find_if(objects.begin(), objects.end(),
+                         [type](const cObjectCollision* col) { return col->m_obj->m_type == type; });
 }
 
 /* *** *** *** *** *** *** *** cObjectCollision *** *** *** *** *** *** *** *** *** *** */

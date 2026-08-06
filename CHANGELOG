@@ -1,6 +1,16 @@
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: The macOS build failed to compile src/core/collision.cpp
+		with "no template named 'binary_function'" and "no member
+		named 'bind2nd'". Both std::binary_function and std::bind2nd
+		were deprecated in C++11 and removed in C++17, which TSC
+		uses for SFML 3; libstdc++ still provided them so Linux
+		built, but macOS's libc++ does not. The four collision
+		predicates (Is_Included and Find_First over sprite, array
+		type, sprite type and validation type) are lambdas now,
+		capturing what bind2nd used to bind as the second argument -
+		the same comparison, no removed API. (by Lauri Ojansivu)
 	* Misc: "Release all" and "Release all missing" now update the
 		website's download pages for the release they build. A new
 		script, .github/scripts/update-download-pages.py, reads the
