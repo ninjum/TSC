@@ -39,11 +39,15 @@ namespace TSC {
      * a) on Windows by looking at the path of the running
      * executable and applying "../../share/tsc" to it, or
      *
-     * b) on any other system by assuming the data resides in
-     * TSC_DATA_DIR, which is set to the value of the
-     * CMAKE_INSTALL_DATADIR option given at compile time plus "/tsc"
-     * appended to it (see config.hpp.in). CMAKE_INSTALL_DATADIR
-     * defaults to CMAKE_INSTALL_PREFIX plus "share" if not given.
+     * b) on any other system by Determine_Game_Data_Dir() in data_dir.hpp,
+     * which prefers, in order, the $TSC_DATA_DIR environment variable, the
+     * $APPDIR an AppImage exports, the location of the running executable,
+     * and finally the path compiled in at build time: the value of the
+     * CMAKE_INSTALL_DATADIR option plus "/tsc" appended to it (see
+     * config.hpp.in). CMAKE_INSTALL_DATADIR defaults to CMAKE_INSTALL_PREFIX
+     * plus "share" if not given. The first three exist because a build can be
+     * RELOCATED - an AppImage runs its /usr tree from a mount point under
+     * /tmp, where the compiled-in path is not there at all.
      *
      * The user directory is determined at runtime platform-specifically.
      */

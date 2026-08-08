@@ -1,3 +1,53 @@
+2026-08-09  Lauri Ojansivu  <x@xet7.org>
+
+	* Version unreleased.
+	* Fix: The AppImage started and then aborted before drawing
+		anything, with "CEGUI::FileIOException ...
+		/usr/share/tsc/gui/schemes/TSCLook256.scheme does not
+		exist". It carried all of its game data, but looked for
+		it at the path compiled in at build time - /usr/share/tsc
+		- and an AppImage is never installed there: its /usr tree
+		is mounted under /tmp/.mount_TSCxxxxxx when it runs, so
+		the compiled-in path belongs to some other TSC or to
+		nothing at all. On Unix the game data directory is now
+		decided by Determine_Game_Data_Dir() in
+		src/core/filesystem/data_dir.cpp, which takes the first of
+		$TSC_DATA_DIR, $APPDIR plus the compiled-in path (the
+		AppImage runtime exports $APPDIR), the running
+		executable's own location from /proc/self/exe with
+		"../share/tsc" applied, and finally the compiled-in path
+		itself, which is still the answer for an installed
+		package. The executable's location is consulted BEFORE
+		the compiled-in path so that a machine with a system TSC
+		installed does not have that other version's data loaded
+		into the AppImage. This also fixes every other relocated
+		build: an unpacked --appimage-extract tree, a tarball, and
+		the developer build from ./build-tsc.sh, which installs
+		into a relative prefix and until now only found its data
+		when started from the right working directory. (by Lauri
+		Ojansivu)
+	* Misc: New option "tsc --print-paths" prints the game data
+		directory, the user data directory and the preferences
+		file, and exits nonzero when the game data is not where
+		TSC will look for it. It opens no window and touches no
+		OpenGL, so it answers "why does it not start" over ssh and
+		in a container - and .github/scripts/build-appimage.sh now
+		runs it against the AppImage it just packed, unpacked so
+		the check works on the emulated armhf job too, and refuses
+		to publish one that cannot find its own game data. (by
+		Lauri Ojansivu)
+	* Misc: New standalone tests in tsc/testing, run by
+		tsc/testing/run-tests.sh. They need only a C++ compiler -
+		no SFML, no CEGUI, no boost, no display and no installed
+		game - so both ./build-tsc.sh and the packaging jobs in
+		.github/scripts/build-tsc.sh run them before compiling
+		anything. The first of them, data_dir_test.cpp, drives the
+		game data directory decision against a fake directory
+		tree and pins the AppImage case above, the installed case,
+		the relocated cases, and that an empty $TSC_DATA_DIR or a
+		stale $APPDIR is ignored rather than used as a path. (by
+		Lauri Ojansivu)
+
 2026-08-03  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.

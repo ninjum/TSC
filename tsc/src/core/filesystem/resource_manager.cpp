@@ -25,6 +25,7 @@
 #endif
 
 #include "resource_manager.hpp"
+#include "data_dir.hpp"
 #include "filesystem.hpp"
 #include "../property_helper.hpp"
 #include "../errors.hpp"
@@ -352,17 +353,22 @@ void cResource_Manager::init_directories()
     game_folder_location += "/Resources/data";
     m_paths.game_data_dir = utf8_to_path(game_folder_location);
 #else
-    // Use the path configured at build time. If it is relative, construct
-    // it from the install prefix, if it is absolute, take it as is.
-    boost::filesystem::path datadir = utf8_to_path(INSTALL_DATADIR);
-
-    if (datadir.is_relative())
-        datadir = utf8_to_path(INSTALL_PREFIX) / datadir;
-
-    // Append our program-specific subdirectory
-    datadir /= utf8_to_path("tsc");
-
-    m_paths.game_data_dir = datadir;
+    // The path configured at build time is the normal answer, but it is not
+    // the only one: an AppImage mounts its whole /usr tree somewhere under
+    // /tmp at runtime, so a compiled-in /usr/share/tsc does not exist there
+    // and the game aborted while loading its CEGUI scheme. Determine_Game_Data_Dir
+    // looks at $TSC_DATA_DIR, at the AppImage's $APPDIR and at the running
+    // executable's own location before falling back to the compiled-in path.
+    m_paths.game_data_dir = utf8_to_path(Determine_Game_Data_Dir(
+        getenv("TSC_DATA_DIR"),
+        getenv("APPDIR"),
+        Running_Executable_Path(),
+        INSTALL_PREFIX,
+        INSTALL_DATADIR,
+        [](const std::string& dir) -> bool {
+            boost::system::error_code error;
+            return fs::is_directory(utf8_to_path(dir), error);
+        }));
 #endif
 
     ////////// The (writeable) user directories //////////

@@ -107,6 +107,7 @@ int main(int argc, char** argv)
                 cout << "-d, --debug\tEnable debug modes with the options : game performance" << endl;
                 cout << "-l, --level\tLoad the given level" << endl;
                 cout << "-w, --world\tLoad the given world" << endl;
+                cout << "    --print-paths\tShow where the game looks for its files, and exit" << endl;
                 return EXIT_SUCCESS;
             }
             // version
@@ -121,6 +122,37 @@ int main(int argc, char** argv)
 #ifdef TSC_VERSION_GIT
                 std::cout << "It was compiled from commit " << TSC_VERSION_GIT << "." << std::endl;
 #endif
+                return EXIT_SUCCESS;
+            }
+            // where the game looks for its files
+            else if (arguments[i] == "--print-paths") {
+                // Only the path logic runs here: no window, no OpenGL, no
+                // sound, so this works over ssh and in a CI container. It is
+                // the answer to "why does it not start" - and it EXITS
+                // NONZERO when the game data is not where TSC will look for
+                // it, which is what the packaging jobs check a built AppImage
+                // with before it is published.
+                cResource_Manager paths;
+
+                boost::filesystem::path datadir = paths.Get_Game_Data_Directory();
+                boost::filesystem::path scheme  = paths.Get_Gui_Scheme_Directory() / utf8_to_path("TSCLook256.scheme");
+
+                cout << "Game data directory: " << path_to_utf8(datadir) << endl;
+                cout << "User data directory: " << path_to_utf8(paths.Get_User_Data_Directory()) << endl;
+                cout << "Preferences file:    " << path_to_utf8(paths.Get_Preferences_File()) << endl;
+
+                if (!boost::filesystem::is_directory(datadir)) {
+                    cerr << "Error: the game data directory does not exist." << endl;
+                    return EXIT_FAILURE;
+                }
+                // The file the game aborted on when the data directory was
+                // wrong; the directory alone existing is not enough.
+                if (!boost::filesystem::exists(scheme)) {
+                    cerr << "Error: " << path_to_utf8(scheme) << " does not exist." << endl;
+                    return EXIT_FAILURE;
+                }
+
+                cout << "The game data is in place." << endl;
                 return EXIT_SUCCESS;
             }
             // debug

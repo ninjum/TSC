@@ -89,7 +89,12 @@ CMakeLists.txt.user*
 /build-deb
 /AppDir
 /.appimage-tools
+# Where the packed AppImage is unpacked again to check it finds its game data.
+/.appimage-check
 /dist
+
+# The standalone tests (tsc/testing/run-tests.sh) build here.
+/tsc/testing/build-tests
 
 # Installer
 /tsc/extras/Setup/*.exe

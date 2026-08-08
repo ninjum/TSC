@@ -172,6 +172,31 @@ fi
 mv "$produced" "$out/${name}.AppImage"
 chmod +x "$out/${name}.AppImage"
 
+# Does the packed AppImage actually FIND its game data? This is what the
+# 2.2.0-beta2 AppImage got wrong: it carried all 240 MB of it and then looked
+# for it at the compiled-in /usr/share/tsc, which does not exist on the machine
+# it runs on, so it aborted with
+#   CEGUI::FileIOException ... /usr/share/tsc/gui/schemes/TSCLook256.scheme does
+#   not exist
+# before drawing a single frame. `tsc --print-paths` resolves the paths exactly
+# as the game does and exits nonzero when the data is not there - and it opens
+# no window, so it runs in this container.
+#
+# The AppImage is UNPACKED for the check instead of being executed: its runtime
+# is a static-PIE binary, which qemu-user cannot load on the emulated armhf job
+# (the same reason linuxdeploy is unpacked above). The tsc inside is dynamic and
+# runs. Unpacked is also the harder case - no AppImage runtime means no $APPDIR
+# is exported, so this proves the game finds its data from its own location.
+check="$repo_root/.appimage-check"
+extract_appimage "$out/${name}.AppImage" "$check"
+# TSC reads $HOME for the XDG user directories and refuses to start without
+# one; a container that has none would fail this check for the wrong reason.
+if ! env HOME="${HOME:-/tmp}" "$check/usr/bin/tsc" --print-paths; then
+    echo "build-appimage.sh: the packed AppImage cannot find its game data" >&2
+    exit 1
+fi
+rm -rf "$check"
+
 (
     cd "$out"
     md5sum    "${name}.AppImage" > "${name}.AppImage.md5sum"

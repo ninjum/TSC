@@ -283,6 +283,23 @@ TSC.
 $ /opt/tsc/bin/tsc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+TSC finds its game data next to that executable — `bin/tsc` looks in
+`../share/tsc` — so the whole install directory can be moved or copied
+elsewhere and still work. If it ever looks in the wrong place, ask it
+where it is looking:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ /opt/tsc/bin/tsc --print-paths
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+which prints the game data directory, the user data directory and the
+preferences file, and exits with a nonzero status if the game data is
+not there. Setting `TSC_DATA_DIR` overrides the search entirely:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$ TSC_DATA_DIR=/somewhere/else/share/tsc /opt/tsc/bin/tsc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
 

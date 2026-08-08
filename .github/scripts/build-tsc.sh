@@ -46,6 +46,13 @@ git submodule update --init --recursive
 
 cd tsc
 
+# The standalone tests, before anything is compiled: they need only a C++
+# compiler and they take a couple of seconds, so every packaging job runs them
+# and a broken one stops the release here rather than in a bug report about a
+# published binary. That is how the 2.2.0-beta2 AppImage got out unable to find
+# its own game data.
+bash testing/run-tests.sh
+
 # A build directory left over from a previous run would carry that run's cmake
 # cache, including its CMAKE_BUILD_TYPE and prefix.
 rm -rf build

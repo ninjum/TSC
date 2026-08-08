@@ -7,6 +7,9 @@ git submodule update
 # Change to tsc directory
 cd tsc
 
+# The standalone tests (a C++ compiler is all they need, no SFML and no display)
+./testing/run-tests.sh
+
 # Delete old build files
 rm -rf build
 mkdir build
