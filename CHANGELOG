@@ -1,6 +1,6 @@
 2026-08-09  Lauri Ojansivu  <x@xet7.org>
 
-	* Version unreleased.
+	* Version 2.2.0-beta2.
 	* Fix: A release workflow could be stopped from LOADING by its own
 		`only` input. Each of AppImage.yml, Deb.yml, Flatpak.yml,
 		Mac.yml and Windows.yml decided which matrix entries to build
@@ -26,15 +26,22 @@
 		interpolated into a command line, and the "nothing was built"
 		error points at the version job as well as at the build logs.
 		(by Lauri Ojansivu)
-	* Misc: The standalone tests (tsc/testing/run-tests.sh) run shell
-		suites as well as compiled ones. The first is
-		testing/matrix-only-test.sh, which pins what the `only` input
-		accepts and refuses, that no workflow hands a raw input to
-		fromJSON any more, and that every selector
-		.github/scripts/expected-assets.sh can produce is one its
-		workflow accepts - so "Release all missing" cannot ask for an
-		asset with a selector the workflow would now reject. (by Lauri
-		Ojansivu)
+	* Misc: New standalone tests, in tsc/testing, run by
+		tsc/testing/run-tests.sh. They need only a C++ compiler and a
+		shell - no SFML, no CEGUI, no boost, no display and no
+		installed game - so both ./build-tsc.sh and the packaging jobs
+		in .github/scripts/build-tsc.sh run them before compiling
+		anything. There are two. data_dir_test.cpp drives the game data
+		directory decision against a fake directory tree and pins the
+		AppImage case, the installed case, the relocated cases, and
+		that an empty $TSC_DATA_DIR or a stale $APPDIR is ignored
+		rather than used as a path. testing/matrix-only-test.sh pins
+		what the workflows' `only` input accepts and refuses, that no
+		workflow hands a raw input to fromJSON any more, and that every
+		selector .github/scripts/expected-assets.sh can produce is one
+		its workflow accepts - so "Release all missing" cannot ask for
+		an asset with a selector the workflow would now reject. (by
+		Lauri Ojansivu)
 	* Fix: The AppImage started and then aborted before drawing
 		anything, with "CEGUI::FileIOException ...
 		/usr/share/tsc/gui/schemes/TSCLook256.scheme does not
@@ -70,21 +77,6 @@
 		the check works on the emulated armhf job too, and refuses
 		to publish one that cannot find its own game data. (by
 		Lauri Ojansivu)
-	* Misc: New standalone tests in tsc/testing, run by
-		tsc/testing/run-tests.sh. They need only a C++ compiler -
-		no SFML, no CEGUI, no boost, no display and no installed
-		game - so both ./build-tsc.sh and the packaging jobs in
-		.github/scripts/build-tsc.sh run them before compiling
-		anything. The first of them, data_dir_test.cpp, drives the
-		game data directory decision against a fake directory
-		tree and pins the AppImage case above, the installed case,
-		the relocated cases, and that an empty $TSC_DATA_DIR or a
-		stale $APPDIR is ignored rather than used as a path. (by
-		Lauri Ojansivu)
-
-2026-08-03  Lauri Ojansivu  <x@xet7.org>
-
-	* Version 2.2.0-beta2.
 	* Fix: The macOS build failed to compile src/core/collision.cpp
 		with "no template named 'binary_function'" and "no member
 		named 'bind2nd'". Both std::binary_function and std::bind2nd
