@@ -62,7 +62,7 @@ on:
         default: true
         type: boolean
       only:
-        description: 'Only build these matrix entries, as a JSON array (e.g. ["15-arm64","26-arm64"]); empty = all of them'
+        description: 'Only these macOS runner and architecture pairs - 15-arm64 26-arm64 15-x86_64 - as 15-arm64,26-arm64 or ["15-arm64","26-arm64"]; empty = all of them'
         required: false
         default: ''
         type: string
@@ -78,7 +78,7 @@ on:
         default: true
         type: boolean
       only:
-        description: 'Only build these matrix entries, as a JSON array (e.g. ["15-arm64","26-arm64"]); empty = all of them'
+        description: 'Only these macOS runner and architecture pairs - 15-arm64 26-arm64 15-x86_64 - as 15-arm64,26-arm64 or ["15-arm64","26-arm64"]; empty = all of them'
         required: false
         default: ''
         type: string
@@ -96,14 +96,39 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.read.outputs.version }}
+      only: ${{ steps.read.outputs.only }}
     steps:
       - uses: actions/checkout@v4
       - id: read
+        env:
+          # Through the environment, not interpolated into the script: an input
+          # pasted straight into a shell line is a value that can end the quote
+          # it sits in and keep going.
+          IN_ONLY: ${{ inputs.only }}
         run: |
           set -euo pipefail
           version="$(bash .github/scripts/changelog-version.sh)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "CHANGELOG says TSC is at $version"
+
+          # WHICH matrix entries this run wants, decided HERE rather than in a
+          # template expression on the build job, where `fromJSON` on a raw
+          # input is evaluated while the workflow TEMPLATE is parsed: hand it
+          # something that is not JSON and the run does not fail a build, it
+          # fails to LOAD ("The template is not valid ... Unexpected character
+          # encountered while parsing value"), killing every matrix entry
+          # before a single step runs. That is what `only: v2.2.0-beta2` did to
+          # AppImage.yml. matrix-only.sh accepts ["a","b"], a,b or a b, rejects
+          # anything else with a message naming the valid entries, and always
+          # prints valid JSON. The entries listed here are this workflow's
+          # matrix - keep them in step with it.
+          only="$(bash .github/scripts/matrix-only.sh "$IN_ONLY" 15-arm64 26-arm64 15-x86_64)"
+          echo "only=$only" >> "$GITHUB_OUTPUT"
+          if [ "$only" = '[]' ]; then
+            echo "Building every entry of the matrix."
+          else
+            echo "Building only: $only"
+          fi
 
   build:
     name: macOS ${{ matrix.macos }} ${{ matrix.arch }}
@@ -136,7 +161,7 @@ jobs:
     # A job-level env CAN see matrix, so the answer is computed once here and
     # every step below asks for it.
     env:
-      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.macos, matrix.arch)) }}
+      BUILD_THIS: ${{ needs.version.outputs.only == '[]' || contains(fromJSON(needs.version.outputs.only), format('{0}-{1}', matrix.macos, matrix.arch)) }}
 
     steps:
       - uses: actions/checkout@v4

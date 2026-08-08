@@ -53,7 +53,7 @@ on:
         default: true
         type: boolean
       only:
-        description: 'Only build these matrix entries, as a JSON array (e.g. ["resolute-armhf","forky-amd64"]); empty = all of them'
+        description: 'Only these distro-arch pairs - resolute-amd64 resolute-arm64 resolute-armhf resolute-ppc64el ... - as resolute-amd64,resolute-arm64 or ["resolute-amd64","resolute-arm64"]; empty = all of them'
         required: false
         default: ''
         type: string
@@ -69,7 +69,7 @@ on:
         default: true
         type: boolean
       only:
-        description: 'Only build these matrix entries, as a JSON array (e.g. ["resolute-armhf","forky-amd64"]); empty = all of them'
+        description: 'Only these distro-arch pairs - resolute-amd64 resolute-arm64 resolute-armhf resolute-ppc64el ... - as resolute-amd64,resolute-arm64 or ["resolute-amd64","resolute-arm64"]; empty = all of them'
         required: false
         default: ''
         type: string
@@ -88,6 +88,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.read.outputs.version }}
+      only: ${{ steps.read.outputs.only }}
     steps:
       - uses: actions/checkout@v4
 
@@ -95,11 +96,40 @@ jobs:
       # v2.2.0-beta2 and the package is 2.2.0-beta2, exactly as in beta1.
       - name: Read the version from CHANGELOG
         id: read
+        env:
+          # Through the environment, not interpolated into the script: an input
+          # pasted straight into a shell line is a value that can end the quote
+          # it sits in and keep going.
+          IN_ONLY: ${{ inputs.only }}
         run: |
           set -euo pipefail
           version="$(bash .github/scripts/changelog-version.sh)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "CHANGELOG says TSC is at $version"
+
+          # WHICH matrix entries this run wants, decided HERE rather than in a
+          # template expression on the build job, where `fromJSON` on a raw
+          # input is evaluated while the workflow TEMPLATE is parsed: hand it
+          # something that is not JSON and the run does not fail a build, it
+          # fails to LOAD ("The template is not valid ... Unexpected character
+          # encountered while parsing value"), killing every matrix entry
+          # before a single step runs. That is what `only: v2.2.0-beta2` did to
+          # AppImage.yml. matrix-only.sh accepts ["a","b"], a,b or a b, rejects
+          # anything else with a message naming the valid entries, and always
+          # prints valid JSON. The entries listed here are this workflow's
+          # matrix - keep them in step with it.
+          # `data` is in the list but is NOT a matrix entry: the architecture-
+          # independent tsc-data package is built by its own job, which runs
+          # whatever `only` says. release-all-missing.yml names it as a selector
+          # when that package is the missing one (expected-assets.sh: `deb data`),
+          # so refusing it here would fail the very run that came to build it.
+          only="$(bash .github/scripts/matrix-only.sh "$IN_ONLY" resolute-amd64 resolute-arm64 resolute-armhf resolute-ppc64el resolute-s390x resolute-riscv64 forky-amd64 forky-arm64 forky-armhf forky-ppc64el forky-s390x forky-riscv64 data)"
+          echo "only=$only" >> "$GITHUB_OUTPUT"
+          if [ "$only" = '[]' ]; then
+            echo "Building every entry of the matrix."
+          else
+            echo "Building only: $only"
+          fi
 
   build:
     name: ${{ matrix.distro }} ${{ matrix.arch }}
@@ -191,7 +221,7 @@ jobs:
     # A job-level env CAN see matrix, so the answer is computed once here and
     # every step below asks for it.
     env:
-      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), format('{0}-{1}', matrix.distro, matrix.arch)) }}
+      BUILD_THIS: ${{ needs.version.outputs.only == '[]' || contains(fromJSON(needs.version.outputs.only), format('{0}-{1}', matrix.distro, matrix.arch)) }}
 
     steps:
       # CEGUI, mruby and pod-parser are submodules TSC compiles itself, and

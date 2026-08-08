@@ -62,7 +62,7 @@ on:
         default: true
         type: boolean
       only:
-        description: 'Only build these matrix entries, as a JSON array (e.g. ["armhf","x86_64"]); empty = all of them'
+        description: 'Only these architectures - x86_64 aarch64 armhf - as x86_64,armhf or ["x86_64","armhf"]; empty = all of them'
         required: false
         default: ''
         type: string
@@ -74,7 +74,7 @@ on:
         default: true
         type: boolean
       only:
-        description: 'Only build these matrix entries, as a JSON array (e.g. ["armhf","x86_64"]); empty = all of them'
+        description: 'Only these architectures - x86_64 aarch64 armhf - as x86_64,armhf or ["x86_64","armhf"]; empty = all of them'
         required: false
         default: ''
         type: string
@@ -98,11 +98,18 @@ jobs:
     outputs:
       version: ${{ steps.read.outputs.version }}
       tag: ${{ steps.read.outputs.tag }}
+      only: ${{ steps.read.outputs.only }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Read the version from CHANGELOG
         id: read
+        env:
+          # Through the environment, not interpolated into the script: an input
+          # pasted straight into a shell line is a value that can end the quote
+          # it sits in and keep going.
+          IN_TAG: ${{ inputs.tag }}
+          IN_ONLY: ${{ inputs.only }}
         run: |
           set -euo pipefail
           # The version names the FILES; the tag names the RELEASE. They are the
@@ -110,11 +117,28 @@ jobs:
           # release-all.yml does, so every workflow in one run publishes to the
           # same place even if CHANGELOG has moved on since.
           version="$(bash .github/scripts/changelog-version.sh)"
-          tag='${{ inputs.tag }}'
+          tag="$IN_TAG"
           [ -n "$tag" ] || tag="v$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "CHANGELOG says TSC is at $version; publishing to $tag"
+
+          # WHICH matrix entries this run wants, decided HERE rather than in a
+          # template expression on the build job. The entries below are this
+          # workflow's matrix; matrix-only.sh accepts ["a","b"], a,b or a b,
+          # rejects anything else with a message that names the valid entries,
+          # and always prints valid JSON - so the `fromJSON` in the build job
+          # cannot take the whole workflow down the way `only: v2.2.0-beta2`
+          # once did (it failed to LOAD: "The template is not valid ...
+          # Unexpected character encountered while parsing value: v", killing
+          # all three architectures before a single step ran).
+          only="$(bash .github/scripts/matrix-only.sh "$IN_ONLY" x86_64 aarch64 armhf)"
+          echo "only=$only" >> "$GITHUB_OUTPUT"
+          if [ "$only" = '[]' ]; then
+            echo "Building every architecture."
+          else
+            echo "Building only: $only"
+          fi
 
   build:
     name: AppImage ${{ matrix.arch }}
@@ -136,16 +160,23 @@ jobs:
             docker_platform: linux/arm/v7
             runs_on: ubuntu-24.04
             emulated: true
-    # WHICH entries this run wants, decided here because it cannot be decided
-    # where it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes
-    # that context to runs-on, env, name, steps and a few others, but not to a
-    # job's own condition - and a workflow that tries answers
+    # WHETHER THIS ENTRY IS WANTED, asked here because it cannot be asked where
+    # it belongs. A job-level `if:` cannot see `matrix` - GitHub exposes that
+    # context to runs-on, env, name, steps and a few others, but not to a job's
+    # own condition - and a workflow that tries answers
     #   Unrecognized named-value: 'matrix'
     # and refuses to load at all, taking every workflow that CALLS it with it.
     # A job-level env CAN see matrix, so the answer is computed once here and
     # every step below asks for it.
+    #
+    # The list comes from the `version` job, which normalised and VALIDATED the
+    # `only` input in a shell. That matters: this expression is evaluated while
+    # the workflow template is parsed, so `fromJSON` on a raw input turned a
+    # mistyped value into "The template is not valid", with every architecture
+    # dead before its first step. `needs.version.outputs.only` is always valid
+    # JSON, and `[]` means all of them.
     env:
-      BUILD_THIS: ${{ inputs.only == '' || contains(fromJSON(inputs.only), matrix.arch) }}
+      BUILD_THIS: ${{ needs.version.outputs.only == '[]' || contains(fromJSON(needs.version.outputs.only), matrix.arch) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -211,8 +242,15 @@ jobs:
             built="$built $(basename "$f")"
           done
           if [ -z "$built" ]; then
-            echo "::error::No architecture produced an AppImage - every build" \
-                 "job failed. Their logs say why; nothing is uploaded."
+            # This job runs on always(), so it also speaks for the case where
+            # the build jobs never STARTED - a rejected `only` input stops the
+            # "read the version" job, and every build is skipped with it. The
+            # old message ("their logs say why") sent readers to three empty
+            # logs, so name the other place to look.
+            echo "::error::No AppImage was produced. Either every build job" \
+                 "failed - their logs say why - or none of them ran: check" \
+                 "the 'read the version' job, which rejects an unknown value" \
+                 "in the 'only' input. Nothing is uploaded."
             exit 1
           fi
           echo "AppImages built:"

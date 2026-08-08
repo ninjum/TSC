@@ -1,6 +1,40 @@
 2026-08-09  Lauri Ojansivu  <x@xet7.org>
 
 	* Version unreleased.
+	* Fix: A release workflow could be stopped from LOADING by its own
+		`only` input. Each of AppImage.yml, Deb.yml, Flatpak.yml,
+		Mac.yml and Windows.yml decided which matrix entries to build
+		with a template expression on the build job,
+		`contains(fromJSON(inputs.only), matrix.arch)`, and fromJSON
+		there is evaluated while the workflow TEMPLATE is parsed. A
+		value that is not JSON therefore did not fail a build, it
+		failed the run: dispatching AppImage with `only: v2.2.0-beta2`
+		answered "The template is not valid. .github/workflows/
+		AppImage.yml (Line: 148, Col: 19): Unexpected character
+		encountered while parsing value: v", all three architectures
+		died at "Prepare workflow directory" before a single step ran,
+		and the publish job then reported "No architecture produced an
+		AppImage - every build job failed" while their logs were empty.
+		The question is answered in a shell now, by the new
+		.github/scripts/matrix-only.sh, which the "read the version"
+		job of each workflow runs: it accepts ["a","b"], a,b or a b,
+		rejects anything else with a message naming that workflow's
+		valid entries, and always prints valid JSON - so the fromJSON
+		in the build job can no longer throw. The `only` input's
+		description now lists the entries it accepts, the tag and only
+		inputs reach the shell through the environment instead of being
+		interpolated into a command line, and the "nothing was built"
+		error points at the version job as well as at the build logs.
+		(by Lauri Ojansivu)
+	* Misc: The standalone tests (tsc/testing/run-tests.sh) run shell
+		suites as well as compiled ones. The first is
+		testing/matrix-only-test.sh, which pins what the `only` input
+		accepts and refuses, that no workflow hands a raw input to
+		fromJSON any more, and that every selector
+		.github/scripts/expected-assets.sh can produce is one its
+		workflow accepts - so "Release all missing" cannot ask for an
+		asset with a selector the workflow would now reject. (by Lauri
+		Ojansivu)
 	* Fix: The AppImage started and then aborted before drawing
 		anything, with "CEGUI::FileIOException ...
 		/usr/share/tsc/gui/schemes/TSCLook256.scheme does not

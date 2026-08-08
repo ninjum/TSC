@@ -49,6 +49,30 @@ run_test data_dir_test \
     "$here/data_dir_test.cpp" \
     "$src/core/filesystem/data_dir.cpp"
 
+# run_script NAME PATH - run a shell test suite, which needs no compiler at all.
+run_script() {
+    local name="$1" path="$2"
+
+    if [ ! -f "$path" ]; then
+        echo "===== $name: MISSING ($path)"
+        failures=$((failures + 1))
+        return
+    fi
+
+    echo "===== $name: running"
+    if bash "$path"; then
+        echo "===== $name: passed"
+    else
+        echo "===== $name: FAILED"
+        failures=$((failures + 1))
+    fi
+    echo
+}
+
+# The release workflows' `only` input: what it accepts, and that no workflow
+# hands a raw input to fromJSON, which used to stop a run from LOADING.
+run_script matrix_only_test "$here/../../testing/matrix-only-test.sh"
+
 if [ "$failures" -ne 0 ]; then
     echo "===== $failures test program(s) failed"
     exit 1
