@@ -57,6 +57,48 @@
 		sits on no default search path, shows find_package(LibIntl
 		REQUIRED) failing without its prefix, then finding it and linking
 		with it. (by Lauri Ojansivu)
+	* Fix: 26 CEGUI::RendererException lines while the game ran, and a
+		dummy image drawn for each. Not the bit depth this time:
+		png-bit-depth-test.sh passed 1029 of 1029 while every one of
+		these was broken, and each failing file is 8-bit and
+		non-interlaced. What they have in common is their COLOUR TYPE,
+		0 (greyscale) or 4 (greyscale+alpha) - 38 of the 1029 PNGs are
+		one of those two, and the 26 in the log are the ones that
+		session happened to open. CEGUI's STBImageCodec asks stb for
+		whatever channel count the file has, with
+		stbi_load_from_memory(..., &comp, 0), and then accepts only
+		comp 3 and 4; greyscale is ONE channel and greyscale+alpha TWO,
+		so stb decoded them perfectly well and the switch threw them
+		away with "Only RGB and RGBA images are supported". The new
+		cegui-stb-greyscale.patch, applied by ProvideCEGUI.cmake beside
+		the two patches already there, reloads those two cases asking
+		for RGBA - the same decoder doing the widening the caller would
+		otherwise do, since stb's convert_format has CASE(1,4), which
+		fills an opaque alpha, and CASE(2,4), which keeps the image's
+		own. 3- and 4-channel images are untouched, so the 962 that
+		already worked load exactly as before. Converting the 38 files
+		would also have worked and would have been wrong: it fixes
+		those 38 and nothing else, leaving a greyscale PNG in somebody
+		else's level still drawing a dummy image. Verified against the
+		real assets rather than by reading - compiling the codec's exact
+		logic against CEGUI's own vendored stb_image.cpp and running it
+		over the game data gives 38 rejected before and 0 after, and
+		over the 26 files named in the log, 26 before and 0 after. New
+		test testing/cegui-greyscale-test.sh. (by Lauri Ojansivu)
+	* Fix: An ordinary start reported two problems it does not have.
+		Every first run printed "Warning: Preferences file ... does not
+		exist. Using default values." on stderr - there is no
+		preferences file until something is saved, so the first thing a
+		new player saw was the game reporting a fault it did not have.
+		It is a fact on stdout now and still names the path, so an
+		EXISTING preferences file that stopped being found is as visible
+		as before. And "No joysticks available" printed on almost every
+		start, because most machines have no joystick, while its own
+		sibling "Joysticks found : N" was already behind m_debug - the
+		uninteresting answer loud, the interesting one silent. Both are
+		gated now. This is not only tidiness: the 26 image errors above
+		sat in exactly this noise. New test
+		testing/startup-messages-test.sh. (by Lauri Ojansivu)
 	* Fix: A release workflow could be stopped from LOADING by its own
 		`only` input. Each of AppImage.yml, Deb.yml, Flatpak.yml,
 		Mac.yml and Windows.yml decided which matrix entries to build
