@@ -108,7 +108,13 @@ cPreferences* cPreferences::Load_From_File(fs::path filename)
 {
     // If the preferences file doesn’t exist, use default values.
     if (!File_Exists(filename)) {
-        cerr << "Warning: Preferences file '" << path_to_utf8(filename) << "' does not exist. Using default values." << endl;
+        // A FACT on stdout, not a warning on stderr. Every first run reaches
+        // this - there is no preferences file until something is saved - so
+        // "Warning:" told a new player that something had gone wrong the very
+        // first time they started the game, and told a script's stderr the
+        // same. Nothing is wrong, and the path is still named so the case where
+        // an EXISTING file stopped being found is just as visible.
+        cout << "No preferences file at '" << path_to_utf8(filename) << "' yet; using default settings." << endl;
         cPreferences* p_pref = new cPreferences();
         p_pref->m_config_filename = filename;
         return p_pref;

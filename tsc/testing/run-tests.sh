@@ -102,6 +102,11 @@ run_script macos_libintl_test "$here/../../testing/macos-libintl-test.sh"
 # is why this is a second test and not another check inside that one.
 run_script cegui_greyscale_test "$here/../../testing/cegui-greyscale-test.sh"
 
+# An ordinary start is quiet. A first run has no preferences file and most
+# machines have no joystick, and both facts were reported as though something
+# had gone wrong - one of them on stderr, calling itself a Warning.
+run_script startup_messages_test "$here/../../testing/startup-messages-test.sh"
+
 if [ "$failures" -ne 0 ]; then
     echo "===== $failures test program(s) failed"
     exit 1

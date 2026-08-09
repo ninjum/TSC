@@ -64,7 +64,14 @@ int cJoystick::Init(void)
 
     // no joystick available
     if (m_num_joysticks == 0) {
-        cout << "No joysticks available" << endl;
+        // Debug-gated, like the "Joysticks found" line below it. Most machines
+        // have no joystick, so this printed on almost every start and said only
+        // that the computer is an ordinary computer - while the interesting
+        // case, a joystick that IS there, was the one nobody saw. The two are
+        // the same question and now answer at the same volume.
+        if (m_debug) {
+            cout << "No joysticks available" << endl;
+        }
         pPreferences->m_joy_enabled = 0;
         return 0;
     }
