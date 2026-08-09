@@ -80,6 +80,13 @@
 		saying the data is not where it will look for it, which is the
 		bug the check is there for. testing/build-appimage-test.sh pins
 		both halves. (by Lauri Ojansivu)
+	* Misc: The release scripts' Python bytecode is ignored. Running
+		.github/scripts/expected-assets.sh or any other release helper
+		leaves __pycache__ directories and .pyc files beside the
+		scripts, which then show up in git status and invite being
+		committed - build output for one machine's interpreter version,
+		useless to everybody else. .gitignore covers them now.
+		(by Lauri Ojansivu)
 	* Misc: New standalone tests, in tsc/testing, run by
 		tsc/testing/run-tests.sh. They need only a C++ compiler and a
 		shell - no SFML, no CEGUI, no boost, no display and no
