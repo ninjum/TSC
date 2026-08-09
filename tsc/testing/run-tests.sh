@@ -73,6 +73,11 @@ run_script() {
 # hands a raw input to fromJSON, which used to stop a run from LOADING.
 run_script matrix_only_test "$here/../../testing/matrix-only-test.sh"
 
+# Every PNG in the game data must be at least 8 bits per channel: the image
+# codec TSC ships decodes 8 and 16 only, and a 1-bit one aborted the 2.2.0-beta2
+# AppImage after it had drawn its loading bar.
+run_script png_bit_depth_test "$here/../../testing/png-bit-depth-test.sh"
+
 # What the AppImage packaging script may and may not fail a release for.
 run_script build_appimage_test "$here/../../testing/build-appimage-test.sh"
 

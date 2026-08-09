@@ -1,6 +1,37 @@
 2026-08-09  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.
+	* Fix: The AppImage drew its loading bar and then aborted with
+		"CEGUI::RendererException ... STBImageCodec - stb_image.c
+		based image codec failed to load image 'darkening.png'".
+		That file was a 1-BIT COLORMAP PNG. It had always been one,
+		and it had always worked - under DevIL. Switching CEGUI to
+		its built-in STB image codec, so the macOS and Windows
+		builds would link, quietly took away support for sub-8-bit
+		PNG depths: CEGUI 0.8 vendors an old stb_image.c that
+		decodes 8 and 16 bits only. Five files out of 1029 were
+		affected - darkening.png and the four screw_block middle
+		textures - and the first one the GUI touched killed the
+		process. All five are converted to 8-bit RGBA, which is
+		lossless for a palette of two colours and works with any
+		codec rather than only the one that happens to be linked.
+		(by Lauri Ojansivu)
+	* Misc: New test testing/png-bit-depth-test.sh, run by
+		tsc/testing/run-tests.sh, fails on any PNG in the game data
+		below 8 bits per channel. Nothing caught the bug above at
+		build time: the data is copied rather than decoded, so the
+		build succeeded, and "tsc --print-paths" confirms the data
+		is FINDABLE - the PREVIOUS bug - while saying nothing about
+		whether it DECODES. It only appeared when one particular
+		image was loaded, at runtime, on a machine with a display.
+		The test reads the bit depth straight out of each PNG's
+		IHDR with od, so it needs no image library, no `file` and no
+		Python; it names the offending files and prints the exact
+		conversion command; and it fails when it finds NO PNGs at
+		all, because a check that checked nothing must not report
+		success. Verified in both directions - it passes on the
+		converted data and fails on all five originals. (by Lauri
+		Ojansivu)
 	* Fix: A release workflow could be stopped from LOADING by its own
 		`only` input. Each of AppImage.yml, Deb.yml, Flatpak.yml,
 		Mac.yml and Windows.yml decided which matrix entries to build
