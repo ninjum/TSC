@@ -94,6 +94,14 @@ run_script link_flags_test "$here/../../testing/link-flags-test.sh"
 # fails.
 run_script macos_libintl_test "$here/../../testing/macos-libintl-test.sh"
 
+# The shipped image codec can read every PNG in the game data, greyscale
+# included. CEGUI's STB codec asked stb for the file's own channel count and
+# then accepted only 3 and 4, so all 38 greyscale images - one channel, or two
+# with alpha - were decoded fine and thrown away, and the game drew a dummy
+# image for each. png-bit-depth-test.sh passed 1029 of 1029 throughout, which
+# is why this is a second test and not another check inside that one.
+run_script cegui_greyscale_test "$here/../../testing/cegui-greyscale-test.sh"
+
 if [ "$failures" -ne 0 ]; then
     echo "===== $failures test program(s) failed"
     exit 1

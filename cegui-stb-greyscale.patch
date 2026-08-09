@@ -1,0 +1,37 @@
+--- a/cegui/src/ImageCodecModules/STB/ImageCodec.cpp
++++ b/cegui/src/ImageCodecModules/STB/ImageCodec.cpp
+@@ -66,6 +66,34 @@
+         return 0;
+     }
+ 
++    // A greyscale image decodes to ONE channel and greyscale+alpha to TWO, and
++    // CEGUI's Texture has no pixel format for either - so the switch below
++    // rejected both as "Invalid image format" even though stb_image had just
++    // decoded them perfectly well. Ask stb for RGBA in that case instead: it is
++    // the same decoder doing the widening the caller would otherwise have to do
++    // (convert_format's CASE(1,4) fills an opaque alpha, CASE(2,4) keeps the
++    // image's own), and 3- and 4-channel images are left completely untouched,
++    // so nothing that worked before changes size or format.
++    if (comp == 1 || comp == 2)
++    {
++        stbi_image_free(image);
++        image = stbi_load_from_memory(data.getDataPtr(),
++                                      data.getSize(),
++                                      &width, &height, &comp, 4);
++
++        if (!image)
++        {
++            Logger::getSingletonPtr()->logEvent(
++                "STBImageCodec::load - Invalid image data", Errors);
++
++            return 0;
++        }
++
++        // stb reports the FILE's channel count in comp even when asked to
++        // convert, so say what the buffer actually holds.
++        comp = 4;
++    }
++
+     Texture::PixelFormat format;
+     switch (comp) 
+     {
