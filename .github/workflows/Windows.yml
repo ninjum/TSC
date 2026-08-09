@@ -396,9 +396,13 @@ jobs:
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
+          IN_TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          tag='${{ inputs.tag }}'
+          # Through the environment, not interpolated into the script: a value
+          # pasted straight into a shell line can end the quote it sits in and
+          # keep going, and this one is typed into a dispatch box.
+          tag="$IN_TAG"
           # No tag given: the version CHANGELOG names, which is what the
           # release is called.
           [ -n "$tag" ] || tag="v$(bash .github/scripts/changelog-version.sh)"

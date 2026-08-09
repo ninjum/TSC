@@ -26,6 +26,19 @@
 		interpolated into a command line, and the "nothing was built"
 		error points at the version job as well as at the build logs.
 		(by Lauri Ojansivu)
+	* Fix: A release tag is no longer pasted into a shell line. Seven
+		steps across Deb.yml, Flatpak.yml, Mac.yml, Windows.yml,
+		Repos.yml, release-all.yml and release-all-missing.yml began
+		with `tag='${{ inputs.tag }}'`, which puts a value somebody
+		typed into a dispatch box inside a single-quoted shell string: a
+		quote in the value ends the string and the rest of it becomes
+		script. All seven read the value from the environment now, where
+		the shell never parses it, and so do the three steps of
+		AppImage.yml's publish job that carry the same value one hop
+		later as needs.version.outputs.tag. This is the same class as
+		the `only` input above - a hand-typed value reaching somewhere
+		that treats it as syntax - and testing/matrix-only-test.sh now
+		fails if any workflow puts one back. (by Lauri Ojansivu)
 	* Fix: The AppImage packaging script could fail a release for a
 		reason that is not the AppImage's. After packing, it unpacks what
 		it built and runs `tsc --print-paths` to prove the game finds its

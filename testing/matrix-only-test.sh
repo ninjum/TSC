@@ -164,6 +164,23 @@ check_kind deb Deb.yml
 check_kind mac Mac.yml
 check_kind windows Windows.yml
 
+# A RELEASE TAG MUST NOT BE PASTED INTO A SHELL LINE. `tag='${{ inputs.tag }}'`
+# puts a value somebody typed into a dispatch box inside a single-quoted string,
+# where a quote in the value ends the string and the rest of it becomes script.
+# Every one of them goes through the environment instead, so the shell sees a
+# variable and never parses the value. This is the same class as the `only`
+# input above: a hand-typed value reaching a place that treats it as syntax.
+echo
+for wf in "$repo"/.github/workflows/*.yml; do
+    name="$(basename "$wf")"
+    hits="$(grep -nE "^[^#]*(tag|TAG)=('|\")\\\$\{\{" "$wf" || true)"
+    if [ -z "$hits" ]; then
+        ok "$name: negative - no tag value is pasted into a shell line"
+    else
+        bad "$name: a tag value is pasted into a shell line: $hits"
+    fi
+done
+
 echo
 if [ "$failures" -ne 0 ]; then
     echo "===== $checks checks, $failures FAILED"

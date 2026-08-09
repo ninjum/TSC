@@ -262,25 +262,29 @@ jobs:
             esac
           done
 
-      # The release named by CHANGELOG. If it is not there yet this creates it,
-      # pinned to the commit that was built rather than to whatever the branch
-      # points at by the time anyone looks.
       # The release these AppImages go to. Created if it is not there yet, with
       # the CHANGELOG entry for its version as the notes - see
-      # .github/scripts/ensure-release.sh, which every workflow here shares.
+      # .github/scripts/ensure-release.sh, which every workflow here shares. It
+      # is pinned to the commit that was built, rather than to whatever the
+      # branch points at by the time anyone looks.
+      #
+      # TAG comes through the environment: it is the version job's output, but
+      # that output is `inputs.tag` when a caller gave one, so it is a value
+      # somebody typed and must not be pasted into a shell line.
       - name: Make sure the release exists
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
         run: |
           set -euo pipefail
-          bash .github/scripts/ensure-release.sh '${{ needs.version.outputs.tag }}' \
+          bash .github/scripts/ensure-release.sh "$TAG" \
             ${{ inputs.draft && '--draft' || '' }}
 
       - name: Upload them
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
         run: |
           set -euo pipefail
-          gh release upload '${{ needs.version.outputs.tag }}' \
-            assets/* --clobber
-          echo "Uploaded to $(gh release view '${{ needs.version.outputs.tag }}' --json url --jq .url)"
+          gh release upload "$TAG" assets/* --clobber
+          echo "Uploaded to $(gh release view "$TAG" --json url --jq .url)"
