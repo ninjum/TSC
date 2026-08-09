@@ -242,7 +242,51 @@ target_link_libraries(tsc
 
 # Passing --as-needed to ld ensures that we get the Win32 ld's behaviour
 # even on Linux and discover linking problems before building for Win32.
-set_property(TARGET tsc APPEND PROPERTY LINK_FLAGS "-Wl,--as-needed")
+#
+# It is a GNU ld and lld option, and Apple's linker does not have it. Passing it
+# there is not ignored, it is FATAL - every macOS build died at the very last
+# step, after compiling all 203 objects:
+#
+#   [203/203] Linking CXX executable tsc
+#   ld: unknown options: --as-needed
+#   clang++: error: linker command failed with exit code 1
+#
+# on macOS 15 x86_64, macOS 15 arm64 and macOS 26 arm64 alike, which is why a
+# release that carried 97 assets carried no disk image at all.
+#
+# So ask the LINKER whether it knows the flag, by actually linking with it,
+# rather than deciding from the platform: the flag belongs to the linker, and
+# which linker is in use is not something CMAKE_SYSTEM_NAME answers - lld on a
+# Mac would take it, and a cross-build might not. check_linker_flag would say
+# this in one line but it needs CMake 3.18, and this project supports 3.5.
+include(CheckCXXSourceCompiles)
+
+# Apple's equivalent. -dead_strip_dylibs drops the load commands for dylibs
+# nothing actually references, which is the part of --as-needed that finds the
+# over-linking this flag is here to find.
+foreach(_tsc_link_flag "-Wl,--as-needed" "-Wl,-dead_strip_dylibs")
+  if (NOT DEFINED TSC_LINK_TRIM_FLAG)
+    string(MAKE_C_IDENTIFIER "TSC_LINKER_ACCEPTS${_tsc_link_flag}" _tsc_link_var)
+    set(_tsc_saved_flags "${CMAKE_REQUIRED_FLAGS}")
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${_tsc_link_flag}")
+    check_cxx_source_compiles("int main(void) { return 0; }" ${_tsc_link_var})
+    set(CMAKE_REQUIRED_FLAGS "${_tsc_saved_flags}")
+    if (${_tsc_link_var})
+      set(TSC_LINK_TRIM_FLAG "${_tsc_link_flag}")
+    endif()
+  endif()
+endforeach()
+
+if (DEFINED TSC_LINK_TRIM_FLAG)
+  message(STATUS "Trimming unused libraries with ${TSC_LINK_TRIM_FLAG}")
+  set_property(TARGET tsc APPEND PROPERTY LINK_FLAGS "${TSC_LINK_TRIM_FLAG}")
+else()
+  # Not a reason to fail: the flag is a check, not something the game needs to
+  # run. Say so, so a linker nobody tried yet is a line in the log and not a
+  # silently weaker build.
+  message(STATUS "This linker takes neither --as-needed nor -dead_strip_dylibs;"
+                 " unused libraries will not be trimmed.")
+endif()
 
 if (WIN32)
   target_link_libraries(tsc iconv intl ws2_32)

@@ -81,6 +81,12 @@ run_script png_bit_depth_test "$here/../../testing/png-bit-depth-test.sh"
 # What the AppImage packaging script may and may not fail a release for.
 run_script build_appimage_test "$here/../../testing/build-appimage-test.sh"
 
+# A linker flag is never handed to a linker that does not have it. -Wl,--as-needed
+# was applied unconditionally, and Apple's linker rejects it - so every macOS job
+# died at "[203/203] Linking CXX executable tsc" and the release carried 97
+# assets and no disk image.
+run_script link_flags_test "$here/../../testing/link-flags-test.sh"
+
 if [ "$failures" -ne 0 ]; then
     echo "===== $failures test program(s) failed"
     exit 1
