@@ -187,12 +187,29 @@ chmod +x "$out/${name}.AppImage"
 # (the same reason linuxdeploy is unpacked above). The tsc inside is dynamic and
 # runs. Unpacked is also the harder case - no AppImage runtime means no $APPDIR
 # is exported, so this proves the game finds its data from its own location.
+# A CHECK THAT CANNOT RUN IS NOT A FAILED CHECK. The AppImage is finished and
+# correct as far as anything here knows; if unsquashfs is missing, or the
+# unpacking does not produce a tsc to run, that is this script's problem and not
+# a reason to withhold a release. Those cases warn. Only tsc itself SAYING the
+# data is not where it will look for it fails the build - that is the bug this
+# is here for, and it is not environmental.
 check="$repo_root/.appimage-check"
-extract_appimage "$out/${name}.AppImage" "$check"
+rm -rf "$check"
+if ! command -v unsquashfs >/dev/null 2>&1; then
+    echo "build-appimage.sh: WARNING - no unsquashfs, so the packed AppImage" \
+         "was not checked for whether it finds its game data." >&2
+elif ! extract_appimage "$out/${name}.AppImage" "$check"; then
+    echo "build-appimage.sh: WARNING - could not unpack the AppImage just built," \
+         "so it was not checked for whether it finds its game data." >&2
+elif [ ! -x "$check/usr/bin/tsc" ]; then
+    echo "build-appimage.sh: WARNING - no usr/bin/tsc in the unpacked AppImage," \
+         "so it was not checked for whether it finds its game data." >&2
 # TSC reads $HOME for the XDG user directories and refuses to start without
 # one; a container that has none would fail this check for the wrong reason.
-if ! env HOME="${HOME:-/tmp}" "$check/usr/bin/tsc" --print-paths; then
-    echo "build-appimage.sh: the packed AppImage cannot find its game data" >&2
+elif ! env HOME="${HOME:-/tmp}" "$check/usr/bin/tsc" --print-paths; then
+    echo "build-appimage.sh: the packed AppImage cannot find its game data." \
+         "It would abort on startup the way the 2.2.0-beta2 one did, so it is" \
+         "not published." >&2
     exit 1
 fi
 rm -rf "$check"

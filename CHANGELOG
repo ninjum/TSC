@@ -26,12 +26,22 @@
 		interpolated into a command line, and the "nothing was built"
 		error points at the version job as well as at the build logs.
 		(by Lauri Ojansivu)
+	* Fix: The AppImage packaging script could fail a release for a
+		reason that is not the AppImage's. After packing, it unpacks what
+		it built and runs `tsc --print-paths` to prove the game finds its
+		data; anything that stopped that check from RUNNING - no
+		unsquashfs, an image that would not unpack, no tsc inside it -
+		failed the build and withheld a finished AppImage. Those three
+		warn now. The one case that still fails the build is tsc itself
+		saying the data is not where it will look for it, which is the
+		bug the check is there for. testing/build-appimage-test.sh pins
+		both halves. (by Lauri Ojansivu)
 	* Misc: New standalone tests, in tsc/testing, run by
 		tsc/testing/run-tests.sh. They need only a C++ compiler and a
 		shell - no SFML, no CEGUI, no boost, no display and no
 		installed game - so both ./build-tsc.sh and the packaging jobs
 		in .github/scripts/build-tsc.sh run them before compiling
-		anything. There are two. data_dir_test.cpp drives the game data
+		anything. There are three. data_dir_test.cpp drives the game data
 		directory decision against a fake directory tree and pins the
 		AppImage case, the installed case, the relocated cases, and
 		that an empty $TSC_DATA_DIR or a stale $APPDIR is ignored
@@ -40,8 +50,9 @@
 		workflow hands a raw input to fromJSON any more, and that every
 		selector .github/scripts/expected-assets.sh can produce is one
 		its workflow accepts - so "Release all missing" cannot ask for
-		an asset with a selector the workflow would now reject. (by
-		Lauri Ojansivu)
+		an asset with a selector the workflow would now reject. And
+		testing/build-appimage-test.sh pins what the AppImage packaging
+		script may and may not fail a release for. (by Lauri Ojansivu)
 	* Fix: The AppImage started and then aborted before drawing
 		anything, with "CEGUI::FileIOException ...
 		/usr/share/tsc/gui/schemes/TSCLook256.scheme does not

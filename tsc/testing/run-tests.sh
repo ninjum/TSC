@@ -73,6 +73,9 @@ run_script() {
 # hands a raw input to fromJSON, which used to stop a run from LOADING.
 run_script matrix_only_test "$here/../../testing/matrix-only-test.sh"
 
+# What the AppImage packaging script may and may not fail a release for.
+run_script build_appimage_test "$here/../../testing/build-appimage-test.sh"
+
 if [ "$failures" -ne 0 ]; then
     echo "===== $failures test program(s) failed"
     exit 1
