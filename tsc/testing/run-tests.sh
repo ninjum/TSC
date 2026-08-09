@@ -87,6 +87,13 @@ run_script build_appimage_test "$here/../../testing/build-appimage-test.sh"
 # assets and no disk image.
 run_script link_flags_test "$here/../../testing/link-flags-test.sh"
 
+# macOS links the gettext library, and can find it. On Linux the gettext
+# functions are in glibc so nothing needs linking; on macOS they are not in
+# libSystem, and Homebrew's gettext is keg-only so it is not under
+# $(brew --prefix)/lib either. Both halves failed at once, and each alone still
+# fails.
+run_script macos_libintl_test "$here/../../testing/macos-libintl-test.sh"
+
 if [ "$failures" -ne 0 ]; then
     echo "===== $failures test program(s) failed"
     exit 1

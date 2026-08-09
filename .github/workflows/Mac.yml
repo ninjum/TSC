@@ -187,12 +187,25 @@ jobs:
         run: |
           set -euo pipefail
           cd tsc
+          # gettext is KEG-ONLY: macOS ships a BSD gettext of its own, so
+          # Homebrew refuses to shadow it and `brew install gettext` does NOT
+          # symlink libintl into $(brew --prefix)/lib. With only that on
+          # CMAKE_PREFIX_PATH, find_library(intl) came back empty and every
+          # macOS job ended at "ld: symbol(s) not found" on _libintl_ngettext,
+          # _libintl_setlocale and _libintl_textdomain - a library that was
+          # installed the whole time, in a directory nothing was looking in.
+          # The keg's own prefix goes on the path beside the main one.
+          prefixes="$(brew --prefix)"
+          if gettext_prefix="$(brew --prefix gettext 2>/dev/null)"; then
+            prefixes="${prefixes};${gettext_prefix}"
+            echo "Homebrew gettext (keg-only) at ${gettext_prefix}"
+          fi
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_OSX_ARCHITECTURES='${{ matrix.arch }}' \
             -DCMAKE_OSX_DEPLOYMENT_TARGET='${{ matrix.deployment_target }}' \
             -DCMAKE_INSTALL_PREFIX=/usr \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+            -DCMAKE_PREFIX_PATH="$prefixes"
           cmake --build build -j "$(sysctl -n hw.ncpu)"
           cmake --install build --prefix "$PWD/stage/usr"
 

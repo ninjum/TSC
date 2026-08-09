@@ -294,7 +294,7 @@ else()
   target_link_libraries(tsc
     ${X11_LIBRARIES}
     ${CMAKE_DL_LIBS})
-  if (CMAKE_SYSTEM_NAME MATCHES "BSD")
+  if (CMAKE_SYSTEM_NAME MATCHES "BSD" OR APPLE)
     # These were named as bare -liconv and -lintl, which asks the linker to
     # find them on its own default search path. On the BSDs they are not on it:
     # the ports tree installs them under /usr/local/lib, and the link failed
@@ -304,7 +304,41 @@ else()
     # resolved the same way. FindLibIntl.cmake is this project's own module;
     # FindIconv is CMake's own, shipped since CMake 3.11, and on systems where
     # iconv lives in libc it correctly answers with no library to link at all.
-    # Only the BSD branch uses it, and every current BSD is far past 3.11.
+    # Every current BSD, and every macOS runner, is far past 3.11.
+    #
+    # macOS is here for the same reason as the BSDs and not by analogy. On
+    # Linux the gettext functions are IN glibc, so nothing needs linking and
+    # nobody notices; on macOS they are not in libSystem, they come from
+    # Homebrew's gettext, and the link ends with:
+    #
+    #   "_libintl_ngettext", referenced from:
+    #       TSC::cEditor::replace_sprites() in editor.cpp.o
+    #   "_libintl_setlocale", referenced from: TSC::I18N_Init() in i18n.cpp.o
+    #   "_libintl_textdomain", referenced from: TSC::I18N_Init() in i18n.cpp.o
+    #   ld: symbol(s) not found for architecture arm64
+    #
+    # on all three macOS jobs. That was hidden until now: the build never got
+    # as far as resolving symbols, because -Wl,--as-needed had already been
+    # refused by Apple's linker at the start of the same step.
+    #
+    # Homebrew's gettext is KEG-ONLY - macOS ships a BSD gettext of its own and
+    # Homebrew refuses to shadow it - so `brew install gettext` does NOT put
+    # libintl into $(brew --prefix)/lib, which is the only place
+    # CMAKE_PREFIX_PATH pointed. The workflow passes the keg's own prefix as
+    # well now, and the hint below means a plain local `cmake` finds it too.
+    if (APPLE)
+      find_program(TSC_BREW brew)
+      if (TSC_BREW)
+        execute_process(COMMAND "${TSC_BREW}" --prefix gettext
+                        OUTPUT_VARIABLE TSC_GETTEXT_PREFIX
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
+                        ERROR_QUIET)
+        if (TSC_GETTEXT_PREFIX)
+          message(STATUS "Homebrew gettext (keg-only) at ${TSC_GETTEXT_PREFIX}")
+          list(APPEND CMAKE_PREFIX_PATH "${TSC_GETTEXT_PREFIX}")
+        endif()
+      endif()
+    endif()
     find_package(Iconv REQUIRED)
     find_package(LibIntl REQUIRED)
     target_link_libraries(tsc ${Iconv_LIBRARIES} ${LIBINTL_LIBRARIES})
