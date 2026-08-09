@@ -32,6 +32,31 @@
 		success. Verified in both directions - it passes on the
 		converted data and fails on all five originals. (by Lauri
 		Ojansivu)
+	* Fix: The macOS disk image was missing from the release for two
+		reasons, one behind the other. With -Wl,--as-needed no longer
+		refused by Apple's linker, all three macOS jobs reached the link
+		and ended there instead: "_libintl_ngettext", "_libintl_setlocale"
+		and "_libintl_textdomain" undefined, "ld: symbol(s) not found for
+		architecture arm64", on macOS 15 arm64, macOS 15 x86_64 and macOS
+		26 arm64 alike. On Linux the gettext functions are IN glibc, so
+		nothing has to be linked and nobody notices; on macOS they are not
+		in libSystem. CMakeLists.txt resolved and linked iconv and intl on
+		WIN32 and on the BSDs, and macOS fell into the plain else-branch
+		and linked neither - it now uses the same find_package branch as
+		the BSDs. That alone still failed, because Homebrew's gettext is
+		KEG-ONLY: macOS ships a BSD gettext of its own, so Homebrew
+		refuses to shadow it and `brew install gettext` does not symlink
+		libintl into $(brew --prefix)/lib, which was the only prefix on
+		CMAKE_PREFIX_PATH. find_library(intl) came back empty for a
+		library installed the whole time, in a directory nothing was
+		looking in. Mac.yml passes the keg's own prefix too, and
+		CMakeLists asks `brew --prefix gettext` itself so a plain local
+		cmake finds it as well. New test testing/macos-libintl-test.sh,
+		run by tsc/testing/run-tests.sh, reads both files and then
+		REPRODUCES the bug on any OS: it builds a libintl that exists but
+		sits on no default search path, shows find_package(LibIntl
+		REQUIRED) failing without its prefix, then finding it and linking
+		with it. (by Lauri Ojansivu)
 	* Fix: A release workflow could be stopped from LOADING by its own
 		`only` input. Each of AppImage.yml, Deb.yml, Flatpak.yml,
 		Mac.yml and Windows.yml decided which matrix entries to build
