@@ -1,3 +1,61 @@
+2026-08-10  Lauri Ojansivu  <x@xet7.org>
+
+	* Fix: Clicking Options in the main menu aborted the game. The
+		aarch64 AppImage of 2.2.0-beta2 started, drew its menu, and died
+		the moment "Options" was chosen:
+		"CEGUI::InvalidRequestException in function 'void
+		CEGUI::Editbox::setValidationString(const CEGUI::String&)'
+		(cegui/src/widgets/Editbox.cpp:161) : Unable to set validation
+		string on Editbox 'game_spinner_camera_hor_speed/__auto_editbox__'
+		because it does not currently have a RegexMatcher validator",
+		then "terminate called after throwing an instance of
+		'CEGUI::InvalidRequestException'". The whole chain is in CEGUI:
+		an Editbox takes its validator from
+		System::createRegexMatcher(), which is "#ifdef
+		CEGUI_HAS_PCRE_REGEX ... #else return 0"; CEGUI's own CMakeLists
+		defaults that option to ${PCRE_FOUND}; and Spinner calls
+		Editbox::setValidationString() for each of its four input modes,
+		which THROWS when there is no validator. So a build on a machine
+		without a PCRE development package produced, silently and with no
+		warning of any kind, a library that aborts the application the
+		first time a spinner is shown - and the Options menu is made of
+		spinners. The release builds are exactly that: the developer
+		dependency script installed libpcre3-dev, the CI one never did,
+		which is why every local build worked and every released binary
+		did not. Installing PCRE in the release builds was not the fix
+		worth making: PCRE 1 is end-of-life, MSYS2 no longer packages it
+		for mingw at all and Homebrew has deprecated it, so the Windows
+		build could not have it and the macOS one is on borrowed time.
+		New cegui-std-regex.patch instead: a RegexMatcher implemented with
+		std::regex, returned on the no-PCRE path, needing no external
+		library on any platform. ProvideCEGUI.cmake applies it and pins
+		-DCEGUI_HAS_PCRE_REGEX=OFF, so all four platforms take that one
+		path rather than whichever the build machine happens to allow, and
+		libpcre3-dev is dropped from install-build-dependencies.sh. The one
+		difference from the PCRE matcher is that std::regex has no partial
+		matching, so a string that could still become valid reports
+		MS_INVALID rather than MS_PARTIAL - which for Spinner's four
+		validation strings, every one of them built out of * quantifiers,
+		never happens: each intermediate string a person types matches
+		fully, and that is tested. (by Lauri Ojansivu)
+	* Misc: New test testing/cegui-regex-test.sh, run by
+		tsc/testing/run-tests.sh. It checks that the patch exists, adds
+		both matcher files, rewires System.cpp so the no-PCRE branch
+		RETURNS the new matcher rather than 0, and that ProvideCEGUI
+		applies it and pins the option. Then it EXTRACTS the matcher's
+		source out of the patch, compiles it against a stub of CEGUI's
+		String and RegexMatcher, and runs it over Spinner's own four
+		validation strings - so what is tested is the code that ships, not
+		a copy of it. Every intermediate string on the way to a number
+		("", "-", "1", "1.", "1.5", "-0.25") must be accepted or the
+		editbox would refuse the keystroke; "a", "1a", "1.2.3" and " 1"
+		must be rejected; a bad expression must throw the same exception
+		PCRERegexMatcher throws and leave the object refusing to answer.
+		Verified in the failing direction too: with the patch removed the
+		test fails and names it. The build itself is not run here - no
+		CEGUI, no display - so the first CI run remains the test of the
+		compiled library. (by Lauri Ojansivu)
+
 2026-08-09  Lauri Ojansivu  <x@xet7.org>
 
 	* Version 2.2.0-beta2.

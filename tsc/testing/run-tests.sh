@@ -102,6 +102,13 @@ run_script macos_libintl_test "$here/../../testing/macos-libintl-test.sh"
 # is why this is a second test and not another check inside that one.
 run_script cegui_greyscale_test "$here/../../testing/cegui-greyscale-test.sh"
 
+# A spinner can be created at all. CEGUI's editbox validation is PCRE-only, and
+# without PCRE its editboxes get NO validator - so Editbox::setValidationString,
+# which every Spinner calls, threw and aborted the game the moment the Options
+# menu was opened. The patch adds a std::regex matcher; this compiles it out of
+# the patch and runs it against Spinner's four validation strings.
+run_script cegui_regex_test "$here/../../testing/cegui-regex-test.sh"
+
 # An ordinary start is quiet. A first run has no preferences file and most
 # machines have no joystick, and both facts were reported as though something
 # had gone wrong - one of them on stderr, calling itself a Warning.
