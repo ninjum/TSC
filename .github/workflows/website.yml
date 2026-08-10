@@ -1,6 +1,11 @@
 name: Website
 
-# Fill in the download pages' MISSING checksums. Nothing else.
+# Make the download pages say exactly what the GitHub releases hold. Nothing else.
+#
+# Two things, both about the same promise - "here is the file, here is its
+# checksum": every file that IS on its release gets its checksums shown, and a row
+# for a file that is NOT on its release is removed, because nobody can download it
+# and it can have no checksum either.
 #
 # WHY A WORKFLOW OF ITS OWN. Repos.yml rewrites the pages for one release and
 # rebuilds the apt/AppImage/Flatpak repositories - minutes of work, and it needs a
@@ -10,11 +15,15 @@ name: Website
 # Windows rows said nothing while the .sha256sum files sat on the release), or a
 # row in the hand-written stable tables, which a beta rewrite never touches.
 #
-# So this does exactly one thing: walk en/es/fi/download/index.html, and for every
-# row that links a release asset and shows no checksum, put one there - from the
-# release's own checksum file, or by downloading the file and computing it. Rows
-# that already have a checksum are never rewritten, and neither is anything else
-# on the page.
+# So this does exactly one thing: walk en/es/fi/download/index.html and reconcile
+# every row that links a release asset with what that release actually has. No
+# checksum shown and the file is there -> put one in, from the release's own
+# checksum file or by downloading the file and computing it. File not there ->
+# drop the row and name it in the log. Rows that already have a checksum are never
+# rewritten, and neither is anything else on the page.
+#
+# `keep_missing` reports the rows for absent files without removing them, for a
+# run that only wants to look.
 #
 # It changes NOTHING about the packages. No build, no release, no repository
 # rebuild.
@@ -50,6 +59,11 @@ on:
         required: false
         default: '400'
         type: string
+      keep_missing:
+        description: 'Report rows for files that are not on the release, but do not remove them'
+        required: false
+        default: false
+        type: boolean
   # Called by Release all / Release all missing so a new build's checksums reach
   # the pages without anybody remembering to run this.
   workflow_call:
@@ -66,6 +80,10 @@ on:
         required: false
         default: '400'
         type: string
+      keep_missing:
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -98,6 +116,7 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
           UPLOAD: ${{ inputs.upload_checksums }}
           LIMIT_MB: ${{ inputs.limit_mb }}
+          KEEP_MISSING: ${{ inputs.keep_missing }}
         run: |
           set -euo pipefail
 
@@ -115,6 +134,7 @@ jobs:
           args=(website --limit-mb "${LIMIT_MB:-400}")
           [ "${UPLOAD}" = "true" ] && args+=(--upload)
           [ "${DRY_RUN}" = "true" ] && args+=(--dry-run)
+          [ "${KEEP_MISSING}" = "true" ] && args+=(--keep-missing)
           python3 .github/scripts/fill-download-checksums.py "${args[@]}"
 
           cd website
@@ -137,5 +157,5 @@ jobs:
           git config user.name "Lauri Ojansivu"
           git config user.email "x@xet7.org"
           git add -A
-          git commit -m "Download pages: fill in the missing checksums"
+          git commit -m "Download pages: only the files the releases have, with their checksums"
           git push

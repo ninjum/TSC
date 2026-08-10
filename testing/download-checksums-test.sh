@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-# download-checksums-test.sh - the download pages get the checksums they are
-# missing, and nothing else changes.
+# download-checksums-test.sh - the download pages say exactly what the releases
+# hold: every file that is there gets its checksums, and a row for a file that is
+# not there is removed.
 #
 # WHY THIS EXISTS. The website's download pages showed download links with an
 # empty checksum cell:
@@ -20,13 +21,19 @@
 # the .deb from the name, so the content is what identifies it), or the file
 # itself, downloaded and hashed.
 #
-# WHAT THIS CHECKS, offline. A fixture page with all four kinds of row and a
+# AND A ROW FOR A FILE THAT IS NOT THERE IS REMOVED. A download page is a promise
+# - here is the file, here is its checksum - and 2.1.0's bookworm-arm64.deb and
+# bookworm-s390x.deb are not on the release and cannot be built either: since the
+# SFML 3 port a .deb needs a distribution whose archive HAS SFML 3, and bookworm
+# does not. A row nobody can download from is worse than no row.
+#
+# WHAT THIS CHECKS, offline. A fixture page with one row of every kind and a
 # stubbed `gh` standing in for the release: a cell filled from a published
 # checksum, a cell filled by hashing the file, a legacy <stem>.sha256sum matched
-# by its content, a row whose asset does not exist on the release (reported, left
-# alone), and a row that already has a checksum (never touched). Then the
-# workflow wiring: website.yml exists and only fills checksums, and both release
-# workflows call it.
+# by its content, a row whose asset is not on the release (removed, and its
+# neighbours left intact), --keep-missing leaving that row alone, and a row that
+# already has a checksum (never touched). Then the workflow wiring: website.yml
+# exists and does only this, and both release workflows call it.
 #
 # Run: testing/download-checksums-test.sh
 
@@ -168,6 +175,8 @@ cat > "$site/index.html" <<EOF
 </body></html>
 EOF
 
+cp "$site/index.html" "$work/keep-original.html"
+
 out="$work/run.log"
 GH_FAKE_RELEASE="$rel" GH_REPO="$REPO" PATH="$work/bin:$PATH" \
   python3 "$script" "$work/website" --upload > "$out" 2>&1
@@ -200,16 +209,46 @@ case "$page" in
   *keepme*) ok "a row that already had a checksum is left exactly as it was" ;;
   *) fail "an existing checksum was overwritten" ;;
 esac
-# The row whose file is not on the release: reported, not invented, not deleted.
+# The row whose file is not on the release: named in the log, and REMOVED - a page
+# that offers a file nobody can download is a broken promise, and it can have no
+# checksum either.
 if grep -q "bookworm-s390x" "$out"; then
-    ok "a link to a file the release does not have is reported"
+    ok "a link to a file the release does not have is named in the log"
 else
     fail "the missing asset was not reported"
 fi
 case "$page" in
-  *TSC-2.1.0-bookworm-s390x.deb*) ok "and its row is left alone rather than removed" ;;
-  *) fail "the row for the missing asset disappeared" ;;
+  *TSC-2.1.0-bookworm-s390x.deb*) fail "the row for the missing file is still there" ;;
+  *) ok "and its row is gone, so the page offers only what exists" ;;
 esac
+# ...but the rest of the table is untouched: the row above it and the one below it
+# must both survive, or the removal took more than it should.
+case "$page" in
+  *TSC-2.1.0-bullseye-arm64.deb*) ok "the row before it is untouched" ;;
+  *) fail "removing the row took its neighbour with it" ;;
+esac
+case "$page" in
+  *TSC-2.1.0-win64.exe*) ok "and the row after it" ;;
+  *) fail "removing the row took the following one with it" ;;
+esac
+# The edit should be invisible except for the row that went: the next row keeps
+# the indentation it had, rather than inheriting the removed row's as well.
+if printf '%s' "$page" | grep -qE '^\s{4,}<tr>'; then
+    fail "a row was left with the removed row's indentation on top of its own"
+else
+    ok "and the rows after it keep their own indentation"
+fi
+# --keep-missing is the way to look without changing anything.
+keepdir="$work/keepmissing"
+mkdir -p "$keepdir/en/download"
+cp "$work/keep-original.html" "$keepdir/en/download/index.html"
+GH_FAKE_RELEASE="$rel" GH_REPO="$REPO" PATH="$work/bin:$PATH" \
+  python3 "$script" "$keepdir" --keep-missing > "$work/keep.log" 2>&1
+if grep -q "bookworm-s390x" "$keepdir/en/download/index.html"; then
+    ok "--keep-missing leaves the row alone and only reports it"
+else
+    fail "--keep-missing removed the row anyway"
+fi
 # The computed digests are published, so the next run needs no download.
 if [ -f "$rel/TSC-2.1.0-bookworm-amd64.deb.sha256sum" ]; then
     ok "--upload publishes the computed checksums back to the release"

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 #
 # fill-download-checksums.py <website-root> [--upload] [--limit-mb N] [--dry-run]
+#                            [--keep-missing]
 #
-# Fill in the EMPTY checksum cells of the website's download pages
-# (en/es/fi/download/index.html), for every release they offer, and leave
-# everything else alone.
+# Make the website's download pages (en/es/fi/download/index.html) say exactly
+# what the GitHub releases hold: every file that IS there gets its checksums, and
+# a row for a file that is NOT there is removed. Nothing else on the page is
+# touched.
 #
 # WHY THIS EXISTS, and why it is separate from update-download-pages.py. That
 # script rewrites one release's tables from scratch, with whatever checksums the
@@ -31,10 +33,14 @@
 #      publish them as .md5sum/.sha256sum assets so nobody has to download it
 #      again.
 #
-# A row whose asset DOES NOT EXIST on the release is reported and left alone -
-# that is a page advertising a file that was never built (2.1.0's
-# bookworm-arm64.deb and bookworm-s390x.deb), and inventing a checksum for it, or
-# quietly deleting the row, are both worse than saying so.
+# A row whose asset DOES NOT EXIST on the release is REMOVED, and named in the
+# log. A download page is a promise - here is the file, here is its checksum, this
+# is what you should get - and a row for a file nobody can download is a broken
+# promise that also cannot have a checksum. 2.1.0's bookworm-arm64.deb and
+# bookworm-s390x.deb are exactly that: not on the release, and not buildable
+# either, because since the SFML 3 port a .deb needs a distribution whose archive
+# HAS SFML 3 and bookworm does not. --keep-missing reports them without removing,
+# for a run that only wants to look.
 #
 # The tag comes from the download URL in the row, so one run covers every release
 # the pages offer without being told which.
@@ -147,6 +153,7 @@ def main():
     args = [a for a in sys.argv[1:]]
     upload = "--upload" in args
     dry = "--dry-run" in args
+    keep_missing = "--keep-missing" in args
     limit_mb = 0
     if "--limit-mb" in args:
         limit_mb = int(args[args.index("--limit-mb") + 1])
@@ -157,7 +164,7 @@ def main():
     root = positional[0]
 
     sums_cache, assets_cache = {}, {}
-    filled = computed = missing_asset = 0
+    filled = computed = missing_asset = removed = 0
     unresolved = []
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -192,8 +199,27 @@ def main():
                     continue
                 if asset not in names:
                     missing_asset += 1
-                    unresolved.append("%s/%s (the page links a file this release does not have)"
-                                      % (tag, asset))
+                    unresolved.append("%s/%s (not on the release)" % (tag, asset))
+                    if keep_missing:
+                        continue
+                    # Drop the whole row, not just its cells: a row with no file
+                    # is nothing to a reader. Cut from the START OF ITS LINE to
+                    # the end of the line it ends on, so the row's own
+                    # indentation goes with it and the next row keeps the
+                    # indentation it had - anything less leaves the page looking
+                    # edited, and this edit should be invisible except for the
+                    # row that went.
+                    cut_from = text.rfind("\n", 0, row.start()) + 1
+                    if text[cut_from:row.start()].strip():
+                        cut_from = row.start()   # something else shares that line
+                    out.append(text[last:cut_from])
+                    last = row.end()
+                    if text[last:last + 2] == "\r\n":
+                        last += 2
+                    elif text[last:last + 1] in ("\n", "\r"):
+                        last += 1
+                    removed += 1
+                    changed += 1
                     continue
 
                 if tag not in sums_cache:
@@ -233,16 +259,21 @@ def main():
                 open(path, "w", encoding="utf-8").write("".join(out))
             print("%s: %d checksum cell(s) filled" % (lang, changed))
 
-    print("\nfilled %d cell(s); %d checksum(s) computed from the file itself" % (filled, computed))
+    print("\nfilled %d cell(s); %d checksum(s) computed from the file itself; "
+          "%d row(s) removed" % (filled, computed, removed))
     if unresolved:
         print("left alone (%d):" % len(unresolved))
         for u in sorted(set(unresolved)):
             print("  - %s" % u)
-    # A page that advertises a file the release does not have is worth a warning
-    # in the log, but it is not this script's business to fail a release for it.
+    # Removing somebody's table row is worth saying out loud, whichever way it
+    # went, and it is never a reason to fail a release.
     if missing_asset:
-        print("::warning::%d download link(s) point at files that are not on their release; "
-              "either build them or remove the rows." % missing_asset)
+        if keep_missing:
+            print("::warning::%d download link(s) point at files that are not on their "
+                  "release; run without --keep-missing to remove those rows." % missing_asset)
+        else:
+            print("::warning::%d row(s) removed: the page offered files that are not on "
+                  "their release." % missing_asset)
     return 0
 
 
