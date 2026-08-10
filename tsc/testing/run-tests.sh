@@ -109,6 +109,12 @@ run_script cegui_greyscale_test "$here/../../testing/cegui-greyscale-test.sh"
 # the patch and runs it against Spinner's four validation strings.
 run_script cegui_regex_test "$here/../../testing/cegui-regex-test.sh"
 
+# The website's download pages show a checksum for every file they offer. A
+# checksum uploaded AFTER a page was written left the cell empty forever (the
+# 2.2.0-beta2 AppImage and Windows rows), and the hand-written stable tables were
+# never revisited at all.
+run_script download_checksums_test "$here/../../testing/download-checksums-test.sh"
+
 # An ordinary start is quiet. A first run has no preferences file and most
 # machines have no joystick, and both facts were reported as though something
 # had gone wrong - one of them on stderr, calling itself a Warning.

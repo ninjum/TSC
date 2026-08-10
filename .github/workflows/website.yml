@@ -1,0 +1,141 @@
+name: Website
+
+# Fill in the download pages' MISSING checksums. Nothing else.
+#
+# WHY A WORKFLOW OF ITS OWN. Repos.yml rewrites the pages for one release and
+# rebuilds the apt/AppImage/Flatpak repositories - minutes of work, and it needs a
+# release worth rebuilding around. The thing that is usually wrong with the pages
+# is much smaller: a checksum cell that is empty because the checksum file was
+# uploaded after the page was written (that is why the 2.2.0-beta2 AppImage and
+# Windows rows said nothing while the .sha256sum files sat on the release), or a
+# row in the hand-written stable tables, which a beta rewrite never touches.
+#
+# So this does exactly one thing: walk en/es/fi/download/index.html, and for every
+# row that links a release asset and shows no checksum, put one there - from the
+# release's own checksum file, or by downloading the file and computing it. Rows
+# that already have a checksum are never rewritten, and neither is anything else
+# on the page.
+#
+# It changes NOTHING about the packages. No build, no release, no repository
+# rebuild.
+#
+# WHAT IT NEEDS. WEBSITE_TOKEN to push to
+# Secretchronicles/secretchronicles.github.io. Without it the run still does the
+# work and prints the diff, so the pages can be updated by hand - a workflow
+# should not need a credential to be useful. `upload_checksums` additionally
+# writes the computed digests back to the TSC release as .md5sum/.sha256sum
+# assets, which is what stops the next run having to download the binaries again;
+# it uses the run's own GITHUB_TOKEN, so it needs `contents: write`.
+#
+# Usage:
+#   gh workflow run website.yml                    # fill and push
+#   gh workflow run website.yml -f dry_run=true    # say what it would fill
+#   gh workflow run website.yml -f upload_checksums=false
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only report what is missing; change nothing'
+        required: false
+        default: false
+        type: boolean
+      upload_checksums:
+        description: 'Also publish computed digests as .md5sum/.sha256sum on the release'
+        required: false
+        default: true
+        type: boolean
+      limit_mb:
+        description: 'Do not download an asset larger than this to hash it (MB)'
+        required: false
+        default: '400'
+        type: string
+  # Called by Release all / Release all missing so a new build's checksums reach
+  # the pages without anybody remembering to run this.
+  workflow_call:
+    inputs:
+      dry_run:
+        required: false
+        default: false
+        type: boolean
+      upload_checksums:
+        required: false
+        default: true
+        type: boolean
+      limit_mb:
+        required: false
+        default: '400'
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  # Never two of these at once: they write the same three files in the same
+  # repository, and the second push would be rejected or would clobber.
+  group: tsc-website-checksums
+  cancel-in-progress: false
+
+jobs:
+  checksums:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Say what this run can do
+        env:
+          WEBSITE_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+        run: |
+          if [ -z "${WEBSITE_TOKEN:-}" ]; then
+            echo "::warning::WEBSITE_TOKEN is not set: the pages will be updated and shown as a diff, but not pushed."
+          fi
+
+      - name: Fill the missing checksums
+        env:
+          WEBSITE_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          UPLOAD: ${{ inputs.upload_checksums }}
+          LIMIT_MB: ${{ inputs.limit_mb }}
+        run: |
+          set -euo pipefail
+
+          # The website is public, so it can be READ without the token; the token
+          # is only needed to push. That way a run without it still does the work
+          # and shows the result.
+          if [ -n "${WEBSITE_TOKEN:-}" ]; then
+            git clone --depth 1 \
+              "https://x-access-token:${WEBSITE_TOKEN}@github.com/Secretchronicles/secretchronicles.github.io.git" website
+          else
+            git clone --depth 1 \
+              https://github.com/Secretchronicles/secretchronicles.github.io.git website
+          fi
+
+          args=(website --limit-mb "${LIMIT_MB:-400}")
+          [ "${UPLOAD}" = "true" ] && args+=(--upload)
+          [ "${DRY_RUN}" = "true" ] && args+=(--dry-run)
+          python3 .github/scripts/fill-download-checksums.py "${args[@]}"
+
+          cd website
+          if git diff --quiet; then
+            echo "Every download link already shows a checksum; nothing to change."
+            exit 0
+          fi
+          echo "===== what changed ====="
+          git --no-pager diff --stat
+          git --no-pager diff | head -200
+
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "dry run: not committing."
+            exit 0
+          fi
+          if [ -z "${WEBSITE_TOKEN:-}" ]; then
+            echo "::warning::No WEBSITE_TOKEN, so the change above was not pushed. Set the secret, or apply the diff by hand."
+            exit 0
+          fi
+          git config user.name "Lauri Ojansivu"
+          git config user.email "x@xet7.org"
+          git add -A
+          git commit -m "Download pages: fill in the missing checksums"
+          git push

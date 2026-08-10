@@ -162,9 +162,26 @@ jobs:
     with:
       tag: ${{ needs.release.outputs.tag }}
 
+  # The download pages' checksums, on their own. Repos.yml already rewrites the
+  # pages for THIS release when it runs, but it is skipped when build_repos is
+  # false, and it cannot fill a cell that was left empty by an EARLIER release
+  # whose checksum files arrived late (the 2.2.0-beta2 AppImage and Windows rows)
+  # or a row in the hand-written stable tables. This job does only that, needs no
+  # build, and costs a minute.
+  website:
+    name: download-page checksums
+    needs: [release, deb, appimage, flatpak, windows, mac]
+    if: ${{ always() }}
+    uses: ./.github/workflows/website.yml
+    permissions:
+      contents: write
+    # Same reason as repos above: a reusable workflow inherits no secrets unless
+    # told to, and without WEBSITE_TOKEN this one cannot push the pages.
+    secrets: inherit
+
   summary:
     name: what ended up on the release
-    needs: [release, deb, appimage, flatpak, windows, mac, repos]
+    needs: [release, deb, appimage, flatpak, windows, mac, repos, website]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     steps:

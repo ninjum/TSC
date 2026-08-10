@@ -284,6 +284,16 @@ jobs:
           # The download pages: links and checksums for this release's assets.
           python3 .github/scripts/update-download-pages.py "$TAG" website
 
+          # ...and then every checksum cell that is STILL empty, on any release the
+          # pages offer. Two kinds of hole the rewrite above cannot close: a
+          # checksum uploaded AFTER the page was written for that release (the
+          # 2.2.0-beta2 AppImage and Windows rows sat empty for exactly that
+          # reason), and the hand-written stable tables, which a beta rewrite never
+          # touches. --upload publishes a digest computed here as the release's own
+          # .md5sum/.sha256sum, so the next reader gets it without downloading the
+          # binary again.
+          python3 .github/scripts/fill-download-checksums.py website --upload --limit-mb 400
+
           # The package repositories the pages point people at.
           rm -rf website/apt website/appimage website/flatpak
           cp -a site/apt site/appimage site/flatpak website/ 2>/dev/null || true

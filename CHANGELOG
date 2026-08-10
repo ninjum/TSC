@@ -1,5 +1,70 @@
 2026-08-10  Lauri Ojansivu  <x@xet7.org>
 
+	* Fix: The download pages showed files with no checksum beside them,
+		and nothing ever went back to fill them in. Two different holes.
+		The 2.2.0-beta2 rows for the x86_64 AppImage, the aarch64
+		AppImage and win64.exe were written by
+		update-download-pages.py at a moment when those .md5sum and
+		.sha256sum files were not on the release yet; they have been
+		there since, and the page still said nothing, because that
+		script rewrites a release's tables from scratch and is only run
+		when a release is built. And the 2.1.0 rows are in the
+		hand-written stable tables, outside the TSC-DOWNLOADS markers,
+		which a rewrite for the beta never touches - and that release
+		published no checksum files at all. New
+		.github/scripts/fill-download-checksums.py walks the PAGES
+		instead of a release: every row that links a release asset and
+		shows an empty checksum cell is a hole, and each is filled from
+		the best evidence there is - the release's own <asset>.sha256sum,
+		or another checksum file whose CONTENT names the asset (2.1.0
+		drops the .deb from the file's name, so the content is the only
+		thing that identifies it), or the file itself, downloaded and
+		hashed. With --upload the computed digest is published back to
+		the release as a real .md5sum/.sha256sum, so the next run needs
+		no download. A cell that already has a checksum is never
+		rewritten, and the tag comes from the row's own download URL, so
+		one run covers every release the pages offer. (by Lauri Ojansivu)
+	* Fix: A download link that points at a file the release does not have
+		is reported rather than papered over. The 2.1.0 pages offer
+		TSC-2.1.0-bookworm-arm64.deb and TSC-2.1.0-bookworm-s390x.deb,
+		and neither is on that release - it carries bookworm amd64 and
+		i386 only - so there is no checksum to show and no build that
+		can produce one: since the SFML 3 port a .deb can only be built
+		for a distribution whose archive HAS SFML 3, which rules
+		bookworm out entirely (Deb.yml builds resolute and forky, and
+		points everyone older at the AppImage). The filler leaves those
+		rows exactly as they are and prints a warning naming them,
+		because inventing a checksum and silently deleting somebody's
+		table row are both worse than saying what is wrong. (by Lauri
+		Ojansivu)
+	* Misc: New workflow website.yml, which fills those checksums in and
+		does NOTHING else - no build, no release, no repository rebuild.
+		That is the point of it: Repos.yml rewrites the pages and
+		rebuilds the apt/AppImage/Flatpak trees, which needs a release
+		worth rebuilding around, while the thing usually wrong with the
+		pages is one empty cell. It is workflow_dispatch (with dry_run,
+		upload_checksums and limit_mb inputs) and workflow_call, and
+		both Release all and Release all missing now call it, so a run
+		that builds or fills in a package also puts that package's
+		checksum on the page. Repos.yml runs the filler too, right after
+		its own rewrite, to close the holes the rewrite cannot see.
+		Without WEBSITE_TOKEN the run still does the work and prints the
+		diff instead of pushing. (by Lauri Ojansivu)
+	* Misc: New test testing/download-checksums-test.sh, run by
+		tsc/testing/run-tests.sh. It drives the filler against a fixture
+		page with one row of every kind and a stubbed gh: a cell filled
+		from a published checksum, a cell filled by hashing the file, a
+		legacy <stem>.sha256sum matched by its content, a row whose asset
+		is not on the release (reported, left alone), and a row that
+		already has a checksum (untouched). It also checks that a second
+		run changes nothing, that --dry-run writes nothing, that
+		website.yml runs the filler and nothing else, and that both
+		release workflows call it. Verified against the real thing as
+		well: run over the live en/es/fi pages with a read-only gh
+		standing on the public API, it filled exactly the three
+		2.2.0-beta2 rows in each language - the x86_64 SHA256 matching
+		the one on the release byte for byte - and reported the two
+		bookworm rows. (by Lauri Ojansivu)
 	* Fix: Clicking Options in the main menu aborted the game. The
 		aarch64 AppImage of 2.2.0-beta2 started, drew its menu, and died
 		the moment "Options" was chosen:

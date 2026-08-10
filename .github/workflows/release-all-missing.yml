@@ -258,9 +258,22 @@ jobs:
     with:
       tag: ${{ needs.plan.outputs.tag }}
 
+  # The download pages' checksums, on their own - see the same job in
+  # release-all.yml. A run that filled in one missing package should also put that
+  # package's checksum on the page, and this does it without depending on the
+  # repository rebuild.
+  website:
+    name: download-page checksums
+    needs: [plan, deb, appimage, flatpak, windows, mac]
+    if: ${{ always() && needs.plan.outputs.total != '0' }}
+    uses: ./.github/workflows/website.yml
+    permissions:
+      contents: write
+    secrets: inherit
+
   done:
     name: what is still missing
-    needs: [plan, deb, appimage, flatpak, windows, mac, repos]
+    needs: [plan, deb, appimage, flatpak, windows, mac, repos, website]
     # always(), so a release that needed nothing still reports, and so one failed
     # platform does not hide the ones that were filled in.
     if: ${{ always() }}
