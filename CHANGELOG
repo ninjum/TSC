@@ -24,18 +24,26 @@
 		no download. A cell that already has a checksum is never
 		rewritten, and the tag comes from the row's own download URL, so
 		one run covers every release the pages offer. (by Lauri Ojansivu)
-	* Fix: A download link that points at a file the release does not have
-		is reported rather than papered over. The 2.1.0 pages offer
-		TSC-2.1.0-bookworm-arm64.deb and TSC-2.1.0-bookworm-s390x.deb,
-		and neither is on that release - it carries bookworm amd64 and
-		i386 only - so there is no checksum to show and no build that
-		can produce one: since the SFML 3 port a .deb can only be built
-		for a distribution whose archive HAS SFML 3, which rules
-		bookworm out entirely (Deb.yml builds resolute and forky, and
-		points everyone older at the AppImage). The filler leaves those
-		rows exactly as they are and prints a warning naming them,
-		because inventing a checksum and silently deleting somebody's
-		table row are both worse than saying what is wrong. (by Lauri
+	* Fix: A row for a file the release does not have is REMOVED, so the
+		pages offer only what can actually be downloaded. The 2.1.0
+		tables listed TSC-2.1.0-bookworm-arm64.deb and
+		TSC-2.1.0-bookworm-s390x.deb in all three languages, and neither
+		is on that release - it carries bookworm amd64 and i386 only - so
+		both links 404, and that is exactly why those two cells were
+		empty: there is no file to hash. Nor can they be built now, since
+		after the SFML 3 port a .deb needs a distribution whose archive
+		HAS SFML 3 and bookworm does not (Deb.yml builds resolute and
+		forky and points everyone older at the AppImage). The removal
+		cuts WHOLE LINES - from the start of the line the <tr> is on to
+		the end of the line </tr> is on - because cutting the element
+		alone left the next row wearing the removed row's indentation as
+		well as its own, and this edit should be invisible except for the
+		row that went. --keep-missing reports such rows without removing
+		them, for a run that only wants to look; website.yml takes it as
+		an input. Verified against the real pages: run over the website
+		checkout with a read-only gh on the public API, it removed exactly
+		six rows - the two bookworm ones in each of en, es and fi - and
+		touched nothing else, 42 deletions and no insertions. (by Lauri
 		Ojansivu)
 	* Misc: New workflow website.yml, which fills those checksums in and
 		does NOTHING else - no build, no release, no repository rebuild.
